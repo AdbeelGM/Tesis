@@ -1,3 +1,39 @@
+function applyLevelNodeState(node, currentLevel) {
+  const level = Number(node.dataset.level);
+  if (!level) return;
+
+  const isCompleted = level < currentLevel;
+  const isCurrent = level === currentLevel;
+  const isLocked = level > currentLevel;
+
+  node.classList.toggle("level-node--completed", isCompleted);
+  node.classList.toggle("level-node--current", isCurrent);
+  node.classList.toggle("level-node--locked", isLocked);
+
+  if (isCompleted) {
+    node.innerHTML = '<span class="level-node__icon" aria-hidden="true">✅</span>';
+    node.setAttribute("aria-label", `Nivel ${level} completado`);
+    return;
+  }
+
+  if (isLocked) {
+    node.innerHTML = '<span class="level-node__icon" aria-hidden="true">🔒</span>';
+    node.setAttribute("aria-label", `Nivel ${level} bloqueado`);
+    return;
+  }
+
+  node.textContent = `${level}`;
+  node.setAttribute("aria-label", `Nivel ${level} actual`);
+}
+
+function renderLevelStates(nodes) {
+  const userState = window.currentUserState;
+  if (!userState) return;
+
+  const currentLevel = Number(userState.level) || 1;
+  nodes.forEach((node) => applyLevelNodeState(node, currentLevel));
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const nodes = document.querySelectorAll(".level-node");
 
@@ -16,8 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      if (level !== Number(userState.level)) {
-        alert(`Solo puedes jugar tu nivel actual: ${userState.level}.`);
+      if (level > Number(userState.level)) {
+        alert("Este ejercicio está bloqueado por ahora.");
         return;
       }
 
@@ -25,4 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = target;
     });
   });
+
+  renderLevelStates(nodes);
+  document.addEventListener("user-state-ready", () => renderLevelStates(nodes));
 });
