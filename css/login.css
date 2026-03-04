@@ -1,51 +1,174 @@
-.login-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.72);
-  display: grid;
-  place-items: center;
-  z-index: 99;
+.auth-page {
+  min-height: 100vh;
+  margin: 0;
+  background: radial-gradient(circle at top right, #293f90, #0f1722 48%, #080d14 100%);
+  color: #f8fafc;
 }
 
-.login-overlay--hidden {
+.auth-layout {
+  min-height: 100vh;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  align-items: center;
+}
+
+.auth-panel {
+  border-radius: 20px;
+  background: rgba(15, 23, 34, 0.86);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.auth-panel--brand {
+  padding: 2rem;
+  animation: slideFromLeft 0.65s ease;
+}
+
+.auth-panel--brand h1 {
+  margin-bottom: 0.7rem;
+  font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.auth-panel--brand p {
+  margin: 0;
+  color: #d1d5db;
+  line-height: 1.5;
+}
+
+.auth-chip {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  padding: 0.4rem 0.9rem;
+  background: rgba(88, 204, 2, 0.15);
+  border: 1px solid rgba(88, 204, 2, 0.55);
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.auth-panel--form {
+  padding: 1.25rem;
+  animation: popIn 0.45s ease;
+}
+
+.auth-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.auth-toggle__btn {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-toggle__btn:hover {
+  transform: translateY(-1px);
+}
+
+.auth-toggle__btn--active {
+  background: #58cc02;
+  color: #0a0f18;
+  border-color: #82ef2a;
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.65rem;
+  opacity: 1;
+  transform: translateX(0);
+  animation: fadeSlide 0.35s ease;
+}
+
+.auth-form--hidden {
   display: none;
 }
 
-.login-card {
-  width: min(420px, 90vw);
-  background: #111827;
-  border: 1px solid #1f2937;
-  border-radius: 16px;
-  padding: 1.5rem;
-  display: grid;
-  gap: 0.75rem;
+.auth-form label {
+  font-size: 0.95rem;
+  color: #e2e8f0;
 }
 
-.login-card input {
+.auth-form input {
   background: #0f1722;
-  border: 1px solid #2d3748;
+  border: 1px solid #334155;
   color: #fff;
-  padding: 0.65rem 0.75rem;
+  padding: 0.7rem 0.8rem;
   border-radius: 10px;
 }
 
-.login-btn {
-  margin-top: 0.5rem;
+.auth-btn {
+  margin-top: 0.35rem;
   padding: 0.8rem;
   border-radius: 10px;
   background: #58cc02;
   color: #0a0f18;
   font-weight: 800;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.2s ease;
 }
 
-.login-error {
-  color: #f87171;
-  min-height: 1.2em;
-  font-size: 0.95rem;
+.auth-btn:hover {
+  filter: brightness(1.05);
 }
 
-.app-shell--locked {
-  filter: blur(3px);
-  pointer-events: none;
-  user-select: none;
+.auth-message {
+  min-height: 1.1rem;
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.auth-message--error {
+  color: #fda4af;
+}
+
+.auth-message--ok {
+  color: #86efac;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

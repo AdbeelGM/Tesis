@@ -109,6 +109,47 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
+
+userRouter.post("/register", async (req, res) => {
+  try {
+    const { usuario, password } = req.body;
+
+    if (!usuario || !password) {
+      return res.status(400).json({ error: "Usuario y contraseña son obligatorios" });
+    }
+
+    const username = String(usuario).trim();
+    const pass = String(password).trim();
+
+    if (username.length < 3 || pass.length < 3) {
+      return res.status(400).json({ error: "Usuario y contraseña deben tener al menos 3 caracteres" });
+    }
+
+    const [exists] = await pool.query(
+      `SELECT usuario FROM Usuarios WHERE usuario = ? LIMIT 1`,
+      [username]
+    );
+
+    if (exists[0]) {
+      return res.status(409).json({ error: "Este usuario ya existe" });
+    }
+
+    const now = new Date();
+
+    await pool.query(
+      `INSERT INTO Usuarios (usuario, \`contraseña\`, vidas, gemas, etapa, nivel, vidas_actualizado_en)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [username, pass, MAX_LIVES, 0, 1, 1, now]
+    );
+
+    const state = await getUserState(username);
+    return res.status(201).json(state);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Error al registrar usuario" });
+  }
+});
+
 userRouter.get("/state", async (req, res) => {
   try {
     const { usuario } = req.query;

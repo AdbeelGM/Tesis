@@ -33,7 +33,7 @@ app.use("/api/user", userRouter);
 
 // ✅ ruta principal
 app.get("/", (req, res) => {
-  res.sendFile(path.join(FRONTEND_DIR, "index.html"));
+  res.sendFile(path.join(FRONTEND_DIR, "login.html"));
 });
 
 // ✅ fallback: si piden algo que no es /api, regresamos index.html
@@ -45,8 +45,8 @@ app.use((req, res) => {
     return res.status(404).json({ error: "Ruta API no encontrada" });
   }
 
-  // Para cualquier otra cosa, manda el index.html
-  return res.sendFile(path.join(FRONTEND_DIR, "index.html"));
+  // Para cualquier otra cosa, manda la pantalla de acceso
+  return res.sendFile(path.join(FRONTEND_DIR, "login.html"));
 });
 
 
