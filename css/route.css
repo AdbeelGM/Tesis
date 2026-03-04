@@ -1,0 +1,85 @@
+/* ========== RUTA DE APRENDIZAJE ========== */
+
+.route {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+  background-color: var(--bg-main); /* mismo color que el resto */
+}
+
+/* Encabezado de la ruta */
+.route__header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.route__title {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.route__stage-pill {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background-color: var(--accent-green);
+  color: #0b1b10;
+  font-size: 13px;
+}
+
+/* ------- CULEBRITA AUTOMÁTICA ------- */
+
+.route__path {
+  margin-top: 40px;
+  width: 260px;              /* ancho de la columna de niveles */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;                 /* separación vertical entre niveles */
+}
+
+/* Nodo de nivel (CÍRCULO) */
+.level-node {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;      /* círculo */
+  border: 2px solid #1e2b35;
+  background-color: #111c27;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45);
+  color: #6c7e90;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  /* aquí usamos la variable --offset-x que JS va a ir cambiando */
+  transform: translateX(var(--offset-x, 0px));
+  transition:
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+/* Nivel actual */
+.level-node--current {
+  background-color: var(--accent-green);
+  color: #0a1b0b;
+  border-color: var(--accent-green);
+  box-shadow:
+    0 0 26px rgba(38, 229, 79, 0.75),
+    0 12px 24px rgba(0, 0, 0, 0.7);
+}
+
+/* Hover para niveles que NO son el actual */
+.level-node:not(.level-node--current):hover {
+  box-shadow: 0 16px 26px rgba(0, 0, 0, 0.55);
+  transform: translateX(var(--offset-x, 0px)) translateY(-3px);
+  border-color: rgba(41, 182, 246, 0.7);
+  color: var(--text-primary);
+}

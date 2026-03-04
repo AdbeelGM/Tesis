@@ -1,0 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap");
+
+:root {
+  --bg-main: #0f1722;         /* MISMO COLOR PARA TODO */
+  --text-primary: #f9fafb;
+  --text-muted: #9ca3af;
+  --accent-green: #58cc02;
+  --accent-blue: #29b6f6;
+  --border-soft: #1f2933;
+  --card-dark: #111827;
+}
+
+/* Reset básico */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-main); /* fondo igual en todo */
+}
+
+/* Zona derecha (barra + contenido) */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-main); /* mismo color */
+}

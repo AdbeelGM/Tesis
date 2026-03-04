@@ -1,0 +1,66 @@
+.sidebar {
+  width: 260px;
+  padding: 24px 20px;
+  background-color: var(--bg-main); /* mismo color */
+  border-right: 1px solid var(--border-soft);
+}
+
+.sidebar__brand {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 32px;
+}
+
+.sidebar__brand-main {
+  color: var(--accent-green);
+}
+
+.sidebar__brand-sub {
+  color: var(--text-primary);
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Botón base: mismo color que el fondo */
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background-color: var(--bg-main);        /* MISMO COLOR */
+  color: var(--text-primary);
+  text-align: left;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03); /* apenas visible */
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.nav-btn__icon {
+  font-size: 20px;
+}
+
+.nav-btn__label {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+/* Hover (un poquito más claro) */
+.nav-btn:hover {
+  box-shadow: 0 0 0 2px rgba(41, 182, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Activo: borde azul y texto azul, como Duolingo */
+.nav-btn--active {
+  box-shadow: 0 0 0 2px var(--accent-blue);
+  color: var(--accent-blue);
+  background-color: var(--card-dark);
+}
