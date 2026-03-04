@@ -66,6 +66,18 @@
     border-color 0.18s ease;
 }
 
+.level-node__icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+/* Nivel completado */
+.level-node--completed {
+  background-color: #173322;
+  border-color: #2fd370;
+  color: #9dffd0;
+}
+
 /* Nivel actual */
 .level-node--current {
   background-color: var(--accent-green);
@@ -74,6 +86,13 @@
   box-shadow:
     0 0 26px rgba(38, 229, 79, 0.75),
     0 12px 24px rgba(0, 0, 0, 0.7);
+}
+
+/* Nivel bloqueado */
+.level-node--locked {
+  background-color: #0b151f;
+  border-color: #2a3947;
+  color: #5b6773;
 }
 
 /* Hover para niveles que NO son el actual */
