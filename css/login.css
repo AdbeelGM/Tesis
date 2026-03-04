@@ -1,0 +1,51 @@
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: grid;
+  place-items: center;
+  z-index: 99;
+}
+
+.login-overlay--hidden {
+  display: none;
+}
+
+.login-card {
+  width: min(420px, 90vw);
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.login-card input {
+  background: #0f1722;
+  border: 1px solid #2d3748;
+  color: #fff;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+}
+
+.login-btn {
+  margin-top: 0.5rem;
+  padding: 0.8rem;
+  border-radius: 10px;
+  background: #58cc02;
+  color: #0a0f18;
+  font-weight: 800;
+}
+
+.login-error {
+  color: #f87171;
+  min-height: 1.2em;
+  font-size: 0.95rem;
+}
+
+.app-shell--locked {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}

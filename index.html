@@ -11,10 +11,11 @@
   <link rel="stylesheet" href="css/route.css">
   <link rel="stylesheet" href="css/statusbar.css">
   <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/login.css">
 </head>
 
 <body>
-  <div class="app-shell">
+  <div class="app-shell app-shell--locked">
     <!-- LATERAL IZQUIERDO -->
     <aside class="sidebar">
       <div class="sidebar__brand">
@@ -65,6 +66,8 @@
             <p>Aquí se mostrará información sobre tus gemas.</p>
           </div>
         </button>
+
+        <button class="status-pill" id="btn-logout" type="button">Salir</button>
       </header>
 
       <!-- CONTENIDO CENTRAL -->
@@ -98,6 +101,20 @@
         Aquí irá el contenido del ejercicio seleccionado.
       </p>
     </div>
+  </div>
+
+  <div id="login-overlay" class="login-overlay">
+    <form id="login-form" class="login-card" novalidate>
+      <h2>Iniciar sesión</h2>
+      <label for="login-usuario">Usuario</label>
+      <input id="login-usuario" name="usuario" type="text" required minlength="3" />
+
+      <label for="login-password">Contraseña</label>
+      <input id="login-password" name="password" type="password" required minlength="3" />
+
+      <p id="login-error" class="login-error"></p>
+      <button type="submit" class="login-btn">Entrar</button>
+    </form>
   </div>
 
   <!-- JS -->

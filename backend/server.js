@@ -5,6 +5,7 @@ import cors from "cors";
 
 // ✅ IMPORTA TU ROUTER (ajusta la ruta si tu archivo está en otro lugar)
 import { questionsRouter } from "./routes/questions.js";
+import { userRouter } from "./routes/user.js";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(express.static(FRONTEND_DIR));
 
 // ✅ monta API
 app.use("/api/questions", questionsRouter);
+app.use("/api/user", userRouter);
 
 // ✅ ruta principal
 app.get("/", (req, res) => {
