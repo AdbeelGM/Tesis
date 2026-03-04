@@ -21,6 +21,13 @@ export function loginUser(usuario, password) {
   });
 }
 
+export function registerUser(usuario, password) {
+  return request("/api/user/register", {
+    method: "POST",
+    body: JSON.stringify({ usuario, password }),
+  });
+}
+
 export function fetchUserState(usuario) {
   const qs = new URLSearchParams({ usuario });
   return request(`/api/user/state?${qs.toString()}`);

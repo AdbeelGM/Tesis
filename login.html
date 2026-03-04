@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso | LSM Quest</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/login.css">
+</head>
+
+<body class="auth-page">
+  <main class="auth-layout">
+    <section class="auth-panel auth-panel--brand">
+      <p class="auth-chip">Bienvenido</p>
+      <h1>LSM Quest</h1>
+      <p>Aprende lengua de señas con una experiencia interactiva. Inicia sesión o crea una cuenta para continuar tu progreso.</p>
+    </section>
+
+    <section class="auth-panel auth-panel--form">
+      <div class="auth-toggle" role="tablist" aria-label="Cambiar formulario">
+        <button id="tab-login" class="auth-toggle__btn auth-toggle__btn--active" data-tab="login" role="tab" aria-selected="true">Iniciar sesión</button>
+        <button id="tab-register" class="auth-toggle__btn" data-tab="register" role="tab" aria-selected="false">Registrarse</button>
+      </div>
+
+      <form id="login-form" class="auth-form" novalidate>
+        <h2>Iniciar sesión</h2>
+        <label for="login-usuario">Usuario</label>
+        <input id="login-usuario" name="usuario" type="text" required minlength="3" maxlength="40" />
+
+        <label for="login-password">Contraseña</label>
+        <input id="login-password" name="password" type="password" required minlength="3" maxlength="80" />
+
+        <p id="login-error" class="auth-message auth-message--error"></p>
+        <button type="submit" class="auth-btn">Entrar</button>
+      </form>
+
+      <form id="register-form" class="auth-form auth-form--hidden" novalidate>
+        <h2>Crear cuenta</h2>
+        <label for="register-usuario">Usuario</label>
+        <input id="register-usuario" name="usuario" type="text" required minlength="3" maxlength="40" />
+
+        <label for="register-password">Contraseña</label>
+        <input id="register-password" name="password" type="password" required minlength="3" maxlength="80" />
+
+        <label for="register-password-confirm">Confirmar contraseña</label>
+        <input id="register-password-confirm" name="passwordConfirm" type="password" required minlength="3" maxlength="80" />
+
+        <p id="register-error" class="auth-message auth-message--error"></p>
+        <p id="register-ok" class="auth-message auth-message--ok"></p>
+        <button type="submit" class="auth-btn">Crear cuenta</button>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="js/auth.js"></script>
+</body>
+
+</html>
