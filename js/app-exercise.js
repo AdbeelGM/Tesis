@@ -1,4 +1,6 @@
-import { loadState, loseLifeGlobal, setLives } from "./game-state.js";
+import { loadState, loseLifeGlobal } from "./game-state.js";
+import { completeLevel } from "./api-user.js";
+import { loadSession } from "./user-session.js";
 
 console.log("✅ app-exercise.js cargado");
 
@@ -57,7 +59,12 @@ async function fetchJSON(path, params) {
   const livesEl = document.getElementById("lives");
 
   // ✅ cargar vidas globales
-  const global = loadState();
+  const global = await loadState();
+  if (Number(global.level) !== Number(level)) {
+    alert(`No tienes acceso al nivel ${level}. Tu nivel actual es ${global.level}.`);
+    window.location.href = "index.html";
+    return;
+  }
 
   // Estado del nivel (pero vidas vienen del global)
   const state = {
@@ -118,7 +125,7 @@ async function fetchJSON(path, params) {
     nextQuestion();
   };
 
-  btnCheck.onclick = () => {
+  btnCheck.onclick = async () => {
     // next primero
     if (btnCheck.dataset.mode === "next") return nextQuestion();
 
@@ -133,7 +140,7 @@ async function fetchJSON(path, params) {
       showFeedback(true, "¡Correcto!");
     } else {
       // ✅ RESTA VIDA GLOBAL
-      const updated = loseLifeGlobal(1);
+      const updated = await loseLifeGlobal(1);
       state.lives = updated.lives;
 
       updateLives();
@@ -254,11 +261,19 @@ async function fetchJSON(path, params) {
     renderCurrent();
   }
 
-  function endLevel(completed) {
+  async function endLevel(completed) {
     progressFill.style.width = "100%";
 
-    // ✅ guardamos por si acaso (aunque ya se guarda al fallar)
-    setLives(state.lives);
+    if (completed) {
+      const session = loadSession();
+      if (session?.usuario) {
+        try {
+          await completeLevel(session.usuario, level);
+        } catch (err) {
+          console.warn("No se pudo actualizar avance de nivel:", err.message);
+        }
+      }
+    }
 
     alert(completed ? "✅ Nivel completado" : "❌ Nivel terminado sin vidas");
     window.location.href = "index.html";

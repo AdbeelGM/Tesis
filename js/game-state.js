@@ -1,47 +1,36 @@
-// js/game-state.js
-const KEY = "lsmquest_state_v1";
+import { fetchUserState, loseLife } from "./api-user.js";
+import { loadSession } from "./user-session.js";
 
-const DEFAULT_STATE = {
-  lives: 3,
-  maxLives: 5,
-  gems: 500,
-};
-
-export function loadState() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return { ...DEFAULT_STATE };
-    const s = JSON.parse(raw);
-    return {
-      ...DEFAULT_STATE,
-      ...s,
-      lives: clamp(s.lives ?? DEFAULT_STATE.lives, 0, s.maxLives ?? DEFAULT_STATE.maxLives),
-    };
-  } catch {
-    return { ...DEFAULT_STATE };
+function getUser() {
+  const session = loadSession();
+  if (!session?.usuario) {
+    throw new Error("No hay sesión iniciada");
   }
+  return session.usuario;
 }
 
-export function saveState(next) {
-  localStorage.setItem(KEY, JSON.stringify(next));
+export async function loadState() {
+  const usuario = getUser();
+  const state = await fetchUserState(usuario);
+  return {
+    lives: Number(state.vidas) || 0,
+    maxLives: 5,
+    gems: Number(state.gemas) || 0,
+    stage: Number(state.etapa) || 1,
+    level: Number(state.nivel) || 1,
+    usuario: state.usuario,
+  };
 }
 
-export function loseLifeGlobal(n = 1) {
-  const s = loadState();
-  s.lives = clamp(s.lives - n, 0, s.maxLives);
-  saveState(s);
-  return s;
-}
-
-export function setLives(lives) {
-  const s = loadState();
-  s.lives = clamp(lives, 0, s.maxLives);
-  saveState(s);
-  return s;
-}
-
-function clamp(n, min, max) {
-  n = Number(n);
-  if (!Number.isFinite(n)) n = min;
-  return Math.max(min, Math.min(max, n));
+export async function loseLifeGlobal(n = 1) {
+  const usuario = getUser();
+  const state = await loseLife(usuario, n);
+  return {
+    lives: Number(state.vidas) || 0,
+    maxLives: 5,
+    gems: Number(state.gemas) || 0,
+    stage: Number(state.etapa) || 1,
+    level: Number(state.nivel) || 1,
+    usuario: state.usuario,
+  };
 }
