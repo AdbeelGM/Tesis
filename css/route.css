@@ -46,8 +46,8 @@
   width: 72px;
   height: 72px;
   border-radius: 999px;      /* círculo */
-  border: 2px solid #4f5964;
-  background-color: #626d78;
+  border: 2px solid rgba(46, 58, 65, 1);
+  background-color: rgba(55, 70, 79, 1);
   box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45);
   color: #ecf1f7;
   font-size: 22px;
@@ -74,9 +74,9 @@
 
 /* Nivel completado */
 .level-node--completed {
-  background-color: #717d89;
-  border-color: #5d6670;
-  color: #f2f6fb;
+  background-color: rgba(88, 204, 2, 1);
+  border-color: rgba(74, 176, 4, 1);
+  color: #ffffff;
 }
 
 /* Nivel actual */
