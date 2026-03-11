@@ -1,16 +1,14 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap");
-
 :root {
-  --bg-main: #0f1722;         /* MISMO COLOR PARA TODO */
-  --text-primary: #f9fafb;
-  --text-muted: #9ca3af;
-  --accent-green: #58cc02;
-  --accent-blue: #29b6f6;
-  --border-soft: #1f2933;
-  --card-dark: #111827;
+  --bg-light: #fff5ed;
+  --cream: #fff9f5;
+  --orange: #fb923c;
+  --orange-dark: #ea7a24;
+  --orange-soft: #fed7aa;
+  --teal: #2dd4bf;
+  --teal-dark: #0f9f8d;
+  --text-main: #334155;
 }
 
-/* Reset básico */
 *,
 *::before,
 *::after {
@@ -20,28 +18,35 @@
 }
 
 body {
-  font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--bg-main);
-  color: var(--text-primary);
+  font-family: "Lexend", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-light);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 button {
-  font-family: inherit;
-  border: none;
+  font: inherit;
+  border: 0;
   background: none;
   cursor: pointer;
 }
 
-.app-shell {
-  display: flex;
-  min-height: 100vh;
-  background-color: var(--bg-main); /* fondo igual en todo */
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 600,
+    "GRAD" 0,
+    "opsz" 24;
 }
 
-/* Zona derecha (barra + contenido) */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+}
+
 .app-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-main); /* mismo color */
 }
