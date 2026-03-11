@@ -1,0 +1,68 @@
+.sidebar {
+  width: 294px;
+  border-right: 1px solid #fed7aa;
+  background: #fff9f5;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #f97316;
+}
+
+.sidebar__brand .material-symbols-outlined {
+  font-size: 32px;
+}
+
+.sidebar__brand-main,
+.sidebar__brand-sub {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.nav-btn {
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.nav-btn__icon {
+  font-size: 24px;
+}
+
+.status-bar {
+  background: #fff9f5;
+  border-bottom: 1px solid #fed7aa;
+}
+
+.status-pill {
+  height: 40px;
+  min-width: 72px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+.status-pill--gems { background: #fef3c7; color: #eab308; }
+.status-pill--lives { background: #ffe4e6; color: #fb7185; }
+.status-pill__popup { display: none; }
+
+.status-avatar {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #fdba74;
+  border-radius: 999px;
+  color: #d97706;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Levitación Mascota */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float { animation: float 3s ease-in-out infinite; }
