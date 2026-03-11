@@ -1,55 +1,66 @@
 .sidebar {
-  width: 294px;
-  border-right: 1px solid #fed7aa;
-  background: var(--cream);
-  padding: 24px 18px;
+  width: 260px;
+  padding: 24px 20px;
+  background-color: var(--bg-main); /* mismo color */
+  border-right: 1px solid var(--border-soft);
 }
 
 .sidebar__brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #f97316;
-  margin-bottom: 28px;
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 32px;
 }
 
-.sidebar__brand-text {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.015em;
+.sidebar__brand-main {
+  color: var(--accent-green);
+}
+
+.sidebar__brand-sub {
+  color: var(--text-primary);
 }
 
 .sidebar__nav {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
 }
 
+/* Botón base: mismo color que el fondo */
 .nav-btn {
   display: flex;
   align-items: center;
   gap: 14px;
-  border-radius: 999px;
-  color: #64748b;
-  font-weight: 700;
-  font-size: 16px;
   padding: 14px 18px;
-  transition: background-color .2s, color .2s;
+  border-radius: 18px;
+  background-color: var(--bg-main);        /* MISMO COLOR */
+  color: var(--text-primary);
   text-align: left;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03); /* apenas visible */
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
+.nav-btn__icon {
+  font-size: 20px;
+}
+
+.nav-btn__label {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
+/* Hover (un poquito más claro) */
 .nav-btn:hover {
-  background: #fff1e5;
-  color: #ea580c;
+  box-shadow: 0 0 0 2px rgba(41, 182, 246, 0.4);
+  transform: translateY(-1px);
 }
 
+/* Activo: borde azul y texto azul, como Duolingo */
 .nav-btn--active {
-  background: #f5e3cc;
-  color: #ea580c;
-}
-
-.nav-btn__icon { font-size: 24px; }
-
-@media (max-width: 900px) {
-  .sidebar { display: none; }
+  box-shadow: 0 0 0 2px var(--accent-blue);
+  color: var(--accent-blue);
+  background-color: var(--card-dark);
 }

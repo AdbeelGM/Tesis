@@ -1,17 +1,13 @@
-const STANDARD_LAYOUT_OFFSETS = [1, 2, 3, 4, 5, 6];
-
-function applyStandardPathLayout(path) {
-  const items = Array.from(path.querySelectorAll('.level-item'));
-
-  items.forEach((item, index) => {
-    item.classList.remove('level-item--1', 'level-item--2', 'level-item--3', 'level-item--4', 'level-item--5', 'level-item--6');
-
-    const slot = STANDARD_LAYOUT_OFFSETS[index] ?? ((index % 6) + 1);
-    item.classList.add(`level-item--${slot}`);
-  });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-  const standardPaths = document.querySelectorAll('.route__path--standard');
-  standardPaths.forEach(applyStandardPathLayout);
+  const nodes = document.querySelectorAll('.level-node');
+
+  const amplitud = 50;   // qué tanto se mueve hacia los lados (px)
+  const paso = 1;     // controla cada cuántos niveles gira la curva
+                         // valores más pequeños = curvas más largas
+
+  nodes.forEach((node, index) => {
+    // curva suave tipo seno: 0 → derecha → centro → izquierda → centro...
+    const offset = Math.sin(index * paso) * amplitud;
+    node.style.setProperty('--offset-x', `${offset}px`);
+  });
 });
