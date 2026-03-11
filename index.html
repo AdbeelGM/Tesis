@@ -3,106 +3,114 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LSM Quest</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-
+  <!-- CSS -->
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/sidebar.css">
   <link rel="stylesheet" href="css/route.css">
   <link rel="stylesheet" href="css/statusbar.css">
   <link rel="stylesheet" href="css/modal.css">
-  <link rel="stylesheet" href="css/design-system-lsm.css">
 </head>
 
 <body>
   <div class="app-shell">
+    <!-- LATERAL IZQUIERDO -->
     <aside class="sidebar">
       <div class="sidebar__brand">
-        <span class="material-symbols-outlined">sign_language</span>
         <span class="sidebar__brand-main">LSM</span>
         <span class="sidebar__brand-sub">Quest</span>
       </div>
 
       <nav class="sidebar__nav" id="sidebar-nav">
         <button class="nav-btn nav-btn--active" data-view="aprender">
-          <span class="material-symbols-outlined nav-btn__icon" style="font-variation-settings: 'FILL' 1;">book</span>
-          <span class="nav-btn__label">Learn</span>
+          <span class="nav-btn__icon">🏠</span>
+          <span class="nav-btn__label">APRENDER</span>
         </button>
+
         <button class="nav-btn" data-view="tienda">
-          <span class="material-symbols-outlined nav-btn__icon">storefront</span>
-          <span class="nav-btn__label">Store</span>
+          <span class="nav-btn__icon">🛒</span>
+          <span class="nav-btn__label">TIENDA</span>
         </button>
+
         <button class="nav-btn" data-view="perfil">
-          <span class="material-symbols-outlined nav-btn__icon">person</span>
-          <span class="nav-btn__label">Profile</span>
+          <span class="nav-btn__icon">👤</span>
+          <span class="nav-btn__label">PERFIL</span>
         </button>
       </nav>
     </aside>
 
+    <!-- ZONA DERECHA (HEADER + CONTENIDO) -->
     <div class="app-main">
+      <!-- BARRA SUPERIOR DERECHA -->
       <header class="status-bar">
         <div class="status-bar__spacer"></div>
-        <button class="status-pill status-pill--gems">
-          <span class="material-symbols-outlined status-pill__icon">diamond</span>
-          <span class="status-pill__text" id="gems-label"></span>
-        </button>
+
         <button class="status-pill status-pill--lives">
-          <span class="material-symbols-outlined status-pill__icon" style="font-variation-settings: 'FILL' 1;">favorite</span>
+          <span class="status-pill__icon">❤️</span>
           <span class="status-pill__text" id="lives-label"></span>
+
+
+          <div class="status-pill__popup">
+            <p>Aquí podrás ver detalles de tus vidas.</p>
+          </div>
         </button>
-        <button class="status-avatar" id="btn-logout" type="button" aria-label="Salir">
-          <span class="material-symbols-outlined">logout</span>
+
+        <button class="status-pill status-pill--gems">
+          <span class="status-pill__icon">💎</span>
+          <span class="status-pill__text" id="gems-label"></span>
+
+
+          <div class="status-pill__popup">
+            <p>Aquí se mostrará información sobre tus gemas.</p>
+          </div>
         </button>
+
+        <button class="status-pill" id="btn-logout" type="button">Salir</button>
       </header>
 
+      <!-- CONTENIDO CENTRAL -->
       <main class="route">
-        <section class="route__unit-card">
-          <div>
-            <h1 class="route__title">Unit 1: Basics</h1>
-            <p class="route__subtitle">Greetings, Alphabet, and Numbers</p>
-          </div>
-          <button class="route__guide">Guide</button>
-          <div class="route__orb route__orb--big"></div>
-          <div class="route__orb route__orb--small"></div>
-        </section>
+        <header class="route__header">
+          <h1 class="route__title">Ruta de aprendizaje LSM</h1>
+          <div class="route__stage-pill">Etapa 1 · Básico</div>
+        </header>
 
         <section class="route__path">
-          <svg class="route__snake" viewBox="0 0 100 600" preserveAspectRatio="none">
-            <path d="M50,0 C80,100 20,200 50,300 C80,400 20,500 50,600"></path>
-          </svg>
+          <!-- Cada nivel -->
+           <button class="level-node" data-level="1">1</button>
+          <button class="level-node" data-level="2">2</button>
+          <button class="level-node" data-level="3">3</button>
+          <button class="level-node" data-level="4">4</button>
+          <button class="level-node" data-level="5">5</button>
+          <button class="level-node" data-level="6">6</button>
 
-          <div class="level-item"><button class="level-node" data-level="1"></button></div>
-          <div class="level-item"><button class="level-node" data-level="2"></button></div>
-          <div class="level-item">
-            <div class="start-badge">Start</div>
-            <button class="level-node" data-level="3"></button>
-          </div>
-          <div class="level-item"><button class="level-node" data-level="4"></button></div>
-          <div class="level-item"><button class="level-node" data-level="5"></button></div>
-          <div class="level-item"><button class="level-node" data-level="6"></button></div>
+
         </section>
       </main>
     </div>
   </div>
 
+  <!-- Modal de ejercicio -->
   <div id="exercise-modal" class="exercise-modal exercise-modal--hidden">
     <div class="exercise-modal__content">
       <button class="exercise-modal__close" aria-label="Cerrar ejercicio">&times;</button>
       <h2 class="exercise-modal__title">Ejercicio</h2>
-      <p class="exercise-modal__body">Aquí irá el contenido del ejercicio seleccionado.</p>
+      <p class="exercise-modal__body">
+        Aquí irá el contenido del ejercicio seleccionado.
+      </p>
     </div>
   </div>
 
+
+  <!-- JS -->
   <script src="js/levels.js"></script>
   <script src="js/sidebar.js"></script>
   <script type="module" src="js/statusbar.js"></script>
   <script type="module" src="js/app.js"></script>
+
   <script src="js/route-snake.js"></script>
+
 </body>
 
 </html>
