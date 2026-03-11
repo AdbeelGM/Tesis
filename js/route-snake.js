@@ -1,9 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const items = document.querySelectorAll('.level-item');
-  items.forEach((item) => {
-    const inlineOffset = item.style.getPropertyValue('--offset-x');
-    if (inlineOffset) {
-      item.style.setProperty('--offset-x', inlineOffset);
-    }
+  const paths = document.querySelectorAll('.route__path');
+
+  paths.forEach((path) => {
+    const items = Array.from(path.querySelectorAll('.level-item'));
+
+    items.forEach((item, index) => {
+      const slotClass = `level-item--${index + 1}`;
+      if (![...item.classList].some((className) => className.startsWith('level-item--'))) {
+        item.classList.add(slotClass);
+      }
+    });
   });
 });

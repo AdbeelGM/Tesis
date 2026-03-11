@@ -1,73 +1,43 @@
 .status-bar {
   display: flex;
   align-items: center;
-  padding: 18px 28px;
-  background-color: var(--bg-main); /* mismo color que todo */
+  gap: 12px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #fed7aa;
+  background: var(--cream);
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
-.status-bar__spacer {
-  flex: 1;
-}
+.status-bar__spacer { flex: 1; }
 
-/* Botones de gemas / vidas */
 .status-pill {
-  position: relative;
+  height: 40px;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 14px;
-  margin-left: 12px;
-  border-radius: 999px;
-  background-color: var(--bg-main);      /* mismo color */
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
-  color: var(--text-primary);
+  font-weight: 700;
   font-size: 14px;
-  transition:
-    box-shadow 0.15s ease,
-    transform 0.15s ease,
-    background-color 0.15s ease;
+  padding: 0 14px;
+  min-width: 72px;
 }
 
-.status-pill__icon {
-  font-size: 16px;
+.status-pill--gems { background: #fef3c7; color: #eab308; }
+.status-pill--lives { background: #ffe4e6; color: #fb7185; }
+.status-pill__icon { font-size: 20px; }
+
+.status-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 2px solid #fdba74;
+  background: #fff;
+  color: #d97706;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.status-pill__popup {
-  position: absolute;
-  top: 115%;
-  right: 0;
-  width: 220px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background-color: var(--card-dark);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-  color: var(--text-muted);
-  font-size: 13px;
-  opacity: 0;
-  transform: translateY(-4px);
-  pointer-events: none;
-  transition:
-    opacity 0.15s ease,
-    transform 0.15s ease;
-}
-
-/* Hover: se abre la ventanita */
-.status-pill:hover {
-  box-shadow: 0 0 0 2px rgba(41, 182, 246, 0.6);
-  transform: translateY(-1px);
-}
-
-.status-pill:hover .status-pill__popup {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-/* Extra: colores distintos por tipo */
-.status-pill--lives .status-pill__icon {
-  color: #ff4b6a;
-}
-
-.status-pill--gems .status-pill__icon {
-  color: var(--accent-blue);
-}
+.status-avatar .material-symbols-outlined { font-size: 20px; }
