@@ -40,15 +40,27 @@
 .level-node--completed { background: var(--teal); box-shadow: 0 8px 0 var(--teal-dark), 0 10px 18px rgba(15, 23, 42, 0.2); color: #fff; }
 .level-item--completed:first-of-type::after { content: ""; position: absolute; width: 20px; height: 32px; top: -14px; right: -8px; border-radius: 999px; background: #facc15; border: 2px solid #fff; }
 .level-node--current { width: 96px; height: 96px; background: var(--orange); color: #fff; box-shadow: 0 8px 0 #c76a20, 0 0 15px rgba(251, 146, 60, 0.6); position: relative; z-index: 2; }
-.level-node--current::before { content: ""; position: absolute; inset: -10px; border-radius: inherit; background: rgba(251, 146, 60, 0.35); animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.level-node--current::before { content: ""; position: absolute; inset: -10px; border-radius: inherit; background: rgba(251, 146, 60, 0.35); animation: ping-slow 2s infinite; }
 .level-node--current::after { content: ""; position: absolute; inset: 6px; border-radius: inherit; border: 7px solid rgba(45, 212, 191, 0.95); border-top-color: transparent; border-left-color: transparent; }
 .level-node--locked { background: #fed7aa; color: #fb923c; box-shadow: 0 8px 0 #fdba74, 0 8px 16px rgba(15, 23, 42, 0.12); }
-.start-badge { position: absolute; top: -52px; left: 50%; transform: translateX(-50%); background: #fff; color: #f97316; padding: 8px 16px; border-radius: 12px; border: 1px solid #ffedd5; font-weight: 700; display: none; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1); animation: bounce 1s infinite; }
+.start-badge { position: absolute; top: -52px; left: 50%; transform: translateX(-50%); background: #fff; color: #f97316; padding: 8px 16px; border-radius: 12px; border: 1px solid #ffedd5; font-weight: 700; display: none; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1); animation: bounce-custom 1s infinite; }
 .start-badge::after { content: ""; width: 12px; height: 12px; position: absolute; left: 50%; transform: translateX(-50%) rotate(45deg); bottom: -7px; background: #fff; border-right: 1px solid #ffedd5; border-bottom: 1px solid #ffedd5; }
 .level-item--current .start-badge { display: block; }
 
-@keyframes ping { 75%, 100% { transform: scale(1.22); opacity: 0; } }
-@keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-8px); } }
+/* CSS Animations */
+@keyframes ping-slow {
+  0% { transform: scale(1); opacity: 0.6; }
+  70%, 100% { transform: scale(1.5); opacity: 0; }
+}
+
+@keyframes bounce-custom {
+  0%, 100% { transform: translateY(0) translateX(-50%); }
+  50% { transform: translateY(-15%) translateX(-50%); }
+}
+
+/* Tailwind Classes */
+.animate-ping-slow { animation: ping-slow 2s infinite; }
+.animate-bounce-custom { animation: bounce-custom 1s infinite; }
 
 @media (max-width: 900px) {
   .sidebar { display: none; }
