@@ -101,6 +101,16 @@
   display: grid;
   place-items: center;
   box-shadow: 0 8px 0 rgba(0, 0, 0, 0.2), 0 10px 20px rgba(15, 23, 42, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.level-node:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 14px 0 rgba(0, 0, 0, 0.18), 0 20px 25px rgba(15, 23, 42, 0.25);
+}
+
+.level-node:active {
+  transform: translateY(0) scale(1);
 }
 
 .level-node .material-symbols-outlined { font-size: 44px; }
