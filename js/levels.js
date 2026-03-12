@@ -15,6 +15,13 @@ function applyLevelNodeState(node, currentLevel) {
   item?.classList.toggle('level-item--current', isCurrent);
   item?.classList.toggle('level-item--locked', isLocked);
 
+  if (item && !item.querySelector('.start-badge')) {
+    const badge = document.createElement('div');
+    badge.className = 'start-badge';
+    badge.textContent = 'Start';
+    item.insertBefore(badge, node);
+  }
+
   if (isCompleted) {
     node.innerHTML = '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">check</span>';
     node.setAttribute('aria-label', `Nivel ${level} completado`);
