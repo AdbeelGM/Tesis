@@ -41,13 +41,9 @@ async function fetchJSON(path, params) {
   const level = getLevelFromURL();
   const cfg = await loadLevelConfig(level);
 
-  console.log("📌 Config cargada:", cfg);
   document.title = `Nivel ${cfg.level}`;
-
-  // salir
   document.getElementById("btnExit").onclick = () => (window.location.href = "index.html");
 
-  // UI refs
   const btnSkip = document.getElementById("btnSkip");
   const btnCheck = document.getElementById("btnCheck");
   const feedback = document.getElementById("feedback");
@@ -56,9 +52,10 @@ async function fetchJSON(path, params) {
   const imgEl = document.getElementById("mediaImg");
   const videoEl = document.getElementById("mediaVideo");
   const progressFill = document.getElementById("progressFill");
+  const progressPct = document.getElementById("progressPct");
   const livesEl = document.getElementById("lives");
+  const livesCount = document.getElementById("livesCount");
 
-  // ✅ cargar vidas globales
   const global = await loadState();
   if (Number(global.level) !== Number(level)) {
     alert(`No tienes acceso al nivel ${level}. Tu nivel actual es ${global.level}.`);
@@ -66,20 +63,17 @@ async function fetchJSON(path, params) {
     return;
   }
 
-  // Estado del nivel (pero vidas vienen del global)
   const state = {
     index: 0,
-    lives: global.lives,        // ✅ GLOBAL
-    maxLives: global.maxLives,  // ✅ por si quieres usarlo después
+    lives: global.lives,
+    maxLives: global.maxLives,
     locked: false,
     selected: null,
     queue: [],
   };
 
-  // ✅ pintar corazones al iniciar (según vidas actuales)
   updateLives();
 
-  // 1) Cargar preguntas por tipo
   const mix = cfg.mix || { multiple_choice: 1 };
   const [mc, vf, tx] = await Promise.all([
     mix.multiple_choice
@@ -105,31 +99,24 @@ async function fetchJSON(path, params) {
       : Promise.resolve([]),
   ]);
 
-  // 2) Normalizar a un formato común con "tipo"
-  const queue = [
+  state.queue = shuffle([
     ...mc.map((q) => ({ tipo: "multiple_choice", ...q })),
     ...vf.map((q) => ({ tipo: "true_false", ...q })),
     ...tx.map((q) => ({ tipo: "text_input", ...q })),
-  ];
-
-  state.queue = shuffle(queue);
+  ]);
 
   if (state.queue.length === 0) {
     alert("No hay preguntas para este nivel.");
     return (window.location.href = "index.html");
   }
 
-  // botones
   btnSkip.onclick = () => {
     if (state.locked) return;
     nextQuestion();
   };
 
   btnCheck.onclick = async () => {
-    // next primero
     if (btnCheck.dataset.mode === "next") return nextQuestion();
-
-    // en check validamos según tipo
     if (state.locked) return;
 
     const q = state.queue[state.index];
@@ -137,14 +124,12 @@ async function fetchJSON(path, params) {
 
     state.locked = true;
     if (ok) {
-      showFeedback(true, "¡Correcto!");
+      showFeedback(true, q);
     } else {
-      // ✅ RESTA VIDA GLOBAL
       const updated = await loseLifeGlobal(1);
       state.lives = updated.lives;
-
       updateLives();
-      showFeedback(false, "Incorrecto");
+      showFeedback(false, q);
 
       if (state.lives <= 0) {
         alert("❌ Sin vidas");
@@ -152,29 +137,36 @@ async function fetchJSON(path, params) {
       }
     }
 
-    btnCheck.textContent = "Siguiente";
+    btnCheck.innerHTML = `CONTINUAR <span class="material-symbols-outlined">arrow_forward</span>`;
     btnCheck.dataset.mode = "next";
   };
 
-  // render 1ra
   renderCurrent();
-
-  // --------- funciones ---------
 
   function renderCurrent() {
     state.selected = null;
     state.locked = false;
     feedback.style.display = "none";
-    btnCheck.textContent = "Comprobar";
+    document.body.classList.remove("feedback--ok", "feedback--bad");
+    btnCheck.innerHTML = `COMPROBAR <span class="material-symbols-outlined">arrow_forward</span>`;
     btnCheck.dataset.mode = "check";
 
     const total = state.queue.length;
     const pct = Math.round((state.index / total) * 100);
     progressFill.style.width = `${pct}%`;
+    progressPct.textContent = `${pct}%`;
 
     const q = state.queue[state.index];
+    optionsEl.dataset.type = q.tipo;
 
-    // Media
+    const kickerByType = {
+      multiple_choice: "Select the correct translation",
+      true_false: "Selecciona la opción correcta",
+      text_input: "Selecciona la opción correcta",
+    };
+    const kickerEl = document.querySelector(".exercise__kicker");
+    if (kickerEl) kickerEl.textContent = kickerByType[q.tipo] || "Selecciona la opción correcta";
+
     const ruta = q.media_ruta || "";
     const isVideo = /\.(mp4|webm|ogg)$/i.test(ruta);
     if (isVideo) {
@@ -187,50 +179,50 @@ async function fetchJSON(path, params) {
       imgEl.src = ruta;
     }
 
-    // Render por tipo
     optionsEl.innerHTML = "";
 
     if (q.tipo === "multiple_choice") {
-      promptText.textContent = q.pregunta || "Esta seña representa la palabra:";
+      promptText.textContent = q.pregunta || "What does this sign mean?";
       (q.opciones || []).forEach((op) => {
         const b = document.createElement("button");
         b.className = "option";
-        b.textContent = op;
-        b.onclick = () => {
-          if (state.locked) return;
-          state.selected = op;
-          [...optionsEl.children].forEach((x) => x.classList.remove("option--selected"));
-          b.classList.add("option--selected");
-        };
+        b.innerHTML = `<span>${op}</span>`;
+        b.onclick = () => selectOption(op, b);
         optionsEl.appendChild(b);
       });
       return;
     }
 
     if (q.tipo === "true_false") {
-      promptText.textContent = q.pregunta || "¿Verdadero o falso?";
-      ["Verdadero", "Falso"].forEach((op) => {
+      promptText.textContent = q.pregunta || "¿Esta seña significa \"Hola\"?";
+      [
+        { label: "Verdadero", icon: "check" },
+        { label: "Falso", icon: "close" },
+      ].forEach(({ label, icon }) => {
         const b = document.createElement("button");
         b.className = "option";
-        b.textContent = op;
-        b.onclick = () => {
-          if (state.locked) return;
-          state.selected = op;
-          [...optionsEl.children].forEach((x) => x.classList.remove("option--selected"));
-          b.classList.add("option--selected");
-        };
+        b.dataset.value = label;
+        b.innerHTML = `<span class="option__iconWrap material-symbols-outlined">${icon}</span><span>${label}</span>`;
+        b.onclick = () => selectOption(label, b);
         optionsEl.appendChild(b);
       });
       return;
     }
 
     if (q.tipo === "text_input") {
-      promptText.textContent = q.pregunta || "Escribe la palabra:";
-      optionsEl.innerHTML = `<input id="answerInput" class="text-input" type="text" placeholder="Escribe aquí..." autocomplete="off" />`;
+      promptText.textContent = q.pregunta || "Escribe la palabra que representa la seña:";
+      optionsEl.innerHTML = `<input id="answerInput" class="text-input" type="text" placeholder="Escribe tu respuesta aquí..." autocomplete="off" />`;
       return;
     }
 
     promptText.textContent = "Tipo de ejercicio no soportado";
+  }
+
+  function selectOption(value, element) {
+    if (state.locked) return;
+    state.selected = value;
+    [...optionsEl.children].forEach((x) => x.classList.remove("option--selected"));
+    element.classList.add("option--selected");
   }
 
   function evaluateCurrent(q) {
@@ -263,6 +255,7 @@ async function fetchJSON(path, params) {
 
   async function endLevel(completed) {
     progressFill.style.width = "100%";
+    progressPct.textContent = "100%";
 
     if (completed) {
       const session = loadSession();
@@ -285,11 +278,40 @@ async function fetchJSON(path, params) {
       h.classList.toggle("heart--on", i < state.lives);
       h.classList.toggle("heart--off", i >= state.lives);
     });
+    livesCount.textContent = String(state.lives);
   }
 
-  function showFeedback(ok, text) {
-    feedback.style.display = "block";
-    feedback.className = "exercise__feedback " + (ok ? "feedback--ok" : "feedback--bad");
-    feedback.textContent = text;
+  function getCorrectAnswer(q) {
+    if (q.tipo === "true_false") return q.es_verdadero ? "Verdadero" : "Falso";
+    return q.correcta || "-";
+  }
+
+  function showFeedback(ok, q) {
+    feedback.style.display = "flex";
+    document.body.classList.remove("feedback--ok", "feedback--bad");
+    document.body.classList.add(ok ? "feedback--ok" : "feedback--bad");
+
+    if (ok) {
+      feedback.innerHTML = `
+        <div class="feedback__left">
+          <div class="feedback__icon material-symbols-outlined">check</div>
+          <div>
+            <h4 class="feedback__title">¡Excelente trabajo!</h4>
+            <p class="feedback__desc">Has identificado correctamente la seña.</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    feedback.innerHTML = `
+      <div class="feedback__left">
+        <div class="feedback__icon material-symbols-outlined">close</div>
+        <div>
+          <h4 class="feedback__title">¡Casi lo tienes!</h4>
+          <p class="feedback__desc">La respuesta correcta era: <strong>${getCorrectAnswer(q)}</strong></p>
+        </div>
+      </div>
+    `;
   }
 })();
