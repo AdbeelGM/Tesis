@@ -154,7 +154,7 @@ async function fetchJSON(path, params) {
     const total = state.queue.length;
     const pct = Math.round((state.index / total) * 100);
     progressFill.style.width = `${pct}%`;
-    progressPct.textContent = `${pct}%`;
+    if (progressPct) progressPct.textContent = `${pct}%`;
 
     const q = state.queue[state.index];
     optionsEl.dataset.type = q.tipo;
@@ -255,7 +255,7 @@ async function fetchJSON(path, params) {
 
   async function endLevel(completed) {
     progressFill.style.width = "100%";
-    progressPct.textContent = "100%";
+    if (progressPct) progressPct.textContent = "100%";
 
     if (completed) {
       const session = loadSession();
@@ -278,7 +278,7 @@ async function fetchJSON(path, params) {
       h.classList.toggle("heart--on", i < state.lives);
       h.classList.toggle("heart--off", i >= state.lives);
     });
-    livesCount.textContent = String(state.lives);
+    if (livesCount) livesCount.textContent = String(state.lives);
   }
 
   function getCorrectAnswer(q) {
