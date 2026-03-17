@@ -9,11 +9,11 @@
 
 <body>
   <main class="exercise">
+    <!-- Top bar -->
     <header class="exercise__topbar">
-      <button class="topbar__exit" id="btnExit" aria-label="Salir">Salir</button>
+      <button class="topbar__exit" id="btnExit" aria-label="Salir">✕</button>
 
       <div class="topbar__progress">
-        <span class="topbar__label">Progreso</span>
         <div class="progress__track">
           <div class="progress__fill" id="progressFill" style="width:0%"></div>
         </div>
@@ -28,8 +28,8 @@
       </div>
     </header>
 
+    <!-- Content -->
     <section class="exercise__card">
-      <p class="exercise__kicker">Selecciona la respuesta correcta</p>
       <h2 class="exercise__prompt" id="promptText"></h2>
 
       <div class="exercise__media">
@@ -43,6 +43,7 @@
       <div class="exercise__feedback" id="feedback" style="display:none"></div>
     </section>
 
+    <!-- Bottom actions -->
     <footer class="exercise__actions">
       <button class="btn btn--ghost" id="btnSkip">Saltar</button>
       <button class="btn btn--primary" id="btnCheck">Comprobar</button>
