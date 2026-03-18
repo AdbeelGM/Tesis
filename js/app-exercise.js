@@ -45,13 +45,13 @@ async function fetchJSON(path, params) {
   document.title = `Nivel ${cfg.level}`;
 
   const CHECK_LABEL = 'Comprobar<span class="material-symbols-outlined">arrow_forward</span>';
-  const NEXT_LABEL = 'Siguiente<span class="material-symbols-outlined">arrow_forward</span>';
 
   document.getElementById("btnExit").onclick = () => (window.location.href = "index.html");
 
   const btnSkip = document.getElementById("btnSkip");
   const btnCheck = document.getElementById("btnCheck");
   const feedback = document.getElementById("feedback");
+  const actionsEl = document.getElementById("exerciseActions");
   const optionsEl = document.getElementById("options");
   const promptText = document.getElementById("promptText");
   const promptSubtitle = document.getElementById("promptSubtitle");
@@ -123,7 +123,6 @@ async function fetchJSON(path, params) {
   };
 
   btnCheck.onclick = async () => {
-    if (btnCheck.dataset.mode === "next") return nextQuestion();
     if (state.locked) return;
 
     const q = state.queue[state.index];
@@ -144,8 +143,6 @@ async function fetchJSON(path, params) {
       }
     }
 
-    btnCheck.innerHTML = NEXT_LABEL;
-    btnCheck.dataset.mode = "next";
   };
 
   renderCurrent();
@@ -156,7 +153,7 @@ async function fetchJSON(path, params) {
     feedback.style.display = "none";
     feedback.innerHTML = "";
     btnCheck.innerHTML = CHECK_LABEL;
-    btnCheck.dataset.mode = "check";
+    actionsEl?.classList.remove("is-hidden");
 
     const total = state.queue.length;
     updateProgress(Math.round((state.index / total) * 100));
@@ -315,6 +312,7 @@ async function fetchJSON(path, params) {
 
   function showFeedback(ok, config) {
     feedback.style.display = "block";
+    actionsEl?.classList.add("is-hidden");
     feedback.className = `exercise__feedback ${ok ? "feedback--ok" : "feedback--bad"}`;
     feedback.innerHTML = `
       <div class="feedback__inner">
