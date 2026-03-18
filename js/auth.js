@@ -24,6 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
     registerOk.textContent = "";
   };
 
+  const normalizeUserValue = (value) => value.trim().toLowerCase();
+
   const setTab = (tab) => {
     clearMessages();
     const showLogin = tab === "login";
@@ -40,15 +42,31 @@ document.addEventListener("DOMContentLoaded", () => {
   tabLogin.addEventListener("click", () => setTab("login"));
   tabRegister.addEventListener("click", () => setTab("register"));
 
+  document.querySelectorAll("[data-switch-tab]").forEach((button) => {
+    button.addEventListener("click", () => setTab(button.dataset.switchTab));
+  });
+
+  document.querySelectorAll("[data-toggle-password]").forEach((button) => {
+    const input = document.getElementById(button.dataset.togglePassword);
+    const icon = button.querySelector(".material-symbols-outlined");
+
+    button.addEventListener("click", () => {
+      const showing = input.type === "text";
+      input.type = showing ? "password" : "text";
+      button.setAttribute("aria-label", showing ? "Mostrar contraseña" : "Ocultar contraseña");
+      if (icon) icon.textContent = showing ? "visibility" : "visibility_off";
+    });
+  });
+
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearMessages();
 
-    const usuario = document.getElementById("login-usuario").value.trim();
+    const usuario = normalizeUserValue(document.getElementById("login-usuario").value);
     const password = document.getElementById("login-password").value.trim();
 
     if (!usuario || !password) {
-      loginError.textContent = "Debes ingresar usuario y contraseña.";
+      loginError.textContent = "Ingresa tu correo y contraseña para continuar.";
       return;
     }
 
@@ -65,12 +83,12 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     clearMessages();
 
-    const usuario = document.getElementById("register-usuario").value.trim();
+    const usuario = normalizeUserValue(document.getElementById("register-usuario").value);
     const password = document.getElementById("register-password").value.trim();
     const passwordConfirm = document.getElementById("register-password-confirm").value.trim();
 
     if (!usuario || !password || !passwordConfirm) {
-      registerError.textContent = "Completa todos los campos para registrarte.";
+      registerError.textContent = "Completa todos los campos para crear tu cuenta.";
       return;
     }
 
