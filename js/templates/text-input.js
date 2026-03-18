@@ -69,6 +69,7 @@ export function runTextInput(cfg) {
       feedback.style.display = "none";
       btnCheck.textContent = "Comprobar";
       btnCheck.dataset.mode = "check";
+      optionsEl.classList.remove("exercise__options--text");
 
       const q = state.questions[state.index];
       if (!q) return resolve();
@@ -95,6 +96,7 @@ export function runTextInput(cfg) {
       }
 
       // Input
+      optionsEl.classList.add("exercise__options--text");
       optionsEl.innerHTML = `
         <input id="answerInput" class="text-input" type="text" placeholder="Escribe aquí..." autocomplete="off" />
       `;

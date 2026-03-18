@@ -176,6 +176,7 @@ async function fetchJSON(path, params) {
     }
 
     optionsEl.innerHTML = "";
+    optionsEl.classList.remove("exercise__options--text");
 
     if (q.tipo === "multiple_choice") {
       promptText.textContent = q.pregunta || "What does this sign mean?";
@@ -218,6 +219,7 @@ async function fetchJSON(path, params) {
     if (q.tipo === "text_input") {
       promptText.textContent = q.pregunta || "Escribe la palabra que representa la seña:";
       promptSubtitle.textContent = "Escribe tu respuesta en español";
+      optionsEl.classList.add("exercise__options--text");
       optionsEl.innerHTML = '<input id="answerInput" class="text-input" type="text" placeholder="Escribe tu respuesta aquí..." autocomplete="off" />';
       document.getElementById("answerInput")?.focus();
       return;

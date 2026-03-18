@@ -251,6 +251,15 @@ button {
   gap: 16px;
 }
 
+.exercise__options--text {
+  display: flex;
+  justify-content: center;
+}
+
+.exercise__options--text .text-input {
+  width: min(100%, 540px);
+}
+
 .option {
   min-height: 84px;
   padding: 20px 24px;
