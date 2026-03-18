@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     registerOk.textContent = "";
   };
 
-  const normalizeUserValue = (value) => value.trim().toLowerCase();
+  const normalizeUserValue = (value) => value.trim();
 
   const setTab = (tab) => {
     clearMessages();
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = document.getElementById("login-password").value.trim();
 
     if (!usuario || !password) {
-      loginError.textContent = "Ingresa tu correo y contraseña para continuar.";
+      loginError.textContent = "Ingresa tu usuario y contraseña para continuar.";
       return;
     }
 
@@ -85,15 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const usuario = normalizeUserValue(document.getElementById("register-usuario").value);
     const password = document.getElementById("register-password").value.trim();
-    const passwordConfirm = document.getElementById("register-password-confirm").value.trim();
 
-    if (!usuario || !password || !passwordConfirm) {
+    if (!usuario || !password) {
       registerError.textContent = "Completa todos los campos para crear tu cuenta.";
-      return;
-    }
-
-    if (password !== passwordConfirm) {
-      registerError.textContent = "Las contraseñas no coinciden.";
       return;
     }
 
