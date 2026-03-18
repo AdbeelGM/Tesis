@@ -24,17 +24,17 @@
         <div class="auth-hero__overlay">
           <div class="auth-hero__badge">
             <span class="material-symbols-outlined">sign_language</span>
-            <span>Bridge the gap with every gesture.</span>
+            <span>Conecta cada gesto con su significado.</span>
           </div>
 
           <div class="auth-hero__copy">
-            <h1>Welcome to LSM Quest!</h1>
-            <p>Master Mexican Sign Language through interactive, gamified adventures.</p>
+            <h1>¡Bienvenido a LSM Quest!</h1>
+            <p>Aprende Lengua de Señas Mexicana con aventuras interactivas y divertidas.</p>
           </div>
 
           <div class="auth-hero__stats" aria-label="Comunidad activa">
             <strong>+12k</strong>
-            <span>Active Community</span>
+            <span>Comunidad activa</span>
           </div>
         </div>
       </div>
@@ -43,29 +43,24 @@
     <section class="auth-shell">
       <div class="auth-card">
         <div class="auth-toggle" role="tablist" aria-label="Cambiar formulario">
-          <button id="tab-login" class="auth-toggle__btn auth-toggle__btn--active" data-tab="login" role="tab" aria-controls="login-form" aria-selected="true">Login</button>
-          <button id="tab-register" class="auth-toggle__btn" data-tab="register" role="tab" aria-controls="register-form" aria-selected="false">Sign Up</button>
+          <button id="tab-login" class="auth-toggle__btn auth-toggle__btn--active" data-tab="login" role="tab" aria-controls="login-form" aria-selected="true">Iniciar sesión</button>
+          <button id="tab-register" class="auth-toggle__btn" data-tab="register" role="tab" aria-controls="register-form" aria-selected="false">Registrarse</button>
         </div>
 
         <form id="login-form" class="auth-form" novalidate>
-          <div class="auth-form__intro">
-            <h2>Welcome Back!</h2>
-            <p>Sign in to continue your journey.</p>
-          </div>
-
           <label class="auth-field" for="login-usuario">
-            <span class="auth-field__label">Email Address</span>
+            <span class="auth-field__label">Usuario</span>
             <span class="auth-field__control">
-              <span class="material-symbols-outlined auth-field__icon">mail</span>
-              <input id="login-usuario" name="usuario" type="email" inputmode="email" autocomplete="email" placeholder="Enter your email" required maxlength="80" />
+              <span class="material-symbols-outlined auth-field__icon">person</span>
+              <input id="login-usuario" name="usuario" type="text" autocomplete="username" placeholder="Ingresa tu usuario" required maxlength="80" />
             </span>
           </label>
 
           <label class="auth-field" for="login-password">
-            <span class="auth-field__label">Password</span>
+            <span class="auth-field__label">Contraseña</span>
             <span class="auth-field__control">
               <span class="material-symbols-outlined auth-field__icon">lock</span>
-              <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required minlength="3" maxlength="80" />
+              <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" required minlength="3" maxlength="80" />
               <button type="button" class="auth-field__toggle" data-toggle-password="login-password" aria-label="Mostrar contraseña">
                 <span class="material-symbols-outlined">visibility</span>
               </button>
@@ -73,17 +68,17 @@
           </label>
 
           <div class="auth-form__meta">
-            <a href="#" class="auth-link">Forgot Password?</a>
+            <a href="#" class="auth-link">¿Olvidaste tu contraseña?</a>
           </div>
 
           <p id="login-error" class="auth-message auth-message--error" role="alert"></p>
 
           <button type="submit" class="auth-btn auth-btn--primary">
-            <span>Start Learning</span>
+            <span>Entrar</span>
             <span class="material-symbols-outlined">arrow_forward</span>
           </button>
 
-          <div class="auth-divider"><span>Or continue with</span></div>
+          <div class="auth-divider"><span>O continúa con</span></div>
 
           <button type="button" class="auth-btn auth-btn--social">
             <span class="auth-btn__google-mark" aria-hidden="true"></span>
@@ -93,35 +88,24 @@
 
         <form id="register-form" class="auth-form auth-form--hidden" novalidate>
           <div class="auth-form__intro">
-            <h2>Create your account</h2>
-            <p>Join thousands of learners practicing LSM every day.</p>
+            <h2>Crea tu cuenta</h2>
+            <p>Regístrate para comenzar tu aventura en LSM Quest.</p>
           </div>
 
           <label class="auth-field" for="register-usuario">
-            <span class="auth-field__label">Email Address</span>
+            <span class="auth-field__label">Usuario</span>
             <span class="auth-field__control">
-              <span class="material-symbols-outlined auth-field__icon">mail</span>
-              <input id="register-usuario" name="usuario" type="email" inputmode="email" autocomplete="email" placeholder="hello@lsmquest.com" required maxlength="80" />
+              <span class="material-symbols-outlined auth-field__icon">person</span>
+              <input id="register-usuario" name="usuario" type="text" autocomplete="username" placeholder="Crea tu usuario" required maxlength="80" />
             </span>
           </label>
 
           <label class="auth-field" for="register-password">
-            <span class="auth-field__label">Password</span>
+            <span class="auth-field__label">Contraseña</span>
             <span class="auth-field__control">
               <span class="material-symbols-outlined auth-field__icon">lock</span>
-              <input id="register-password" name="password" type="password" autocomplete="new-password" placeholder="Create your password" required minlength="3" maxlength="80" />
+              <input id="register-password" name="password" type="password" autocomplete="new-password" placeholder="Crea tu contraseña" required minlength="3" maxlength="80" />
               <button type="button" class="auth-field__toggle" data-toggle-password="register-password" aria-label="Mostrar contraseña">
-                <span class="material-symbols-outlined">visibility</span>
-              </button>
-            </span>
-          </label>
-
-          <label class="auth-field" for="register-password-confirm">
-            <span class="auth-field__label">Confirm Password</span>
-            <span class="auth-field__control">
-              <span class="material-symbols-outlined auth-field__icon">lock</span>
-              <input id="register-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="Repeat your password" required minlength="3" maxlength="80" />
-              <button type="button" class="auth-field__toggle" data-toggle-password="register-password-confirm" aria-label="Mostrar contraseña">
                 <span class="material-symbols-outlined">visibility</span>
               </button>
             </span>
@@ -131,17 +115,13 @@
           <p id="register-ok" class="auth-message auth-message--ok" role="status"></p>
 
           <button type="submit" class="auth-btn auth-btn--primary">
-            <span>Create Account</span>
+            <span>Crear cuenta</span>
             <span class="material-symbols-outlined">arrow_forward</span>
           </button>
 
-          <p class="auth-register-hint">Already have an account? <button type="button" class="auth-link auth-link--inline" data-switch-tab="login">Log in</button></p>
+          <p class="auth-register-hint">¿Ya tienes una cuenta? <button type="button" class="auth-link auth-link--inline" data-switch-tab="login">Inicia sesión</button></p>
         </form>
       </div>
-
-      <p class="auth-legal">
-        By joining, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-      </p>
     </section>
   </main>
 
