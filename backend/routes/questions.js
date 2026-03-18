@@ -27,7 +27,7 @@ function getAndValidateCategoria(req, res) {
  * GET /api/questions/multiple-choice?categoria=abecedario&dificultad=1&limit=5
  * Devuelve:
  * [
- *  { media_ruta, correcta, opciones:[...3] }
+ *  { media_ruta, correcta, opciones:[...4] }
  * ]
  */
 questionsRouter.get("/multiple-choice", async (req, res) => {
@@ -48,7 +48,7 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
       [dificultad, limit]
     );
 
-    // 2) Para cada correcta, traer 2 incorrectas aleatorias (misma tabla y dificultad)
+    // 2) Para cada correcta, traer 3 incorrectas aleatorias (misma tabla y dificultad)
     const questions = [];
     for (const row of correctRows) {
       const [wrongRows] = await pool.query(
@@ -56,7 +56,7 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
          FROM ${categoria}
          WHERE dificultad = ? AND id <> ?
          ORDER BY RAND()
-         LIMIT 2`,
+         LIMIT 3`,
         [dificultad, row.id]
       );
 

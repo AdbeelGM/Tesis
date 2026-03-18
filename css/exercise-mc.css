@@ -198,6 +198,10 @@ button {
   gap: 28px;
 }
 
+.exercise__card > .exercise__options {
+  margin-top: 4px;
+}
+
 .exercise__media-shell {
   width: 100%;
   display: flex;
@@ -249,6 +253,7 @@ button {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+  align-content: start;
 }
 
 .exercise__options--text {
@@ -370,8 +375,9 @@ button {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 16px 0 0;
-  margin-top: auto;
+  padding: 24px 0 0;
+  margin-top: 24px;
+  background: linear-gradient(180deg, rgba(255, 247, 241, 0) 0%, rgba(255, 247, 241, 0.9) 35%, rgba(255, 247, 241, 1) 100%);
 }
 
 .btn {
@@ -571,7 +577,7 @@ button {
 @media (max-width: 560px) {
   .exercise {
     gap: 22px;
-    padding-bottom: 168px;
+    padding-bottom: 196px;
   }
 
   .topbar__brand-text {
