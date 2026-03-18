@@ -177,12 +177,16 @@ async function fetchJSON(path, params) {
 
     optionsEl.innerHTML = "";
     optionsEl.classList.remove("exercise__options--text");
+    delete optionsEl.dataset.count;
 
     if (q.tipo === "multiple_choice") {
       promptText.textContent = q.pregunta || "What does this sign mean?";
       promptSubtitle.textContent = "Select the correct translation";
 
-      (q.opciones || []).forEach((op) => {
+      const opciones = (q.opciones || []).slice(0, 4);
+      optionsEl.dataset.count = String(opciones.length);
+
+      opciones.forEach((op) => {
         const b = document.createElement("button");
         b.type = "button";
         b.className = "option option--multiple";

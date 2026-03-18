@@ -48,10 +48,11 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
       [dificultad, limit]
     );
 
-    // 2) Para cada correcta, traer 3 incorrectas aleatorias (misma tabla y dificultad)
+    // 2) Para cada correcta, traer 3 incorrectas aleatorias.
+    //    Priorizamos la misma dificultad y, si no alcanza, completamos con otras dificultades.
     const questions = [];
     for (const row of correctRows) {
-      const [wrongRows] = await pool.query(
+      const [sameLevelWrongRows] = await pool.query(
         `SELECT respuesta
          FROM ${categoria}
          WHERE dificultad = ? AND id <> ?
@@ -60,7 +61,27 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
         [dificultad, row.id]
       );
 
-      const opciones = shuffle([row.respuesta, ...wrongRows.map(r => r.respuesta)]);
+      let wrongOptions = sameLevelWrongRows.map(r => r.respuesta);
+
+      if (wrongOptions.length < 3) {
+        const placeholders = wrongOptions.map(() => "?").join(", ");
+        const exclusionClause = placeholders
+          ? `AND respuesta NOT IN (${placeholders})`
+          : "";
+
+        const [fallbackWrongRows] = await pool.query(
+          `SELECT respuesta
+           FROM ${categoria}
+           WHERE id <> ? AND respuesta <> ? ${exclusionClause}
+           ORDER BY RAND()
+           LIMIT ?`,
+          [row.id, row.respuesta, ...wrongOptions, 3 - wrongOptions.length]
+        );
+
+        wrongOptions = wrongOptions.concat(fallbackWrongRows.map(r => r.respuesta));
+      }
+
+      const opciones = shuffle([row.respuesta, ...wrongOptions]).slice(0, 4);
       questions.push({
         media_ruta: row.media_ruta,
         correcta: row.respuesta,
