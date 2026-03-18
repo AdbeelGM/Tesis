@@ -44,21 +44,24 @@ async function fetchJSON(path, params) {
   console.log("📌 Config cargada:", cfg);
   document.title = `Nivel ${cfg.level}`;
 
-  // salir
+  const CHECK_LABEL = 'Comprobar<span class="material-symbols-outlined">arrow_forward</span>';
+  const NEXT_LABEL = 'Siguiente<span class="material-symbols-outlined">arrow_forward</span>';
+
   document.getElementById("btnExit").onclick = () => (window.location.href = "index.html");
 
-  // UI refs
   const btnSkip = document.getElementById("btnSkip");
   const btnCheck = document.getElementById("btnCheck");
   const feedback = document.getElementById("feedback");
   const optionsEl = document.getElementById("options");
   const promptText = document.getElementById("promptText");
+  const promptSubtitle = document.getElementById("promptSubtitle");
   const imgEl = document.getElementById("mediaImg");
   const videoEl = document.getElementById("mediaVideo");
   const progressFill = document.getElementById("progressFill");
+  const progressValue = document.getElementById("progressValue");
   const livesEl = document.getElementById("lives");
+  const livesCountEl = document.getElementById("livesCount");
 
-  // ✅ cargar vidas globales
   const global = await loadState();
   if (Number(global.level) !== Number(level)) {
     alert(`No tienes acceso al nivel ${level}. Tu nivel actual es ${global.level}.`);
@@ -66,20 +69,17 @@ async function fetchJSON(path, params) {
     return;
   }
 
-  // Estado del nivel (pero vidas vienen del global)
   const state = {
     index: 0,
-    lives: global.lives,        // ✅ GLOBAL
-    maxLives: global.maxLives,  // ✅ por si quieres usarlo después
+    lives: global.lives,
+    maxLives: global.maxLives,
     locked: false,
     selected: null,
     queue: [],
   };
 
-  // ✅ pintar corazones al iniciar (según vidas actuales)
   updateLives();
 
-  // 1) Cargar preguntas por tipo
   const mix = cfg.mix || { multiple_choice: 1 };
   const [mc, vf, tx] = await Promise.all([
     mix.multiple_choice
@@ -105,31 +105,25 @@ async function fetchJSON(path, params) {
       : Promise.resolve([]),
   ]);
 
-  // 2) Normalizar a un formato común con "tipo"
-  const queue = [
+  state.queue = shuffle([
     ...mc.map((q) => ({ tipo: "multiple_choice", ...q })),
     ...vf.map((q) => ({ tipo: "true_false", ...q })),
     ...tx.map((q) => ({ tipo: "text_input", ...q })),
-  ];
-
-  state.queue = shuffle(queue);
+  ]);
 
   if (state.queue.length === 0) {
     alert("No hay preguntas para este nivel.");
-    return (window.location.href = "index.html");
+    window.location.href = "index.html";
+    return;
   }
 
-  // botones
   btnSkip.onclick = () => {
     if (state.locked) return;
     nextQuestion();
   };
 
   btnCheck.onclick = async () => {
-    // next primero
     if (btnCheck.dataset.mode === "next") return nextQuestion();
-
-    // en check validamos según tipo
     if (state.locked) return;
 
     const q = state.queue[state.index];
@@ -137,14 +131,12 @@ async function fetchJSON(path, params) {
 
     state.locked = true;
     if (ok) {
-      showFeedback(true, "¡Correcto!");
+      showFeedback(true, buildFeedback(q, true));
     } else {
-      // ✅ RESTA VIDA GLOBAL
       const updated = await loseLifeGlobal(1);
       state.lives = updated.lives;
-
       updateLives();
-      showFeedback(false, "Incorrecto");
+      showFeedback(false, buildFeedback(q, false));
 
       if (state.lives <= 0) {
         alert("❌ Sin vidas");
@@ -152,31 +144,27 @@ async function fetchJSON(path, params) {
       }
     }
 
-    btnCheck.textContent = "Siguiente";
+    btnCheck.innerHTML = NEXT_LABEL;
     btnCheck.dataset.mode = "next";
   };
 
-  // render 1ra
   renderCurrent();
-
-  // --------- funciones ---------
 
   function renderCurrent() {
     state.selected = null;
     state.locked = false;
     feedback.style.display = "none";
-    btnCheck.textContent = "Comprobar";
+    feedback.innerHTML = "";
+    btnCheck.innerHTML = CHECK_LABEL;
     btnCheck.dataset.mode = "check";
 
     const total = state.queue.length;
-    const pct = Math.round((state.index / total) * 100);
-    progressFill.style.width = `${pct}%`;
+    updateProgress(Math.round((state.index / total) * 100));
 
     const q = state.queue[state.index];
-
-    // Media
     const ruta = q.media_ruta || "";
     const isVideo = /\.(mp4|webm|ogg)$/i.test(ruta);
+
     if (isVideo) {
       imgEl.style.display = "none";
       videoEl.style.display = "block";
@@ -187,50 +175,65 @@ async function fetchJSON(path, params) {
       imgEl.src = ruta;
     }
 
-    // Render por tipo
     optionsEl.innerHTML = "";
+    optionsEl.className = "exercise__options";
 
     if (q.tipo === "multiple_choice") {
-      promptText.textContent = q.pregunta || "Esta seña representa la palabra:";
+      promptText.textContent = q.pregunta || "What does this sign mean?";
+      promptSubtitle.textContent = "Select the correct translation";
+
       (q.opciones || []).forEach((op) => {
         const b = document.createElement("button");
-        b.className = "option";
-        b.textContent = op;
-        b.onclick = () => {
-          if (state.locked) return;
-          state.selected = op;
-          [...optionsEl.children].forEach((x) => x.classList.remove("option--selected"));
-          b.classList.add("option--selected");
-        };
+        b.type = "button";
+        b.className = "option option--multiple";
+        b.innerHTML = `<span class="option__label">${op}</span>`;
+        b.onclick = () => selectOption(op, b);
         optionsEl.appendChild(b);
       });
       return;
     }
 
     if (q.tipo === "true_false") {
-      promptText.textContent = q.pregunta || "¿Verdadero o falso?";
-      ["Verdadero", "Falso"].forEach((op) => {
+      promptText.textContent = q.pregunta || "¿Esta seña significa 'Hola'?";
+      promptSubtitle.textContent = "Selecciona la opción correcta";
+
+      [
+        { label: "Verdadero", icon: "check_circle", modifier: "option--true-false-true" },
+        { label: "Falso", icon: "cancel", modifier: "option--true-false-false" },
+      ].forEach(({ label, icon, modifier }) => {
         const b = document.createElement("button");
-        b.className = "option";
-        b.textContent = op;
-        b.onclick = () => {
-          if (state.locked) return;
-          state.selected = op;
-          [...optionsEl.children].forEach((x) => x.classList.remove("option--selected"));
-          b.classList.add("option--selected");
-        };
+        b.type = "button";
+        b.className = `option ${modifier}`;
+        b.innerHTML = `
+          <span class="option__icon-wrap">
+            <span class="material-symbols-outlined">${icon}</span>
+          </span>
+          <span class="option__label">${label}</span>
+        `;
+        b.onclick = () => selectOption(label, b);
         optionsEl.appendChild(b);
       });
       return;
     }
 
     if (q.tipo === "text_input") {
-      promptText.textContent = q.pregunta || "Escribe la palabra:";
-      optionsEl.innerHTML = `<input id="answerInput" class="text-input" type="text" placeholder="Escribe aquí..." autocomplete="off" />`;
+      promptText.textContent = q.pregunta || "Escribe la palabra que representa la seña:";
+      promptSubtitle.textContent = "Selecciona la opción correcta";
+      optionsEl.classList.add("exercise__options--text-input");
+      optionsEl.innerHTML = '<input id="answerInput" class="text-input" type="text" placeholder="Escribe tu respuesta aquí..." autocomplete="off" />';
+      document.getElementById("answerInput")?.focus();
       return;
     }
 
     promptText.textContent = "Tipo de ejercicio no soportado";
+    promptSubtitle.textContent = "";
+  }
+
+  function selectOption(value, element) {
+    if (state.locked) return;
+    state.selected = value;
+    [...optionsEl.children].forEach((node) => node.classList.remove("option--selected"));
+    element.classList.add("option--selected");
   }
 
   function evaluateCurrent(q) {
@@ -249,7 +252,7 @@ async function fetchJSON(path, params) {
       const input = document.getElementById("answerInput");
       const userText = (input?.value || "").trim().toLowerCase();
       const correct = (q.correcta || "").trim().toLowerCase();
-      return userText && userText === correct;
+      return Boolean(userText) && userText === correct;
     }
 
     return false;
@@ -262,7 +265,7 @@ async function fetchJSON(path, params) {
   }
 
   async function endLevel(completed) {
-    progressFill.style.width = "100%";
+    updateProgress(100);
 
     if (completed) {
       const session = loadSession();
@@ -280,16 +283,53 @@ async function fetchJSON(path, params) {
   }
 
   function updateLives() {
-    const hearts = livesEl.querySelectorAll(".heart");
-    hearts.forEach((h, i) => {
-      h.classList.toggle("heart--on", i < state.lives);
-      h.classList.toggle("heart--off", i >= state.lives);
-    });
+    livesEl.dataset.lives = String(state.lives);
+    if (livesCountEl) livesCountEl.textContent = String(state.lives);
   }
 
-  function showFeedback(ok, text) {
+  function updateProgress(value) {
+    progressFill.style.width = `${value}%`;
+    if (progressValue) progressValue.textContent = `${value}%`;
+  }
+
+  function buildFeedback(question, ok) {
+    if (ok) {
+      return {
+        title: "¡Excelente!",
+        message: "Has identificado correctamente la seña.",
+        icon: "check",
+      };
+    }
+
+    const answer = question.correcta ?? (question.es_verdadero ? "Verdadero" : "Falso");
+    return {
+      title: "Respuesta incorrecta",
+      message: `Solución: <strong>${answer}</strong>`,
+      icon: "close",
+    };
+  }
+
+  function showFeedback(ok, config) {
     feedback.style.display = "block";
-    feedback.className = "exercise__feedback " + (ok ? "feedback--ok" : "feedback--bad");
-    feedback.textContent = text;
+    feedback.className = `exercise__feedback ${ok ? "feedback--ok" : "feedback--bad"}`;
+    feedback.innerHTML = `
+      <div class="feedback__inner">
+        <div class="feedback__summary">
+          <div class="feedback__icon">
+            <span class="material-symbols-outlined">${config.icon}</span>
+          </div>
+          <div>
+            <h3 class="feedback__title">${config.title}</h3>
+            <p class="feedback__message">${config.message}</p>
+          </div>
+        </div>
+        <button type="button" class="feedback__button" id="feedbackContinue">
+          Continuar
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </div>
+    `;
+
+    document.getElementById("feedbackContinue")?.addEventListener("click", nextQuestion, { once: true });
   }
 })();

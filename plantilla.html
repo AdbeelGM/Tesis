@@ -4,53 +4,68 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Ejercicio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/exercise-mc.css" />
 </head>
-
 <body>
   <main class="exercise">
-    <!-- Top bar -->
     <header class="exercise__topbar">
-      <button class="topbar__exit" id="btnExit" aria-label="Salir">✕</button>
+      <div class="topbar__brand">
+        <div class="topbar__brand-mark" aria-hidden="true">
+          <span class="material-symbols-outlined">sign_language</span>
+        </div>
+        <span class="topbar__brand-text">LSM Quest</span>
+      </div>
 
-      <div class="topbar__progress">
+      <div class="topbar__progress-block" aria-label="Progreso de la lección">
+        <div class="topbar__progress-meta">
+          <span class="topbar__progress-label">Lesson Progress</span>
+          <span class="topbar__progress-value" id="progressValue">0%</span>
+        </div>
         <div class="progress__track">
           <div class="progress__fill" id="progressFill" style="width:0%"></div>
         </div>
       </div>
 
-      <div class="topbar__lives" id="lives">
-        <span class="heart heart--on">♥</span>
-        <span class="heart heart--on">♥</span>
-        <span class="heart heart--on">♥</span>
-        <span class="heart heart--on">♥</span>
-        <span class="heart heart--on">♥</span>
+      <div class="topbar__actions">
+        <div class="topbar__lives" id="lives" aria-label="Vidas restantes">
+          <span class="material-symbols-outlined topbar__lives-icon">favorite</span>
+          <span class="topbar__lives-count" id="livesCount">0</span>
+        </div>
+
+        <button class="topbar__exit" id="btnExit" aria-label="Salir">
+          <span class="material-symbols-outlined">close</span>
+        </button>
       </div>
     </header>
 
-    <!-- Content -->
     <section class="exercise__card">
-      <h2 class="exercise__prompt" id="promptText"></h2>
+      <div class="exercise__media-shell">
+        <div class="exercise__media">
+          <img id="mediaImg" alt="Seña" />
+          <video id="mediaVideo" controls style="display:none"></video>
+        </div>
+      </div>
 
-      <div class="exercise__media">
-        <img id="mediaImg" alt="Seña" />
-        <video id="mediaVideo" controls style="display:none"></video>
+      <div class="exercise__copy">
+        <h1 class="exercise__prompt" id="promptText"></h1>
+        <p class="exercise__subtitle" id="promptSubtitle"></p>
       </div>
 
       <div class="exercise__options" id="options"></div>
-
-      <!-- Feedback -->
-      <div class="exercise__feedback" id="feedback" style="display:none"></div>
     </section>
 
-    <!-- Bottom actions -->
+    <div class="exercise__feedback" id="feedback" style="display:none"></div>
+
     <footer class="exercise__actions">
       <button class="btn btn--ghost" id="btnSkip">Saltar</button>
-      <button class="btn btn--primary" id="btnCheck">Comprobar</button>
+      <button class="btn btn--primary" id="btnCheck">Comprobar<span class="material-symbols-outlined">arrow_forward</span></button>
     </footer>
   </main>
 
-  <!-- Bootstrap genérico -->
   <script type="module" src="js/app-exercise.js"></script>
 </body>
 </html>
