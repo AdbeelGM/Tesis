@@ -51,6 +51,7 @@ async function fetchJSON(path, params) {
 
   const btnSkip = document.getElementById("btnSkip");
   const btnCheck = document.getElementById("btnCheck");
+  const actionsBar = document.querySelector(".exercise__actions");
   const feedback = document.getElementById("feedback");
   const optionsEl = document.getElementById("options");
   const promptText = document.getElementById("promptText");
@@ -155,6 +156,7 @@ async function fetchJSON(path, params) {
     state.locked = false;
     feedback.style.display = "none";
     feedback.innerHTML = "";
+    actionsBar?.classList.remove("exercise__actions--hidden");
     btnCheck.innerHTML = CHECK_LABEL;
     btnCheck.dataset.mode = "check";
 
@@ -315,6 +317,7 @@ async function fetchJSON(path, params) {
 
   function showFeedback(ok, config) {
     feedback.style.display = "block";
+    actionsBar?.classList.add("exercise__actions--hidden");
     feedback.className = `exercise__feedback ${ok ? "feedback--ok" : "feedback--bad"}`;
     feedback.innerHTML = `
       <div class="feedback__inner">
