@@ -29,11 +29,9 @@ function applyLevelNodeState(node, currentLevel) {
   }
 
   if (isLocked) {
-    if (level === 4) {
-      node.innerHTML = '<span class="material-symbols-outlined">redeem</span>';
-    } else {
-      node.innerHTML = '<span class="material-symbols-outlined">lock</span>';
-    }
+    node.innerHTML = level === 4
+      ? '<span class="material-symbols-outlined">redeem</span>'
+      : '<span class="material-symbols-outlined">lock</span>';
     node.setAttribute('aria-label', `Nivel ${level} bloqueado`);
     return;
   }
@@ -42,18 +40,21 @@ function applyLevelNodeState(node, currentLevel) {
   node.setAttribute('aria-label', `Nivel ${level} actual`);
 }
 
-function renderLevelStates(nodes) {
+function renderLevelStates(root = document) {
   const userState = window.currentUserState;
   if (!userState) return;
 
+  const nodes = root.querySelectorAll('.level-node');
   const currentLevel = Number(userState.level) || 1;
   nodes.forEach((node) => applyLevelNodeState(node, currentLevel));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const nodes = document.querySelectorAll('.level-node');
+function bindLevelClicks(root = document) {
+  const nodes = root.querySelectorAll('.level-node');
 
   nodes.forEach((node) => {
+    if (node.dataset.boundClick === 'true') return;
+
     node.addEventListener('click', () => {
       const level = Number(node.dataset.level);
       const userState = window.currentUserState;
@@ -76,8 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = `plantilla.html?level=${encodeURIComponent(level)}`;
       window.location.href = target;
     });
-  });
 
-  renderLevelStates(nodes);
-  document.addEventListener('user-state-ready', () => renderLevelStates(nodes));
-});
+    node.dataset.boundClick = 'true';
+  });
+}
+
+function initializeLearnView() {
+  bindLevelClicks(document);
+  renderLevelStates(document);
+}
+
+document.addEventListener('DOMContentLoaded', initializeLearnView);
+document.addEventListener('user-state-ready', () => renderLevelStates(document));
+document.addEventListener('view:aprender:mounted', initializeLearnView);
