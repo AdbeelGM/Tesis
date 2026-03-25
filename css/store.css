@@ -1,0 +1,249 @@
+.btn-hover-elevate {
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-hover-elevate:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(251, 146, 60, 0.2);
+}
+
+.btn-active-press:active {
+  transform: scale(0.95) translateY(0);
+  box-shadow: none;
+}
+
+.btn-3d-orange {
+  background-color: #fb923c;
+  border-bottom: 4px solid #ea580c;
+  color: #fff;
+}
+
+.btn-3d-orange:active {
+  border-bottom-width: 0;
+  margin-top: 4px;
+}
+
+.store {
+  padding-bottom: 1rem;
+}
+
+.store__container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 4px;
+}
+
+.store__banner {
+  background: #fb923c;
+  color: #fff;
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 36px;
+  box-shadow: 0 10px 24px rgba(251, 146, 60, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.store__banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.store__title {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.store__subtitle {
+  color: #ffedd5;
+  font-weight: 500;
+}
+
+.store__counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(3px);
+  font-weight: 700;
+}
+
+.store__orb {
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.store__orb--big {
+  width: 120px;
+  height: 120px;
+  right: -32px;
+  top: -24px;
+}
+
+.store__orb--small {
+  width: 90px;
+  height: 90px;
+  right: 80px;
+  bottom: -24px;
+}
+
+.store__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.product-card {
+  background: #fff;
+  border-radius: 24px;
+  border: 2px solid #ffedd5;
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 360px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 28px rgba(15, 23, 42, 0.09);
+}
+
+.product-card--featured {
+  border-color: #fb923c;
+}
+
+.product-card__badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fb923c;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 4px 12px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.product-card__badge--teal {
+  background: #2dd4bf;
+}
+
+.product-card__icon-wrap {
+  width: 96px;
+  height: 96px;
+  border-radius: 999px;
+  background: #fff1f2;
+  display: grid;
+  place-items: center;
+  position: relative;
+  margin: 12px 0 20px;
+}
+
+.product-card__icon-wrap--cluster {
+  width: 108px;
+  height: 108px;
+}
+
+.product-card__icon-wrap--teal {
+  background: #f0fdfa;
+}
+
+.product-card__icon {
+  font-size: 56px;
+  color: #fb7185;
+}
+
+.product-card__icon--teal {
+  color: #2dd4bf;
+}
+
+.product-card__icon--small {
+  font-size: 34px;
+  position: absolute;
+}
+
+.product-card__icon--small.top-left { top: 2px; left: 8px; }
+.product-card__icon--small.bottom-right { bottom: 0; right: 8px; }
+
+.product-card__mini-heart {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #fb7185;
+  color: #fff;
+  border: 2px solid #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+.product-card__title {
+  font-size: 22px;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.product-card__description {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.product-card__buy {
+  margin-top: auto;
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 2px solid #fed7aa;
+  color: #ea580c;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fff7ed;
+}
+
+.profile-view {
+  display: grid;
+  place-items: center;
+  min-height: 55vh;
+}
+
+.profile-view__card {
+  width: min(500px, 100%);
+  background: #fff;
+  border: 2px solid #fed7aa;
+  border-radius: 24px;
+  padding: 32px;
+  text-align: center;
+}
+
+.profile-view__icon {
+  font-size: 56px;
+  color: #fb923c;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 768px) {
+  .store__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

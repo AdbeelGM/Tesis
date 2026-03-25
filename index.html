@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="css/route.css">
   <link rel="stylesheet" href="css/statusbar.css">
   <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/store.css">
   <link rel="stylesheet" href="css/pastel-overrides.css">
 </head>
 
@@ -27,17 +28,17 @@
       </div>
 
       <nav class="sidebar__nav" id="sidebar-nav">
-        <button class="nav-btn nav-btn--active" data-view="aprender">
-          <span class="material-symbols-outlined nav-btn__icon" style="font-variation-settings: 'FILL' 1;">book</span>
+        <button class="nav-btn nav-btn--active" data-view="aprender" type="button">
+          <span class="material-symbols-outlined nav-btn__icon" style="font-variation-settings: 'FILL' 1;">school</span>
           <span class="nav-btn__label">Learn</span>
         </button>
 
-        <button class="nav-btn" data-view="tienda">
+        <button class="nav-btn" data-view="tienda" type="button">
           <span class="material-symbols-outlined nav-btn__icon">storefront</span>
           <span class="nav-btn__label">Store</span>
         </button>
 
-        <button class="nav-btn" data-view="perfil">
+        <button class="nav-btn" data-view="perfil" type="button">
           <span class="material-symbols-outlined nav-btn__icon">person</span>
           <span class="nav-btn__label">Profile</span>
         </button>
@@ -48,12 +49,12 @@
       <header class="status-bar">
         <div class="status-bar__spacer"></div>
 
-        <button class="status-pill status-pill--gems">
+        <button class="status-pill status-pill--gems" type="button">
           <span class="material-symbols-outlined status-pill__icon">diamond</span>
           <span class="status-pill__text" id="gems-label"></span>
         </button>
 
-        <button class="status-pill status-pill--lives">
+        <button class="status-pill status-pill--lives" type="button">
           <span class="material-symbols-outlined status-pill__icon" style="font-variation-settings: 'FILL' 1;">favorite</span>
           <span class="status-pill__text" id="lives-label"></span>
         </button>
@@ -63,43 +64,7 @@
         </button>
       </header>
 
-      <main class="route">
-        <section class="route__unit-card">
-          <div>
-            <h1 class="route__title">Unit 1: Basics</h1>
-            <p class="route__subtitle">Greetings, Alphabet, and Numbers</p>
-          </div>
-          <button class="route__guide">Guide</button>
-          <div class="route__orb route__orb--big"></div>
-          <div class="route__orb route__orb--small"></div>
-        </section>
-
-        <section class="route__path">
-          <svg class="route__snake" viewBox="0 0 100 600" preserveAspectRatio="none">
-            <path d="M50,0 C80,100 20,200 50,300 C80,400 20,500 50,600"></path>
-          </svg>
-
-          <div class="level-item" style="--offset-x: 90px">
-            <button class="level-node" data-level="1"></button>
-          </div>
-          <div class="level-item" style="--offset-x: -80px">
-            <button class="level-node" data-level="2"></button>
-          </div>
-          <div class="level-item" style="--offset-x: 0px">
-            <div class="start-badge">Start</div>
-            <button class="level-node" data-level="3"></button>
-          </div>
-          <div class="level-item" style="--offset-x: 100px">
-            <button class="level-node" data-level="4"></button>
-          </div>
-          <div class="level-item" style="--offset-x: -60px">
-            <button class="level-node" data-level="5"></button>
-          </div>
-          <div class="level-item" style="--offset-x: 0px">
-            <button class="level-node" data-level="6"></button>
-          </div>
-        </section>
-      </main>
+      <main class="route" id="main-content"></main>
     </div>
   </div>
 
