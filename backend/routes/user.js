@@ -138,8 +138,8 @@ userRouter.post("/register", async (req, res) => {
 
     await pool.query(
       `INSERT INTO Usuarios (usuario, \`contraseña\`, vidas, gemas, etapa, nivel, vidas_actualizado_en)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [username, pass, MAX_LIVES, 0, 1, 1, now]
+       VALUES (?, ?, ?, DEFAULT, DEFAULT, DEFAULT, ?)`,
+      [username, pass, MAX_LIVES, now]
     );
 
     const state = await getUserState(username);
