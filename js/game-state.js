@@ -1,4 +1,4 @@
-import { fetchUserState, loseLife } from "./api-user.js";
+import { fetchUserState, loseLife, purchaseStoreItem } from "./api-user.js";
 import { loadSession } from "./user-session.js";
 
 function getUser() {
@@ -18,6 +18,8 @@ export async function loadState() {
     gems: Number(state.gemas) || 0,
     stage: Number(state.etapa) || 1,
     level: Number(state.nivel) || 1,
+    infiniteHeartsActive: Boolean(state.corazones_ilimitados_activos),
+    infiniteHeartsRemainingSeconds: Number(state.corazones_ilimitados_segundos_restantes) || 0,
     usuario: state.usuario,
   };
 }
@@ -31,6 +33,23 @@ export async function loseLifeGlobal(n = 1) {
     gems: Number(state.gemas) || 0,
     stage: Number(state.etapa) || 1,
     level: Number(state.nivel) || 1,
+    infiniteHeartsActive: Boolean(state.corazones_ilimitados_activos),
+    infiniteHeartsRemainingSeconds: Number(state.corazones_ilimitados_segundos_restantes) || 0,
+    usuario: state.usuario,
+  };
+}
+
+export async function purchaseStoreItemGlobal(productId) {
+  const usuario = getUser();
+  const state = await purchaseStoreItem(usuario, productId);
+  return {
+    lives: Number(state.vidas) || 0,
+    maxLives: 5,
+    gems: Number(state.gemas) || 0,
+    stage: Number(state.etapa) || 1,
+    level: Number(state.nivel) || 1,
+    infiniteHeartsActive: Boolean(state.corazones_ilimitados_activos),
+    infiniteHeartsRemainingSeconds: Number(state.corazones_ilimitados_segundos_restantes) || 0,
     usuario: state.usuario,
   };
 }

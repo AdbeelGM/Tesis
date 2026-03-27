@@ -5,11 +5,26 @@ export const userRouter = Router();
 
 const MAX_LIVES = 5;
 const LIFE_INTERVAL_MINUTES = 5;
+const STORE_PRODUCTS = {
+  single_heart: { gems: 100, lives: 1, type: "lives" },
+  heart_bundle: { gems: 450, lives: 5, type: "lives" },
+  infinite_hearts_24h: { gems: 950, hours: 24, type: "infinite" },
+};
 
 async function ensureSchema() {
   await pool.query(`
     ALTER TABLE Usuarios
     ADD COLUMN IF NOT EXISTS vidas_actualizado_en DATETIME NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS corazones_ilimitados_desde DATETIME NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS corazones_ilimitados_hasta DATETIME NULL
   `);
 }
 
@@ -19,7 +34,7 @@ ensureSchema().catch((err) => {
 
 async function applyLifeRegen(usuario) {
   const [rows] = await pool.query(
-    `SELECT usuario, vidas, vidas_actualizado_en
+    `SELECT usuario, vidas, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta
      FROM Usuarios
      WHERE usuario = ?
      LIMIT 1`,
@@ -30,6 +45,22 @@ async function applyLifeRegen(usuario) {
   if (!user) return null;
 
   const now = new Date();
+  const unlimitedUntil = user.corazones_ilimitados_hasta ? new Date(user.corazones_ilimitados_hasta) : null;
+  const hasUnlimited = unlimitedUntil && unlimitedUntil > now;
+
+  if (hasUnlimited) {
+    if (user.vidas < MAX_LIVES || !user.vidas_actualizado_en) {
+      await pool.query(
+        `UPDATE Usuarios
+         SET vidas = ?, vidas_actualizado_en = ?
+         WHERE usuario = ?`,
+        [MAX_LIVES, now, usuario]
+      );
+      return { ...user, vidas: MAX_LIVES, vidas_actualizado_en: now };
+    }
+    return user;
+  }
+
   const lastUpdate = user.vidas_actualizado_en ? new Date(user.vidas_actualizado_en) : now;
 
   if (!user.vidas_actualizado_en) {
@@ -72,13 +103,27 @@ async function applyLifeRegen(usuario) {
 async function getUserState(usuario) {
   await applyLifeRegen(usuario);
   const [rows] = await pool.query(
-    `SELECT usuario, vidas, gemas, etapa, nivel
+    `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta
      FROM Usuarios
      WHERE usuario = ?
      LIMIT 1`,
     [usuario]
   );
-  return rows[0] || null;
+  const user = rows[0] || null;
+  if (!user) return null;
+
+  const now = new Date();
+  const unlimitedUntil = user.corazones_ilimitados_hasta ? new Date(user.corazones_ilimitados_hasta) : null;
+  const unlimitedActive = Boolean(unlimitedUntil && unlimitedUntil > now);
+  const unlimitedRemainingSeconds = unlimitedActive
+    ? Math.floor((unlimitedUntil.getTime() - now.getTime()) / 1000)
+    : 0;
+
+  return {
+    ...user,
+    corazones_ilimitados_activos: unlimitedActive,
+    corazones_ilimitados_segundos_restantes: Math.max(0, unlimitedRemainingSeconds),
+  };
 }
 
 userRouter.post("/login", async (req, res) => {
@@ -173,6 +218,10 @@ userRouter.post("/lose-life", async (req, res) => {
     const state = await getUserState(usuario);
     if (!state) return res.status(404).json({ error: "Usuario no encontrado" });
 
+    if (state.corazones_ilimitados_activos) {
+      return res.json(state);
+    }
+
     const nextLives = Math.max(0, Number(state.vidas) - Number(amount));
     const now = new Date();
 
@@ -186,6 +235,61 @@ userRouter.post("/lose-life", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Error al descontar vida" });
+  }
+});
+
+userRouter.post("/purchase", async (req, res) => {
+  try {
+    const { usuario, productId } = req.body;
+    if (!usuario || !productId) {
+      return res.status(400).json({ error: "Falta usuario o producto" });
+    }
+
+    const product = STORE_PRODUCTS[productId];
+    if (!product) {
+      return res.status(400).json({ error: "Producto inválido" });
+    }
+
+    const state = await getUserState(usuario);
+    if (!state) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    if (Number(state.gemas) < product.gems) {
+      return res.status(400).json({ error: "No tienes gemas suficientes" });
+    }
+
+    const now = new Date();
+    const nextGems = Number(state.gemas) - product.gems;
+
+    if (product.type === "lives") {
+      const nextLives = Math.min(MAX_LIVES, Number(state.vidas) + product.lives);
+      const nextLifeUpdatedAt = nextLives >= MAX_LIVES ? now : state.vidas_actualizado_en || now;
+
+      await pool.query(
+        `UPDATE Usuarios
+         SET gemas = ?, vidas = ?, vidas_actualizado_en = ?
+         WHERE usuario = ?`,
+        [nextGems, nextLives, nextLifeUpdatedAt, usuario]
+      );
+    } else {
+      const currentUnlimitedUntil = state.corazones_ilimitados_hasta
+        ? new Date(state.corazones_ilimitados_hasta)
+        : null;
+      const startsAt = currentUnlimitedUntil && currentUnlimitedUntil > now ? currentUnlimitedUntil : now;
+      const endsAt = new Date(startsAt.getTime() + product.hours * 60 * 60 * 1000);
+
+      await pool.query(
+        `UPDATE Usuarios
+         SET gemas = ?, vidas = ?, vidas_actualizado_en = ?, corazones_ilimitados_desde = ?, corazones_ilimitados_hasta = ?
+         WHERE usuario = ?`,
+        [nextGems, MAX_LIVES, now, now, endsAt, usuario]
+      );
+    }
+
+    const updated = await getUserState(usuario);
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Error al comprar en la tienda" });
   }
 });
 

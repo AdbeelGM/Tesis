@@ -46,3 +46,10 @@ export function completeLevel(usuario, level) {
     body: JSON.stringify({ usuario, level }),
   });
 }
+
+export function purchaseStoreItem(usuario, productId) {
+  return request("/api/user/purchase", {
+    method: "POST",
+    body: JSON.stringify({ usuario, productId }),
+  });
+}
