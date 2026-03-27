@@ -155,16 +155,53 @@ function updateStoreStatus(state) {
   }
 }
 
+function updateStorePurchaseAvailability(state) {
+  const livesAtMax = Number(state.lives) >= Number(state.maxLives);
+  const infiniteActive = Boolean(state.infiniteHeartsActive);
+  const buyButtons = [...document.querySelectorAll('.product-card__buy[data-product-id]')];
+
+  buyButtons.forEach((btn) => {
+    const productId = btn.dataset.productId;
+    const isLivesProduct = productId === 'single_heart' || productId === 'heart_bundle';
+    const isInfiniteProduct = productId === 'infinite_hearts_24h';
+    const blocked = (isLivesProduct && livesAtMax) || (isInfiniteProduct && infiniteActive);
+
+    btn.disabled = blocked;
+    if (isLivesProduct && livesAtMax) {
+      btn.title = 'Ya tienes el máximo de corazones';
+    } else if (isInfiniteProduct && infiniteActive) {
+      btn.title = 'Ya tienes corazones ilimitados activos';
+    } else {
+      btn.title = '';
+    }
+  });
+}
+
 function bindStoreActions() {
   const buyButtons = [...document.querySelectorAll('.product-card__buy[data-product-id]')];
   if (buyButtons.length === 0) return;
 
-  updateStoreStatus(window.currentUserState || { lives: 0, maxLives: 5, infiniteHeartsActive: false });
+  const initialState = window.currentUserState || { lives: 0, maxLives: 5, infiniteHeartsActive: false };
+  updateStoreStatus(initialState);
+  updateStorePurchaseAvailability(initialState);
 
   buyButtons.forEach((btn) => {
     btn.addEventListener('click', async () => {
       const productId = btn.dataset.productId;
       if (!productId) return;
+
+      const state = window.currentUserState || { lives: 0, maxLives: 5, infiniteHeartsActive: false };
+      const livesAtMax = Number(state.lives) >= Number(state.maxLives);
+      if ((productId === 'single_heart' || productId === 'heart_bundle') && livesAtMax) {
+        alert('⚠️ Ya tienes el máximo de corazones.');
+        updateStorePurchaseAvailability(state);
+        return;
+      }
+      if (productId === 'infinite_hearts_24h' && state.infiniteHeartsActive) {
+        alert('⚠️ Ya tienes corazones ilimitados activos.');
+        updateStorePurchaseAvailability(state);
+        return;
+      }
 
       btn.disabled = true;
       const originalText = btn.innerHTML;
@@ -174,6 +211,7 @@ function bindStoreActions() {
         const updated = await purchaseStoreItemGlobal(productId);
         window.currentUserState = updated;
         updateStoreStatus(updated);
+        updateStorePurchaseAvailability(updated);
         await refreshStatusBar();
         alert('✅ Compra realizada');
       } catch (err) {
@@ -181,6 +219,7 @@ function bindStoreActions() {
       } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
+        updateStorePurchaseAvailability(window.currentUserState || state);
       }
     });
   });

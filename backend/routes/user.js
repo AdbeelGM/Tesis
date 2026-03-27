@@ -257,6 +257,14 @@ userRouter.post("/purchase", async (req, res) => {
       return res.status(400).json({ error: "No tienes gemas suficientes" });
     }
 
+    if (product.type === "lives" && Number(state.vidas) >= MAX_LIVES) {
+      return res.status(400).json({ error: "Ya tienes el máximo de corazones" });
+    }
+
+    if (product.type === "infinite" && state.corazones_ilimitados_activos) {
+      return res.status(400).json({ error: "Ya tienes corazones ilimitados activos" });
+    }
+
     const now = new Date();
     const nextGems = Number(state.gemas) - product.gems;
 
@@ -271,10 +279,7 @@ userRouter.post("/purchase", async (req, res) => {
         [nextGems, nextLives, nextLifeUpdatedAt, usuario]
       );
     } else {
-      const currentUnlimitedUntil = state.corazones_ilimitados_hasta
-        ? new Date(state.corazones_ilimitados_hasta)
-        : null;
-      const startsAt = currentUnlimitedUntil && currentUnlimitedUntil > now ? currentUnlimitedUntil : now;
+      const startsAt = now;
       const endsAt = new Date(startsAt.getTime() + product.hours * 60 * 60 * 1000);
 
       await pool.query(
