@@ -1,5 +1,6 @@
 import { loadSession, clearSession } from './user-session.js';
 import { refreshStatusBar } from './statusbar.js';
+import { purchaseStoreItemGlobal } from './game-state.js';
 
 const LOGIN_URL = 'login.html';
 
@@ -55,7 +56,7 @@ function renderStoreView() {
             </div>
             <div class="store__counter">
               <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
-              <span>5 / 5</span>
+              <span id="store-lives-label">0 / 5</span>
             </div>
           </div>
           <div class="store__orb store__orb--big"></div>
@@ -69,7 +70,7 @@ function renderStoreView() {
             </div>
             <h3 class="product-card__title">Single Heart</h3>
             <p class="product-card__description">One life to keep your streak alive</p>
-            <button class="product-card__buy btn-hover-elevate btn-active-press" type="button">
+            <button class="product-card__buy btn-hover-elevate btn-active-press" data-product-id="single_heart" type="button">
               <span class="material-symbols-outlined">diamond</span>
               <span>100 Gems</span>
             </button>
@@ -84,7 +85,7 @@ function renderStoreView() {
             </div>
             <h3 class="product-card__title">Heart Bundle</h3>
             <p class="product-card__description">Full refill! Get 5 hearts instantly</p>
-            <button class="product-card__buy btn-3d-orange btn-hover-elevate btn-active-press" type="button">
+            <button class="product-card__buy btn-3d-orange btn-hover-elevate btn-active-press" data-product-id="heart_bundle" type="button">
               <span class="material-symbols-outlined">diamond</span>
               <span>450 Gems</span>
             </button>
@@ -98,12 +99,13 @@ function renderStoreView() {
             </div>
             <h3 class="product-card__title">Infinite Hearts</h3>
             <p class="product-card__description">24 hours of unlimited learning</p>
-            <button class="product-card__buy btn-hover-elevate btn-active-press" type="button">
+            <button class="product-card__buy btn-hover-elevate btn-active-press" data-product-id="infinite_hearts_24h" type="button">
               <span class="material-symbols-outlined">diamond</span>
               <span>950 Gems</span>
             </button>
           </article>
         </div>
+        <p id="store-infinite-status" style="text-align:center; margin-top: 14px; color: #0f766e; font-weight: 700;"></p>
       </div>
     </section>
   `;
@@ -133,6 +135,57 @@ function mountView(viewName, mountNode) {
   document.dispatchEvent(new CustomEvent(`view:${viewName}:mounted`));
 }
 
+function formatDuration(seconds) {
+  const clamped = Math.max(0, Number(seconds) || 0);
+  const h = Math.floor(clamped / 3600);
+  const m = Math.floor((clamped % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
+function updateStoreStatus(state) {
+  const livesLabel = document.getElementById('store-lives-label');
+  const infiniteLabel = document.getElementById('store-infinite-status');
+  if (livesLabel) {
+    livesLabel.textContent = `${state.lives} / ${state.maxLives}`;
+  }
+  if (infiniteLabel) {
+    infiniteLabel.textContent = state.infiniteHeartsActive
+      ? `💖 Corazones ilimitados activos (${formatDuration(state.infiniteHeartsRemainingSeconds)} restantes)`
+      : '';
+  }
+}
+
+function bindStoreActions() {
+  const buyButtons = [...document.querySelectorAll('.product-card__buy[data-product-id]')];
+  if (buyButtons.length === 0) return;
+
+  updateStoreStatus(window.currentUserState || { lives: 0, maxLives: 5, infiniteHeartsActive: false });
+
+  buyButtons.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const productId = btn.dataset.productId;
+      if (!productId) return;
+
+      btn.disabled = true;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span>Comprando...</span>';
+
+      try {
+        const updated = await purchaseStoreItemGlobal(productId);
+        window.currentUserState = updated;
+        updateStoreStatus(updated);
+        await refreshStatusBar();
+        alert('✅ Compra realizada');
+      } catch (err) {
+        alert(`❌ ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const session = loadSession();
   const contentRoot = document.getElementById('main-content');
@@ -148,6 +201,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       onViewChange: (viewName) => mountView(viewName, contentRoot),
     })
     : null;
+
+  document.addEventListener('view:tienda:mounted', bindStoreActions);
 
   const initialView = sidebar?.activeView || 'aprender';
   mountView(initialView, contentRoot);
