@@ -114,10 +114,98 @@ function renderStoreView() {
 function renderProfileView() {
   return `
     <section class="profile-view">
-      <div class="profile-view__card">
-        <span class="material-symbols-outlined profile-view__icon">person</span>
-        <h1>Profile</h1>
-        <p>Tu perfil estará aquí en la siguiente sección.</p>
+      <div class="profile-layout">
+        <article class="profile-banner card-hover-lift">
+          <div class="profile-banner__bg profile-banner__bg--grid"></div>
+          <div class="profile-banner__bg profile-banner__bg--orb-top"></div>
+          <div class="profile-banner__bg profile-banner__bg--orb-bottom"></div>
+
+          <div class="profile-banner__content">
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar-ring">
+                <img class="profile-avatar" src="https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80" alt="Alex Pathweaver">
+              </div>
+              <span class="profile-pro-badge">PRO</span>
+            </div>
+
+            <div class="profile-main-info">
+              <div class="profile-header-row">
+                <div>
+                  <div class="profile-name-row">
+                    <h1 class="profile-name">Alex Pathweaver</h1>
+                    <span class="material-symbols-outlined profile-verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+                  </div>
+                  <p class="profile-meta">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    Se unió en enero de 2026
+                  </p>
+                </div>
+
+                <button class="profile-edit-btn btn-active-press" type="button">
+                  <span class="material-symbols-outlined">edit</span>
+                  Edit Profile
+                </button>
+              </div>
+
+              <div class="profile-progress-wrap">
+                <div class="profile-progress-head">
+                  <span class="profile-progress-title">
+                    <span class="material-symbols-outlined">auto_awesome</span>
+                    Journey Progress
+                  </span>
+                  <span class="profile-progress-percent">74%</span>
+                </div>
+
+                <div class="profile-progress-track">
+                  <div class="profile-progress-fill progress-fill" style="width: 74%;">
+                    <span class="profile-progress-dot"></span>
+                  </div>
+                </div>
+
+                <div class="profile-progress-meta">
+                  <span>Level 12 (12,400 XP)</span>
+                  <span>Next: Level 13 (15,000 XP)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <section class="profile-stats-grid">
+          <div class="profile-stats-list">
+            <article class="profile-stat-card card-hover-lift">
+              <div class="profile-stat-icon profile-stat-icon--orange">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+              </div>
+              <h3>7 days</h3>
+              <p>Daily Streak</p>
+            </article>
+
+            <article class="profile-stat-card card-hover-lift">
+              <div class="profile-stat-icon profile-stat-icon--yellow">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">diamond</span>
+              </div>
+              <h3>1,240</h3>
+              <p>Total Gems</p>
+            </article>
+
+            <article class="profile-stat-card card-hover-lift">
+              <div class="profile-stat-icon profile-stat-icon--teal">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+              </div>
+              <h3>48</h3>
+              <p>Lessons Done</p>
+            </article>
+          </div>
+
+          <article class="profile-quests-card card-hover-lift">
+            <h4>Total Quests</h4>
+            <strong>148</strong>
+            <div class="profile-quests-separator"></div>
+            <p>Time Invested</p>
+            <span>242 Hours</span>
+          </article>
+        </section>
       </div>
     </section>
   `;
