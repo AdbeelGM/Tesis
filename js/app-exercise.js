@@ -1,5 +1,5 @@
 import { loadState, loseLifeGlobal } from "./game-state.js";
-import { completeLevel } from "./api-user.js";
+import { addTimeInvested, completeLevel } from "./api-user.js";
 import { loadSession } from "./user-session.js";
 
 console.log("✅ app-exercise.js cargado");
@@ -46,7 +46,10 @@ async function fetchJSON(path, params) {
 
   const CHECK_LABEL = 'Comprobar<span class="material-symbols-outlined">arrow_forward</span>';
 
-  document.getElementById("btnExit").onclick = () => (window.location.href = "index.html");
+  document.getElementById("btnExit").onclick = async () => {
+    await reportTimeSpent();
+    window.location.href = "index.html";
+  };
 
   const btnSkip = document.getElementById("btnSkip");
   const btnCheck = document.getElementById("btnCheck");
@@ -77,6 +80,8 @@ async function fetchJSON(path, params) {
     selected: null,
     queue: [],
   };
+  const levelStartedAt = Date.now();
+  let timeReported = false;
 
   updateLives();
 
@@ -267,6 +272,7 @@ async function fetchJSON(path, params) {
 
   async function endLevel(completed) {
     updateProgress(100);
+    await reportTimeSpent();
 
     if (completed) {
       const session = loadSession();
@@ -281,6 +287,22 @@ async function fetchJSON(path, params) {
 
     alert(completed ? "✅ Nivel completado" : "❌ Nivel terminado sin vidas");
     window.location.href = "index.html";
+  }
+
+  async function reportTimeSpent() {
+    if (timeReported) return;
+    const session = loadSession();
+    if (!session?.usuario) return;
+
+    const elapsedSeconds = Math.floor((Date.now() - levelStartedAt) / 1000);
+    if (elapsedSeconds <= 0) return;
+
+    try {
+      await addTimeInvested(session.usuario, elapsedSeconds);
+      timeReported = true;
+    } catch (err) {
+      console.warn("No se pudo guardar el tiempo invertido:", err.message);
+    }
   }
 
   function updateLives() {

@@ -373,6 +373,34 @@ userRouter.post("/complete-level", async (req, res) => {
   }
 });
 
+userRouter.post("/time-invested", async (req, res) => {
+  try {
+    const { usuario, seconds } = req.body;
+    if (!usuario) return res.status(400).json({ error: "Falta usuario" });
+
+    const increment = Math.max(0, Math.floor(Number(seconds) || 0));
+    if (increment <= 0) {
+      const state = await getUserState(usuario);
+      if (!state) return res.status(404).json({ error: "Usuario no encontrado" });
+      return res.json(state);
+    }
+
+    await pool.query(
+      `UPDATE Usuarios
+       SET tiempo_invertido_segundos = tiempo_invertido_segundos + ?
+       WHERE usuario = ?`,
+      [increment, usuario]
+    );
+
+    const updated = await getUserState(usuario);
+    if (!updated) return res.status(404).json({ error: "Usuario no encontrado" });
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Error al guardar tiempo invertido" });
+  }
+});
+
 userRouter.post("/profile-photo", async (req, res) => {
   try {
     const { usuario, dataUrl, photoUrl = null } = req.body;

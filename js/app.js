@@ -201,10 +201,7 @@ function renderProfileView() {
 
           <article class="profile-quests-card card-hover-lift">
             <h4>Tiempo invertido</h4>
-            <strong id="profile-time-hours">0 h</strong>
-            <div class="profile-quests-separator"></div>
-            <p>Total acumulado</p>
-            <span id="profile-time-detail">0 h 0 min</span>
+            <strong id="profile-time-hours">0d 0h</strong>
           </article>
         </section>
       </div>
@@ -241,11 +238,9 @@ function formatJoinedDate(dateValue) {
 function formatTimeInvested(seconds) {
   const clamped = Math.max(0, Number(seconds) || 0);
   const totalHours = Math.floor(clamped / 3600);
-  const totalMinutes = Math.floor((clamped % 3600) / 60);
-  return {
-    short: `${totalHours} h`,
-    detail: `${totalHours} h ${totalMinutes} min`,
-  };
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+  return `${days}d ${hours}h`;
 }
 
 function updateStoreStatus(state) {
@@ -342,7 +337,6 @@ function updateProfileView(state) {
   const gems = document.getElementById('profile-gems');
   const lessons = document.getElementById('profile-lessons');
   const timeHours = document.getElementById('profile-time-hours');
-  const timeDetail = document.getElementById('profile-time-detail');
 
   const progress = Math.max(0, Math.min(100, Number(state.progress) || 0));
   const xp = Math.max(0, Number(state.experience) || 0);
@@ -361,8 +355,7 @@ function updateProfileView(state) {
   if (streak) streak.textContent = `${Number(state.streakDays) || 0} días`;
   if (gems) gems.textContent = `${Number(state.gems) || 0}`;
   if (lessons) lessons.textContent = `${Number(state.lessonsDone) || 0}`;
-  if (timeHours) timeHours.textContent = time.short;
-  if (timeDetail) timeDetail.textContent = time.detail;
+  if (timeHours) timeHours.textContent = time;
 }
 
 function bindProfileActions() {
