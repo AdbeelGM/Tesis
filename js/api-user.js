@@ -53,3 +53,10 @@ export function purchaseStoreItem(usuario, productId) {
     body: JSON.stringify({ usuario, productId }),
   });
 }
+
+export function updateUserProfile(usuario, payload = {}) {
+  return request("/api/user/profile/update", {
+    method: "POST",
+    body: JSON.stringify({ usuario, ...payload }),
+  });
+}

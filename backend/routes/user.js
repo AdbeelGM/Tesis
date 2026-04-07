@@ -26,6 +26,51 @@ async function ensureSchema() {
     ALTER TABLE Usuarios
     ADD COLUMN IF NOT EXISTS corazones_ilimitados_hasta DATETIME NULL
   `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS foto_perfil_url VARCHAR(500) NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS foto_perfil LONGBLOB NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS foto_perfil_mime VARCHAR(100) NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS experiencia INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS progreso INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS dias_racha INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS lecciones_terminadas INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS tiempo_invertido_segundos INT NOT NULL DEFAULT 0
+  `);
 }
 
 ensureSchema().catch((err) => {
@@ -103,7 +148,8 @@ async function applyLifeRegen(usuario) {
 async function getUserState(usuario) {
   await applyLifeRegen(usuario);
   const [rows] = await pool.query(
-    `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta
+    `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta, creado_en,
+            foto_perfil_url, foto_perfil, foto_perfil_mime, experiencia, progreso, dias_racha, lecciones_terminadas, tiempo_invertido_segundos
      FROM Usuarios
      WHERE usuario = ?
      LIMIT 1`,
@@ -121,9 +167,16 @@ async function getUserState(usuario) {
 
   return {
     ...user,
+    foto_perfil_base64: user.foto_perfil ? Buffer.from(user.foto_perfil).toString("base64") : null,
     corazones_ilimitados_activos: unlimitedActive,
     corazones_ilimitados_segundos_restantes: Math.max(0, unlimitedRemainingSeconds),
   };
+}
+
+function normalizeNonNegativeInteger(value, fallback = 0) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) return fallback;
+  return Math.floor(parsed);
 }
 
 userRouter.post("/login", async (req, res) => {
@@ -313,12 +366,78 @@ userRouter.post("/complete-level", async (req, res) => {
       return res.status(403).json({ error: "Nivel bloqueado para este usuario" });
     }
 
-    await pool.query(`UPDATE Usuarios SET nivel = nivel + 1 WHERE usuario = ?`, [usuario]);
+    await pool.query(
+      `UPDATE Usuarios
+       SET nivel = nivel + 1,
+           lecciones_terminadas = lecciones_terminadas + 1,
+           experiencia = experiencia + 50,
+           progreso = LEAST(100, progreso + 5)
+       WHERE usuario = ?`,
+      [usuario]
+    );
 
     const updated = await getUserState(usuario);
     return res.json(updated);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Error al completar nivel" });
+  }
+});
+
+userRouter.post("/profile/update", async (req, res) => {
+  try {
+    const {
+      usuario,
+      experiencia,
+      progreso,
+      dias_racha,
+      lecciones_terminadas,
+      tiempo_invertido_segundos,
+      foto_perfil_url,
+      foto_perfil_base64,
+      foto_perfil_mime,
+    } = req.body;
+
+    if (!usuario) return res.status(400).json({ error: "Falta usuario" });
+
+    const profileImageBuffer = foto_perfil_base64
+      ? Buffer.from(String(foto_perfil_base64), "base64")
+      : null;
+
+    if (profileImageBuffer && profileImageBuffer.length > 10 * 1024 * 1024) {
+      return res.status(400).json({ error: "La foto de perfil no puede superar 10 MB" });
+    }
+
+    await pool.query(
+      `UPDATE Usuarios
+       SET experiencia = ?,
+           progreso = ?,
+           dias_racha = ?,
+           lecciones_terminadas = ?,
+           tiempo_invertido_segundos = ?,
+           foto_perfil_url = ?,
+           foto_perfil = ?,
+           foto_perfil_mime = ?
+       WHERE usuario = ?`,
+      [
+        normalizeNonNegativeInteger(experiencia),
+        Math.min(100, normalizeNonNegativeInteger(progreso)),
+        normalizeNonNegativeInteger(dias_racha),
+        normalizeNonNegativeInteger(lecciones_terminadas),
+        normalizeNonNegativeInteger(tiempo_invertido_segundos),
+        foto_perfil_url || null,
+        profileImageBuffer,
+        foto_perfil_mime || null,
+        usuario,
+      ]
+    );
+
+    const updated = await getUserState(usuario);
+    if (!updated) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Error al actualizar perfil" });
   }
 });

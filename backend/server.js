@@ -22,7 +22,7 @@ app.use(cors({
 }));
 
 // ✅ parseo JSON (por si luego haces POST)
-app.use(express.json());
+app.use(express.json({ limit: "15mb" }));
 
 // ✅ sirve archivos estáticos del frontend: css/, js/, img/, index.html, plantilla.html, etc.
 app.use(express.static(FRONTEND_DIR));

@@ -1,6 +1,6 @@
 import { loadSession, clearSession } from './user-session.js';
 import { refreshStatusBar } from './statusbar.js';
-import { purchaseStoreItemGlobal } from './game-state.js';
+import { purchaseStoreItemGlobal, updateProfileGlobal } from './game-state.js';
 
 const LOGIN_URL = 'login.html';
 
@@ -111,7 +111,36 @@ function renderStoreView() {
   `;
 }
 
-function renderProfileView() {
+function formatJoinDate(dateString) {
+  if (!dateString) return 'Sin fecha';
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return 'Sin fecha';
+  return new Intl.DateTimeFormat('es-MX', { month: 'long', year: 'numeric' }).format(date);
+}
+
+function formatTimeSpent(seconds) {
+  const total = Math.max(0, Number(seconds) || 0);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  return `${h}h ${m}m`;
+}
+
+function getProfileImage(state) {
+  if (state?.fotoPerfilBase64 && state?.fotoPerfilMime) {
+    return `data:${state.fotoPerfilMime};base64,${state.fotoPerfilBase64}`;
+  }
+  if (state?.fotoPerfilUrl) return state.fotoPerfilUrl;
+  return 'https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80';
+}
+
+function renderProfileView(state = {}) {
+  const username = state.usuario || 'Invitado';
+  const progress = Math.max(0, Math.min(100, Number(state.progreso) || 0));
+  const xp = Number(state.experiencia) || 0;
+  const joinDate = formatJoinDate(state.creadoEn);
+  const level = Number(state.level) || 1;
+  const nextLevel = level + 1;
+  const nextLevelXp = (level * 1000) + 1000;
   return `
     <section class="profile-view">
       <div class="profile-layout">
@@ -123,7 +152,7 @@ function renderProfileView() {
           <div class="profile-banner__content">
             <div class="profile-avatar-wrap">
               <div class="profile-avatar-ring">
-                <img class="profile-avatar" src="https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80" alt="Alex Pathweaver">
+                <img class="profile-avatar" src="${getProfileImage(state)}" alt="Foto de perfil de ${username}">
               </div>
               <span class="profile-pro-badge">PRO</span>
             </div>
@@ -132,39 +161,40 @@ function renderProfileView() {
               <div class="profile-header-row">
                 <div>
                   <div class="profile-name-row">
-                    <h1 class="profile-name">Alex Pathweaver</h1>
+                    <h1 class="profile-name">${username}</h1>
                     <span class="material-symbols-outlined profile-verified" style="font-variation-settings: 'FILL' 1;">verified</span>
                   </div>
                   <p class="profile-meta">
                     <span class="material-symbols-outlined">calendar_today</span>
-                    Se unió en enero de 2026
+                    Se unió en ${joinDate}
                   </p>
                 </div>
 
-                <button class="profile-edit-btn btn-active-press" type="button">
+                <button id="profile-edit-btn" class="profile-edit-btn btn-active-press" type="button">
                   <span class="material-symbols-outlined">edit</span>
-                  Edit Profile
+                  Editar perfil
                 </button>
+                <input id="profile-photo-input" type="file" accept="image/*" hidden>
               </div>
 
               <div class="profile-progress-wrap">
                 <div class="profile-progress-head">
                   <span class="profile-progress-title">
                     <span class="material-symbols-outlined">auto_awesome</span>
-                    Journey Progress
+                    Progreso
                   </span>
-                  <span class="profile-progress-percent">74%</span>
+                  <span class="profile-progress-percent">${progress}%</span>
                 </div>
 
                 <div class="profile-progress-track">
-                  <div class="profile-progress-fill progress-fill" style="width: 74%;">
+                  <div class="profile-progress-fill progress-fill" style="width: ${progress}%;">
                     <span class="profile-progress-dot"></span>
                   </div>
                 </div>
 
                 <div class="profile-progress-meta">
-                  <span>Level 12 (12,400 XP)</span>
-                  <span>Next: Level 13 (15,000 XP)</span>
+                  <span>Nivel ${level} (${xp.toLocaleString('es-MX')} XP)</span>
+                  <span>Siguiente: Nivel ${nextLevel} (${nextLevelXp.toLocaleString('es-MX')} XP)</span>
                 </div>
               </div>
             </div>
@@ -177,34 +207,33 @@ function renderProfileView() {
               <div class="profile-stat-icon profile-stat-icon--orange">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
               </div>
-              <h3>7 days</h3>
-              <p>Daily Streak</p>
+              <h3>${Number(state.diasRacha) || 0} días</h3>
+              <p>Racha diaria</p>
             </article>
 
             <article class="profile-stat-card card-hover-lift">
               <div class="profile-stat-icon profile-stat-icon--yellow">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">diamond</span>
               </div>
-              <h3>1,240</h3>
-              <p>Total Gems</p>
+              <h3>${(Number(state.gems) || 0).toLocaleString('es-MX')}</h3>
+              <p>Gemas</p>
             </article>
 
             <article class="profile-stat-card card-hover-lift">
               <div class="profile-stat-icon profile-stat-icon--teal">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">task_alt</span>
               </div>
-              <h3>48</h3>
-              <p>Lessons Done</p>
+              <h3>${Number(state.leccionesTerminadas) || 0}</h3>
+              <p>Lecciones terminadas</p>
+            </article>
+            <article class="profile-stat-card card-hover-lift">
+              <div class="profile-stat-icon profile-stat-icon--orange">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">schedule</span>
+              </div>
+              <h3>${formatTimeSpent(state.tiempoInvertidoSegundos)}</h3>
+              <p>Tiempo invertido</p>
             </article>
           </div>
-
-          <article class="profile-quests-card card-hover-lift">
-            <h4>Total Quests</h4>
-            <strong>148</strong>
-            <div class="profile-quests-separator"></div>
-            <p>Time Invested</p>
-            <span>242 Hours</span>
-          </article>
         </section>
       </div>
     </section>
@@ -219,7 +248,7 @@ function mountView(viewName, mountNode) {
   };
 
   const renderer = views[viewName] || views.aprender;
-  mountNode.innerHTML = renderer();
+  mountNode.innerHTML = renderer(window.currentUserState || {});
   document.dispatchEvent(new CustomEvent(`view:${viewName}:mounted`));
 }
 
@@ -313,6 +342,56 @@ function bindStoreActions() {
   });
 }
 
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      const base64 = result.includes(",") ? result.split(",")[1] : "";
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function bindProfileActions() {
+  const editBtn = document.getElementById('profile-edit-btn');
+  const photoInput = document.getElementById('profile-photo-input');
+  if (!editBtn || !photoInput) return;
+
+  editBtn.addEventListener('click', () => photoInput.click());
+  photoInput.addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert('⚠️ La foto de perfil debe ser menor o igual a 10 MB.');
+      return;
+    }
+
+    try {
+      const base64 = await fileToBase64(file);
+      const updated = await updateProfileGlobal({
+        experiencia: window.currentUserState?.experiencia || 0,
+        progreso: window.currentUserState?.progreso || 0,
+        dias_racha: window.currentUserState?.diasRacha || 0,
+        lecciones_terminadas: window.currentUserState?.leccionesTerminadas || 0,
+        tiempo_invertido_segundos: window.currentUserState?.tiempoInvertidoSegundos || 0,
+        foto_perfil_base64: base64,
+        foto_perfil_mime: file.type || 'image/jpeg',
+      });
+      window.currentUserState = updated;
+      mountView('perfil', document.getElementById('main-content'));
+      await refreshStatusBar();
+      alert('✅ Foto de perfil actualizada');
+    } catch (err) {
+      alert(`❌ ${err.message}`);
+    } finally {
+      photoInput.value = '';
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const session = loadSession();
   const contentRoot = document.getElementById('main-content');
@@ -330,6 +409,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     : null;
 
   document.addEventListener('view:tienda:mounted', bindStoreActions);
+  document.addEventListener('view:perfil:mounted', bindProfileActions);
+
+  await refreshStatusBar();
 
   const initialView = sidebar?.activeView || 'aprender';
   mountView(initialView, contentRoot);
@@ -340,6 +422,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.replace(LOGIN_URL);
   });
 
-  await refreshStatusBar();
   document.dispatchEvent(new CustomEvent('user-state-ready', { detail: window.currentUserState }));
 });
