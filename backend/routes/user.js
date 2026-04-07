@@ -10,6 +10,7 @@ const STORE_PRODUCTS = {
   heart_bundle: { gems: 450, lives: 5, type: "lives" },
   infinite_hearts_24h: { gems: 950, hours: 24, type: "infinite" },
 };
+const MAX_PROFILE_IMAGE_BYTES = 2 * 1024 * 1024;
 
 async function ensureSchema() {
   await pool.query(`
@@ -25,6 +26,51 @@ async function ensureSchema() {
   await pool.query(`
     ALTER TABLE Usuarios
     ADD COLUMN IF NOT EXISTS corazones_ilimitados_hasta DATETIME NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS foto_perfil_url VARCHAR(500) NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS foto_perfil LONGBLOB NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS foto_perfil_mime VARCHAR(100) NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS experiencia INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS progreso INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS dias_racha INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS lecciones_terminadas INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS tiempo_invertido_segundos INT NOT NULL DEFAULT 0
   `);
 }
 
@@ -103,7 +149,8 @@ async function applyLifeRegen(usuario) {
 async function getUserState(usuario) {
   await applyLifeRegen(usuario);
   const [rows] = await pool.query(
-    `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta
+    `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta,
+            creado_en, foto_perfil_url, foto_perfil, foto_perfil_mime, experiencia, progreso, dias_racha, lecciones_terminadas, tiempo_invertido_segundos
      FROM Usuarios
      WHERE usuario = ?
      LIMIT 1`,
@@ -118,9 +165,14 @@ async function getUserState(usuario) {
   const unlimitedRemainingSeconds = unlimitedActive
     ? Math.floor((unlimitedUntil.getTime() - now.getTime()) / 1000)
     : 0;
+  const hasBinaryProfilePhoto = user.foto_perfil && user.foto_perfil_mime;
+  const profilePhotoDataUrl = hasBinaryProfilePhoto
+    ? `data:${user.foto_perfil_mime};base64,${Buffer.from(user.foto_perfil).toString("base64")}`
+    : null;
 
   return {
     ...user,
+    foto_perfil_base64: profilePhotoDataUrl,
     corazones_ilimitados_activos: unlimitedActive,
     corazones_ilimitados_segundos_restantes: Math.max(0, unlimitedRemainingSeconds),
   };
@@ -182,9 +234,12 @@ userRouter.post("/register", async (req, res) => {
     const now = new Date();
 
     await pool.query(
-      `INSERT INTO Usuarios (usuario, \`contraseña\`, vidas, gemas, etapa, nivel, vidas_actualizado_en)
-       VALUES (?, ?, ?, DEFAULT, DEFAULT, DEFAULT, ?)`,
-      [username, pass, MAX_LIVES, now]
+      `INSERT INTO Usuarios (
+         usuario, \`contraseña\`, vidas, gemas, etapa, nivel, vidas_actualizado_en,
+         creado_en, foto_perfil_url, foto_perfil, foto_perfil_mime, experiencia, progreso, dias_racha, lecciones_terminadas, tiempo_invertido_segundos
+       )
+       VALUES (?, ?, ?, DEFAULT, DEFAULT, DEFAULT, ?, ?, NULL, NULL, NULL, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)`,
+      [username, pass, MAX_LIVES, now, now]
     );
 
     const state = await getUserState(username);
@@ -313,12 +368,75 @@ userRouter.post("/complete-level", async (req, res) => {
       return res.status(403).json({ error: "Nivel bloqueado para este usuario" });
     }
 
-    await pool.query(`UPDATE Usuarios SET nivel = nivel + 1 WHERE usuario = ?`, [usuario]);
+    const xpGanada = 100;
+    const segundosInvertidos = 300;
+    const progresoActual = Number(state.progreso) || 0;
+    const progresoSiguiente = Math.min(100, progresoActual + 5);
+
+    await pool.query(
+      `UPDATE Usuarios
+       SET nivel = nivel + 1,
+           experiencia = experiencia + ?,
+           lecciones_terminadas = lecciones_terminadas + 1,
+           tiempo_invertido_segundos = tiempo_invertido_segundos + ?,
+           progreso = ?
+       WHERE usuario = ?`,
+      [xpGanada, segundosInvertidos, progresoSiguiente, usuario]
+    );
 
     const updated = await getUserState(usuario);
     return res.json(updated);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Error al completar nivel" });
+  }
+});
+
+userRouter.post("/profile", async (req, res) => {
+  try {
+    const { usuario, foto_perfil_base64, dias_racha, progreso } = req.body;
+    if (!usuario) return res.status(400).json({ error: "Falta usuario" });
+
+    const state = await getUserState(usuario);
+    if (!state) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    const nextRacha = Number.isFinite(Number(dias_racha)) ? Math.max(0, Number(dias_racha)) : Number(state.dias_racha) || 0;
+    const nextProgreso = Number.isFinite(Number(progreso)) ? Math.min(100, Math.max(0, Number(progreso))) : Number(state.progreso) || 0;
+    let nextFotoBuffer = state.foto_perfil || null;
+    let nextFotoMime = state.foto_perfil_mime || null;
+
+    if (typeof foto_perfil_base64 === "string") {
+      const raw = foto_perfil_base64.trim();
+      if (!raw) {
+        nextFotoBuffer = null;
+        nextFotoMime = null;
+      } else {
+        const parsed = raw.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+        if (!parsed) {
+          return res.status(400).json({ error: "Formato de foto inválido. Usa Data URL base64 (image/*)" });
+        }
+        const mime = parsed[1];
+        const base64Payload = parsed[2];
+        const buffer = Buffer.from(base64Payload, "base64");
+        if (!buffer.length || buffer.byteLength > MAX_PROFILE_IMAGE_BYTES) {
+          return res.status(400).json({ error: "La imagen debe pesar entre 1 byte y 2 MB" });
+        }
+        nextFotoBuffer = buffer;
+        nextFotoMime = mime;
+      }
+    }
+
+    await pool.query(
+      `UPDATE Usuarios
+       SET foto_perfil_url = NULL, foto_perfil = ?, foto_perfil_mime = ?, dias_racha = ?, progreso = ?
+       WHERE usuario = ?`,
+      [nextFotoBuffer, nextFotoMime, nextRacha, nextProgreso, usuario]
+    );
+
+    const updated = await getUserState(usuario);
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Error al actualizar perfil" });
   }
 });

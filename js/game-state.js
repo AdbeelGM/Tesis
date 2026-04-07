@@ -21,6 +21,13 @@ export async function loadState() {
     infiniteHeartsActive: Boolean(state.corazones_ilimitados_activos),
     infiniteHeartsRemainingSeconds: Number(state.corazones_ilimitados_segundos_restantes) || 0,
     usuario: state.usuario,
+    joinedAt: state.creado_en || null,
+    profilePhotoUrl: state.foto_perfil_base64 || state.foto_perfil_url || null,
+    experience: Number(state.experiencia) || 0,
+    progress: Number(state.progreso) || 0,
+    streakDays: Number(state.dias_racha) || 0,
+    lessonsCompleted: Number(state.lecciones_terminadas) || 0,
+    timeInvestedSeconds: Number(state.tiempo_invertido_segundos) || 0,
   };
 }
 
@@ -36,6 +43,13 @@ export async function loseLifeGlobal(n = 1) {
     infiniteHeartsActive: Boolean(state.corazones_ilimitados_activos),
     infiniteHeartsRemainingSeconds: Number(state.corazones_ilimitados_segundos_restantes) || 0,
     usuario: state.usuario,
+    joinedAt: state.creado_en || null,
+    profilePhotoUrl: state.foto_perfil_base64 || state.foto_perfil_url || null,
+    experience: Number(state.experiencia) || 0,
+    progress: Number(state.progreso) || 0,
+    streakDays: Number(state.dias_racha) || 0,
+    lessonsCompleted: Number(state.lecciones_terminadas) || 0,
+    timeInvestedSeconds: Number(state.tiempo_invertido_segundos) || 0,
   };
 }
 
@@ -51,5 +65,12 @@ export async function purchaseStoreItemGlobal(productId) {
     infiniteHeartsActive: Boolean(state.corazones_ilimitados_activos),
     infiniteHeartsRemainingSeconds: Number(state.corazones_ilimitados_segundos_restantes) || 0,
     usuario: state.usuario,
+    joinedAt: state.creado_en || null,
+    profilePhotoUrl: state.foto_perfil_base64 || state.foto_perfil_url || null,
+    experience: Number(state.experiencia) || 0,
+    progress: Number(state.progreso) || 0,
+    streakDays: Number(state.dias_racha) || 0,
+    lessonsCompleted: Number(state.lecciones_terminadas) || 0,
+    timeInvestedSeconds: Number(state.tiempo_invertido_segundos) || 0,
   };
 }

@@ -112,6 +112,21 @@ function renderStoreView() {
 }
 
 function renderProfileView() {
+  const state = window.currentUserState || {};
+  const avatar = state.profilePhotoUrl || 'https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80';
+  const username = state.usuario || 'Usuario';
+  const joinedAt = state.joinedAt ? new Date(state.joinedAt) : null;
+  const joinedLabel = joinedAt
+    ? joinedAt.toLocaleDateString('es-MX', { year: 'numeric', month: 'long' })
+    : 'fecha no disponible';
+  const progress = Math.min(100, Math.max(0, Number(state.progress) || 0));
+  const xp = Number(state.experience) || 0;
+  const level = Number(state.level) || 1;
+  const streakDays = Number(state.streakDays) || 0;
+  const gems = Number(state.gems) || 0;
+  const lessonsCompleted = Number(state.lessonsCompleted) || 0;
+  const investedHours = (Number(state.timeInvestedSeconds) || 0) / 3600;
+
   return `
     <section class="profile-view">
       <div class="profile-layout">
@@ -123,7 +138,7 @@ function renderProfileView() {
           <div class="profile-banner__content">
             <div class="profile-avatar-wrap">
               <div class="profile-avatar-ring">
-                <img class="profile-avatar" src="https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80" alt="Alex Pathweaver">
+                <img class="profile-avatar" src="${avatar}" alt="${username}">
               </div>
               <span class="profile-pro-badge">PRO</span>
             </div>
@@ -132,12 +147,12 @@ function renderProfileView() {
               <div class="profile-header-row">
                 <div>
                   <div class="profile-name-row">
-                    <h1 class="profile-name">Alex Pathweaver</h1>
+                    <h1 class="profile-name">${username}</h1>
                     <span class="material-symbols-outlined profile-verified" style="font-variation-settings: 'FILL' 1;">verified</span>
                   </div>
                   <p class="profile-meta">
                     <span class="material-symbols-outlined">calendar_today</span>
-                    Se unió en enero de 2026
+                    Se unió en ${joinedLabel}
                   </p>
                 </div>
 
@@ -153,18 +168,18 @@ function renderProfileView() {
                     <span class="material-symbols-outlined">auto_awesome</span>
                     Journey Progress
                   </span>
-                  <span class="profile-progress-percent">74%</span>
+                  <span class="profile-progress-percent">${progress}%</span>
                 </div>
 
                 <div class="profile-progress-track">
-                  <div class="profile-progress-fill progress-fill" style="width: 74%;">
+                  <div class="profile-progress-fill progress-fill" style="width: ${progress}%;">
                     <span class="profile-progress-dot"></span>
                   </div>
                 </div>
 
                 <div class="profile-progress-meta">
-                  <span>Level 12 (12,400 XP)</span>
-                  <span>Next: Level 13 (15,000 XP)</span>
+                  <span>Nivel ${level} (${xp.toLocaleString('es-MX')} XP)</span>
+                  <span>Siguiente: Nivel ${level + 1}</span>
                 </div>
               </div>
             </div>
@@ -177,34 +192,33 @@ function renderProfileView() {
               <div class="profile-stat-icon profile-stat-icon--orange">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
               </div>
-              <h3>7 days</h3>
-              <p>Daily Streak</p>
+              <h3>${streakDays} días</h3>
+              <p>Racha diaria</p>
             </article>
 
             <article class="profile-stat-card card-hover-lift">
               <div class="profile-stat-icon profile-stat-icon--yellow">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">diamond</span>
               </div>
-              <h3>1,240</h3>
-              <p>Total Gems</p>
+              <h3>${gems.toLocaleString('es-MX')}</h3>
+              <p>Gemas totales</p>
             </article>
 
             <article class="profile-stat-card card-hover-lift">
               <div class="profile-stat-icon profile-stat-icon--teal">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">task_alt</span>
               </div>
-              <h3>48</h3>
-              <p>Lessons Done</p>
+              <h3>${lessonsCompleted}</h3>
+              <p>Lecciones terminadas</p>
+            </article>
+            <article class="profile-stat-card card-hover-lift">
+              <div class="profile-stat-icon profile-stat-icon--teal">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">schedule</span>
+              </div>
+              <h3>${investedHours.toFixed(1)} h</h3>
+              <p>Tiempo invertido</p>
             </article>
           </div>
-
-          <article class="profile-quests-card card-hover-lift">
-            <h4>Total Quests</h4>
-            <strong>148</strong>
-            <div class="profile-quests-separator"></div>
-            <p>Time Invested</p>
-            <span>242 Hours</span>
-          </article>
         </section>
       </div>
     </section>
@@ -331,6 +345,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('view:tienda:mounted', bindStoreActions);
 
+  await refreshStatusBar();
+
   const initialView = sidebar?.activeView || 'aprender';
   mountView(initialView, contentRoot);
 
@@ -340,6 +356,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.replace(LOGIN_URL);
   });
 
-  await refreshStatusBar();
   document.dispatchEvent(new CustomEvent('user-state-ready', { detail: window.currentUserState }));
 });
