@@ -53,3 +53,10 @@ export function purchaseStoreItem(usuario, productId) {
     body: JSON.stringify({ usuario, productId }),
   });
 }
+
+export function updateProfilePhoto(usuario, dataUrl) {
+  return request("/api/user/profile-photo", {
+    method: "POST",
+    body: JSON.stringify({ usuario, dataUrl }),
+  });
+}
