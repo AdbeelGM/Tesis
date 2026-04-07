@@ -47,6 +47,13 @@ export function completeLevel(usuario, level) {
   });
 }
 
+export function addTimeInvested(usuario, seconds) {
+  return request("/api/user/time-invested", {
+    method: "POST",
+    body: JSON.stringify({ usuario, seconds }),
+  });
+}
+
 export function purchaseStoreItem(usuario, productId) {
   return request("/api/user/purchase", {
     method: "POST",
