@@ -1,6 +1,6 @@
 import { loadSession, clearSession } from './user-session.js';
 import { refreshStatusBar } from './statusbar.js';
-import { purchaseStoreItemGlobal } from './game-state.js';
+import { purchaseStoreItemGlobal, updateProfilePhotoGlobal } from './game-state.js';
 
 const LOGIN_URL = 'login.html';
 
@@ -121,10 +121,10 @@ function renderProfileView() {
           <div class="profile-banner__bg profile-banner__bg--orb-bottom"></div>
 
           <div class="profile-banner__content">
-            <div class="profile-avatar-wrap">
-              <div class="profile-avatar-ring">
-                <img class="profile-avatar" src="https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80" alt="Alex Pathweaver">
-              </div>
+              <div class="profile-avatar-wrap">
+                <div class="profile-avatar-ring">
+                  <img id="profile-avatar" class="profile-avatar" src="https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80" alt="Foto de perfil">
+                </div>
               <span class="profile-pro-badge">PRO</span>
             </div>
 
@@ -132,19 +132,20 @@ function renderProfileView() {
               <div class="profile-header-row">
                 <div>
                   <div class="profile-name-row">
-                    <h1 class="profile-name">Alex Pathweaver</h1>
+                    <h1 id="profile-name" class="profile-name">Usuario</h1>
                     <span class="material-symbols-outlined profile-verified" style="font-variation-settings: 'FILL' 1;">verified</span>
                   </div>
-                  <p class="profile-meta">
+                  <p id="profile-joined" class="profile-meta">
                     <span class="material-symbols-outlined">calendar_today</span>
-                    Se unió en enero de 2026
+                    Se unió recientemente
                   </p>
                 </div>
 
-                <button class="profile-edit-btn btn-active-press" type="button">
+                <button id="profile-edit-btn" class="profile-edit-btn btn-active-press" type="button">
                   <span class="material-symbols-outlined">edit</span>
-                  Edit Profile
+                  Cambiar foto
                 </button>
+                <input id="profile-photo-input" type="file" accept="image/*" hidden>
               </div>
 
               <div class="profile-progress-wrap">
@@ -153,18 +154,18 @@ function renderProfileView() {
                     <span class="material-symbols-outlined">auto_awesome</span>
                     Journey Progress
                   </span>
-                  <span class="profile-progress-percent">74%</span>
+                  <span id="profile-progress-percent" class="profile-progress-percent">0%</span>
                 </div>
 
                 <div class="profile-progress-track">
-                  <div class="profile-progress-fill progress-fill" style="width: 74%;">
+                  <div id="profile-progress-fill" class="profile-progress-fill progress-fill" style="width: 0%;">
                     <span class="profile-progress-dot"></span>
                   </div>
                 </div>
 
-                <div class="profile-progress-meta">
-                  <span>Level 12 (12,400 XP)</span>
-                  <span>Next: Level 13 (15,000 XP)</span>
+                <div id="profile-progress-meta" class="profile-progress-meta">
+                  <span>Nivel 1 (0 XP)</span>
+                  <span>Progreso de aprendizaje</span>
                 </div>
               </div>
             </div>
@@ -177,33 +178,33 @@ function renderProfileView() {
               <div class="profile-stat-icon profile-stat-icon--orange">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
               </div>
-              <h3>7 days</h3>
-              <p>Daily Streak</p>
+              <h3 id="profile-streak">0 días</h3>
+              <p>Racha diaria</p>
             </article>
 
             <article class="profile-stat-card card-hover-lift">
               <div class="profile-stat-icon profile-stat-icon--yellow">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">diamond</span>
               </div>
-              <h3>1,240</h3>
-              <p>Total Gems</p>
+              <h3 id="profile-gems">0</h3>
+              <p>Gemas</p>
             </article>
 
             <article class="profile-stat-card card-hover-lift">
               <div class="profile-stat-icon profile-stat-icon--teal">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">task_alt</span>
               </div>
-              <h3>48</h3>
-              <p>Lessons Done</p>
+              <h3 id="profile-lessons">0</h3>
+              <p>Lecciones terminadas</p>
             </article>
           </div>
 
           <article class="profile-quests-card card-hover-lift">
-            <h4>Total Quests</h4>
-            <strong>148</strong>
+            <h4>Tiempo invertido</h4>
+            <strong id="profile-time-hours">0 h</strong>
             <div class="profile-quests-separator"></div>
-            <p>Time Invested</p>
-            <span>242 Hours</span>
+            <p>Total acumulado</p>
+            <span id="profile-time-detail">0 h 0 min</span>
           </article>
         </section>
       </div>
@@ -228,6 +229,23 @@ function formatDuration(seconds) {
   const h = Math.floor(clamped / 3600);
   const m = Math.floor((clamped % 3600) / 60);
   return `${h}h ${m}m`;
+}
+
+function formatJoinedDate(dateValue) {
+  if (!dateValue) return 'Se unió recientemente';
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return 'Se unió recientemente';
+  return `Se unió el ${new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(date)}`;
+}
+
+function formatTimeInvested(seconds) {
+  const clamped = Math.max(0, Number(seconds) || 0);
+  const totalHours = Math.floor(clamped / 3600);
+  const totalMinutes = Math.floor((clamped % 3600) / 60);
+  return {
+    short: `${totalHours} h`,
+    detail: `${totalHours} h ${totalMinutes} min`,
+  };
 }
 
 function updateStoreStatus(state) {
@@ -313,6 +331,82 @@ function bindStoreActions() {
   });
 }
 
+function updateProfileView(state) {
+  const avatar = document.getElementById('profile-avatar');
+  const profileName = document.getElementById('profile-name');
+  const joined = document.getElementById('profile-joined');
+  const progressPercent = document.getElementById('profile-progress-percent');
+  const progressFill = document.getElementById('profile-progress-fill');
+  const progressMeta = document.getElementById('profile-progress-meta');
+  const streak = document.getElementById('profile-streak');
+  const gems = document.getElementById('profile-gems');
+  const lessons = document.getElementById('profile-lessons');
+  const timeHours = document.getElementById('profile-time-hours');
+  const timeDetail = document.getElementById('profile-time-detail');
+
+  const progress = Math.max(0, Math.min(100, Number(state.progress) || 0));
+  const xp = Math.max(0, Number(state.experience) || 0);
+  const level = Math.max(1, Number(state.level) || 1);
+  const time = formatTimeInvested(state.timeInvestedSeconds);
+  const avatarSrc = state.profilePhotoBase64 || state.profilePhotoUrl || 'https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80';
+
+  if (avatar) avatar.src = avatarSrc;
+  if (profileName) profileName.textContent = state.usuario || 'Usuario';
+  if (joined) joined.innerHTML = `<span class="material-symbols-outlined">calendar_today</span>${formatJoinedDate(state.createdAt)}`;
+  if (progressPercent) progressPercent.textContent = `${progress}%`;
+  if (progressFill) progressFill.style.width = `${progress}%`;
+  if (progressMeta) {
+    progressMeta.innerHTML = `<span>Nivel ${level} (${xp.toLocaleString('es-MX')} XP)</span><span>Progreso general</span>`;
+  }
+  if (streak) streak.textContent = `${Number(state.streakDays) || 0} días`;
+  if (gems) gems.textContent = `${Number(state.gems) || 0}`;
+  if (lessons) lessons.textContent = `${Number(state.lessonsDone) || 0}`;
+  if (timeHours) timeHours.textContent = time.short;
+  if (timeDetail) timeDetail.textContent = time.detail;
+}
+
+function bindProfileActions() {
+  updateProfileView(window.currentUserState || {});
+  const editBtn = document.getElementById('profile-edit-btn');
+  const input = document.getElementById('profile-photo-input');
+  if (!editBtn || !input) return;
+
+  editBtn.addEventListener('click', () => input.click());
+  input.addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('⚠️ Solo se permiten imágenes para la foto de perfil.');
+      input.value = '';
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('⚠️ La foto de perfil debe ser de máximo 10 MB.');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const updated = await updateProfilePhotoGlobal(reader.result);
+        window.currentUserState = updated;
+        updateProfileView(updated);
+      } catch (err) {
+        alert(`❌ ${err.message}`);
+      } finally {
+        input.value = '';
+      }
+    };
+    reader.onerror = () => {
+      alert('❌ No se pudo leer la imagen seleccionada.');
+      input.value = '';
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const session = loadSession();
   const contentRoot = document.getElementById('main-content');
@@ -330,6 +424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     : null;
 
   document.addEventListener('view:tienda:mounted', bindStoreActions);
+  document.addEventListener('view:perfil:mounted', bindProfileActions);
 
   const initialView = sidebar?.activeView || 'aprender';
   mountView(initialView, contentRoot);

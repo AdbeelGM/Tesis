@@ -5,6 +5,7 @@ export const userRouter = Router();
 
 const MAX_LIVES = 5;
 const LIFE_INTERVAL_MINUTES = 5;
+const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
 const STORE_PRODUCTS = {
   single_heart: { gems: 100, lives: 1, type: "lives" },
   heart_bundle: { gems: 450, lives: 5, type: "lives" },
@@ -25,6 +26,51 @@ async function ensureSchema() {
   await pool.query(`
     ALTER TABLE Usuarios
     ADD COLUMN IF NOT EXISTS corazones_ilimitados_hasta DATETIME NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS foto_perfil_url VARCHAR(500) NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS foto_perfil LONGBLOB NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS foto_perfil_mime VARCHAR(100) NULL
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS experiencia INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS progreso INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS dias_racha INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS lecciones_terminadas INT NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    ALTER TABLE Usuarios
+    ADD COLUMN IF NOT EXISTS tiempo_invertido_segundos INT NOT NULL DEFAULT 0
   `);
 }
 
@@ -103,7 +149,8 @@ async function applyLifeRegen(usuario) {
 async function getUserState(usuario) {
   await applyLifeRegen(usuario);
   const [rows] = await pool.query(
-    `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta
+    `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta,
+            creado_en, foto_perfil_url, foto_perfil, foto_perfil_mime, experiencia, progreso, dias_racha, lecciones_terminadas, tiempo_invertido_segundos
      FROM Usuarios
      WHERE usuario = ?
      LIMIT 1`,
@@ -121,6 +168,9 @@ async function getUserState(usuario) {
 
   return {
     ...user,
+    foto_perfil_base64: user.foto_perfil && user.foto_perfil_mime
+      ? `data:${user.foto_perfil_mime};base64,${Buffer.from(user.foto_perfil).toString("base64")}`
+      : null,
     corazones_ilimitados_activos: unlimitedActive,
     corazones_ilimitados_segundos_restantes: Math.max(0, unlimitedRemainingSeconds),
   };
@@ -320,5 +370,46 @@ userRouter.post("/complete-level", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Error al completar nivel" });
+  }
+});
+
+userRouter.post("/profile-photo", async (req, res) => {
+  try {
+    const { usuario, dataUrl, photoUrl = null } = req.body;
+    if (!usuario) return res.status(400).json({ error: "Falta usuario" });
+
+    if (!dataUrl && !photoUrl) {
+      return res.status(400).json({ error: "Falta foto de perfil" });
+    }
+
+    let photoBuffer = null;
+    let mimeType = null;
+
+    if (dataUrl) {
+      const dataUrlMatch = String(dataUrl).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+      if (!dataUrlMatch) {
+        return res.status(400).json({ error: "Formato de imagen inválido" });
+      }
+
+      mimeType = dataUrlMatch[1];
+      const b64 = dataUrlMatch[2];
+      photoBuffer = Buffer.from(b64, "base64");
+      if (photoBuffer.length > MAX_PROFILE_PHOTO_BYTES) {
+        return res.status(400).json({ error: "La foto de perfil excede 10 MB" });
+      }
+    }
+
+    await pool.query(
+      `UPDATE Usuarios
+       SET foto_perfil = ?, foto_perfil_mime = ?, foto_perfil_url = ?
+       WHERE usuario = ?`,
+      [photoBuffer, mimeType, photoUrl, usuario]
+    );
+
+    const updated = await getUserState(usuario);
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Error al guardar foto de perfil" });
   }
 });
