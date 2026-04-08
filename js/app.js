@@ -3,6 +3,7 @@ import { refreshStatusBar } from './statusbar.js';
 import { purchaseStoreItemGlobal, updateProfilePhotoGlobal } from './game-state.js';
 
 const LOGIN_URL = 'login.html';
+const XP_PER_LEVEL = 100;
 
 function renderLearnView() {
   return `
@@ -338,9 +339,11 @@ function updateProfileView(state) {
   const lessons = document.getElementById('profile-lessons');
   const timeHours = document.getElementById('profile-time-hours');
 
-  const progress = Math.max(0, Math.min(100, Number(state.progress) || 0));
   const xp = Math.max(0, Number(state.experience) || 0);
   const level = Math.max(1, Number(state.level) || 1);
+  const xpIntoLevel = xp % XP_PER_LEVEL;
+  const xpToNextLevel = XP_PER_LEVEL - xpIntoLevel;
+  const progress = Math.max(0, Math.min(100, Math.round((xpIntoLevel / XP_PER_LEVEL) * 100)));
   const time = formatTimeInvested(state.timeInvestedSeconds);
   const avatarSrc = state.profilePhotoBase64 || state.profilePhotoUrl || 'https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80';
 
@@ -350,7 +353,7 @@ function updateProfileView(state) {
   if (progressPercent) progressPercent.textContent = `${progress}%`;
   if (progressFill) progressFill.style.width = `${progress}%`;
   if (progressMeta) {
-    progressMeta.innerHTML = `<span>Nivel ${level} (${xp.toLocaleString('es-MX')} XP)</span><span>Progreso general</span>`;
+    progressMeta.innerHTML = `<span>Nivel ${level} (${xp.toLocaleString('es-MX')} XP total)</span><span>${xpToNextLevel} XP para el siguiente nivel</span>`;
   }
   if (streak) streak.textContent = `${Number(state.streakDays) || 0} días`;
   if (gems) gems.textContent = `${Number(state.gems) || 0}`;

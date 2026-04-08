@@ -199,6 +199,18 @@
   display: block;
 }
 
+.level-exp-badge {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f766e;
+  background: #ecfeff;
+  border: 1px solid #99f6e4;
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
 @keyframes ping {
   from { transform: scale(1); opacity: 1; }
   to { transform: scale(1.18); opacity: 0; }

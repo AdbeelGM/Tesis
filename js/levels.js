@@ -1,3 +1,5 @@
+const XP_PER_LEVEL = 100;
+
 function applyLevelNodeState(node, currentLevel) {
   const level = Number(node.dataset.level);
   if (!level) return;
@@ -20,6 +22,13 @@ function applyLevelNodeState(node, currentLevel) {
     badge.className = 'start-badge';
     badge.textContent = 'Start';
     item.insertBefore(badge, node);
+  }
+
+  if (item && !item.querySelector('.level-exp-badge')) {
+    const expBadge = document.createElement('div');
+    expBadge.className = 'level-exp-badge';
+    expBadge.textContent = `+${XP_PER_LEVEL} XP`;
+    item.appendChild(expBadge);
   }
 
   if (isCompleted) {

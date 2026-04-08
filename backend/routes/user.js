@@ -6,6 +6,8 @@ export const userRouter = Router();
 const MAX_LIVES = 5;
 const LIFE_INTERVAL_MINUTES = 5;
 const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
+const XP_PER_LEVEL = 100;
+const TOTAL_LEVELS = 6;
 const STORE_PRODUCTS = {
   single_heart: { gems: 100, lives: 1, type: "lives" },
   heart_bundle: { gems: 450, lives: 5, type: "lives" },
@@ -363,7 +365,18 @@ userRouter.post("/complete-level", async (req, res) => {
       return res.status(403).json({ error: "Nivel bloqueado para este usuario" });
     }
 
-    await pool.query(`UPDATE Usuarios SET nivel = nivel + 1 WHERE usuario = ?`, [usuario]);
+    const completedLevels = Math.min(TOTAL_LEVELS, requestedLevel);
+    const nextProgress = Math.round((completedLevels / TOTAL_LEVELS) * 100);
+
+    await pool.query(
+      `UPDATE Usuarios
+       SET nivel = nivel + 1,
+           experiencia = experiencia + ?,
+           lecciones_terminadas = lecciones_terminadas + 1,
+           progreso = ?
+       WHERE usuario = ?`,
+      [XP_PER_LEVEL, nextProgress, usuario]
+    );
 
     const updated = await getUserState(usuario);
     return res.json(updated);
