@@ -6,11 +6,20 @@ export const userRouter = Router();
 const MAX_LIVES = 5;
 const LIFE_INTERVAL_MINUTES = 5;
 const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
+const TOTAL_LEVELS = 6;
 const STORE_PRODUCTS = {
   single_heart: { gems: 100, lives: 1, type: "lives" },
   heart_bundle: { gems: 450, lives: 5, type: "lives" },
   infinite_hearts_24h: { gems: 950, hours: 24, type: "infinite" },
 };
+
+function getExperienceRewardForLevel(levelNumber) {
+  const level = Math.max(1, Number(levelNumber) || 1);
+  const base = 40;
+  const linear = level * 25;
+  const curve = Math.floor(Math.pow(level, 1.35) * 15);
+  return base + linear + curve;
+}
 
 async function ensureSchema() {
   await pool.query(`
@@ -363,10 +372,25 @@ userRouter.post("/complete-level", async (req, res) => {
       return res.status(403).json({ error: "Nivel bloqueado para este usuario" });
     }
 
-    await pool.query(`UPDATE Usuarios SET nivel = nivel + 1 WHERE usuario = ?`, [usuario]);
+    const xpReward = getExperienceRewardForLevel(requestedLevel);
+    const nextLevel = currentLevel + 1;
+    const nextProgress = Math.min(
+      100,
+      Math.round((Math.min(nextLevel - 1, TOTAL_LEVELS) / TOTAL_LEVELS) * 100)
+    );
+
+    await pool.query(
+      `UPDATE Usuarios
+       SET nivel = nivel + 1,
+           experiencia = experiencia + ?,
+           lecciones_terminadas = lecciones_terminadas + 1,
+           progreso = GREATEST(progreso, ?)
+       WHERE usuario = ?`,
+      [xpReward, nextProgress, usuario]
+    );
 
     const updated = await getUserState(usuario);
-    return res.json(updated);
+    return res.json({ ...updated, xp_ganada: xpReward });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Error al completar nivel" });

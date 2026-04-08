@@ -3,6 +3,32 @@ import { refreshStatusBar } from './statusbar.js';
 import { purchaseStoreItemGlobal, updateProfilePhotoGlobal } from './game-state.js';
 
 const LOGIN_URL = 'login.html';
+const XP_BASE_REQUIREMENT = 120;
+
+function xpNeededToAdvance(accountLevel) {
+  const level = Math.max(1, Number(accountLevel) || 1);
+  return Math.round(XP_BASE_REQUIREMENT + (level * 32) + (Math.pow(level, 1.4) * 14));
+}
+
+function getExperienceProgress(totalXp) {
+  let xp = Math.max(0, Number(totalXp) || 0);
+  let accountLevel = 1;
+  let required = xpNeededToAdvance(accountLevel);
+
+  while (xp >= required) {
+    xp -= required;
+    accountLevel += 1;
+    required = xpNeededToAdvance(accountLevel);
+  }
+
+  const percent = Math.max(0, Math.min(100, Math.round((xp / required) * 100)));
+  return {
+    accountLevel,
+    currentXpInLevel: xp,
+    neededXpForNext: required,
+    percent,
+  };
+}
 
 function renderLearnView() {
   return `
@@ -338,19 +364,22 @@ function updateProfileView(state) {
   const lessons = document.getElementById('profile-lessons');
   const timeHours = document.getElementById('profile-time-hours');
 
-  const progress = Math.max(0, Math.min(100, Number(state.progress) || 0));
   const xp = Math.max(0, Number(state.experience) || 0);
-  const level = Math.max(1, Number(state.level) || 1);
+  const routeLevel = Math.max(1, Number(state.level) || 1);
+  const xpProgress = getExperienceProgress(xp);
   const time = formatTimeInvested(state.timeInvestedSeconds);
   const avatarSrc = state.profilePhotoBase64 || state.profilePhotoUrl || 'https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80';
 
   if (avatar) avatar.src = avatarSrc;
   if (profileName) profileName.textContent = state.usuario || 'Usuario';
   if (joined) joined.innerHTML = `<span class="material-symbols-outlined">calendar_today</span>${formatJoinedDate(state.createdAt)}`;
-  if (progressPercent) progressPercent.textContent = `${progress}%`;
-  if (progressFill) progressFill.style.width = `${progress}%`;
+  if (progressPercent) progressPercent.textContent = `${xpProgress.percent}%`;
+  if (progressFill) progressFill.style.width = `${xpProgress.percent}%`;
   if (progressMeta) {
-    progressMeta.innerHTML = `<span>Nivel ${level} (${xp.toLocaleString('es-MX')} XP)</span><span>Progreso general</span>`;
+    progressMeta.innerHTML = `
+      <span>Nivel de cuenta ${xpProgress.accountLevel} • Ruta ${routeLevel} • ${xp.toLocaleString('es-MX')} XP</span>
+      <span>${xpProgress.currentXpInLevel.toLocaleString('es-MX')} / ${xpProgress.neededXpForNext.toLocaleString('es-MX')} XP para el siguiente nivel</span>
+    `;
   }
   if (streak) streak.textContent = `${Number(state.streakDays) || 0} días`;
   if (gems) gems.textContent = `${Number(state.gems) || 0}`;
