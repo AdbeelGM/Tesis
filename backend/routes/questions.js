@@ -8,19 +8,45 @@ questionsRouter.get("/", (req, res) => {
 });
 
 // Whitelist para evitar SQL injection por nombre de tabla
-const allowedTables = new Set(["abecedario"]);
+const allowedTables = new Set([
+  "abecedario",
+  "palabras_comunes",
+  "familia",
+  "viajes",
+  "comida"
+]);
 
-function getAndValidateCategoria(req, res) {
-  const categoria = req.query.categoria;
-  if (!categoria) {
+function getAndValidateCategorias(req, res) {
+  const categoriasRaw = req.query.categoria;
+  if (!categoriasRaw) {
     res.status(400).json({ error: "Falta categoria" });
     return null;
   }
-  if (!allowedTables.has(categoria)) {
+
+  const categorias = String(categoriasRaw)
+    .split(",")
+    .map(c => c.trim())
+    .filter(Boolean);
+
+  if (categorias.length === 0) {
+    res.status(400).json({ error: "Categoria inválida" });
+    return null;
+  }
+
+  const unicas = [...new Set(categorias)];
+  const invalida = unicas.find(c => !allowedTables.has(c));
+  if (invalida) {
     res.status(400).json({ error: "Categoria no permitida" });
     return null;
   }
-  return categoria;
+
+  return unicas;
+}
+
+function buildUnionSubquery(categorias) {
+  return categorias
+    .map((tabla) => `SELECT id, media_ruta, respuesta, dificultad FROM ${tabla}`)
+    .join(" UNION ALL ");
 }
 
 /**
@@ -32,16 +58,17 @@ function getAndValidateCategoria(req, res) {
  */
 questionsRouter.get("/multiple-choice", async (req, res) => {
   try {
-    const categoria = getAndValidateCategoria(req, res);
-    if (!categoria) return;
+    const categorias = getAndValidateCategorias(req, res);
+    if (!categorias) return;
 
     const dificultad = Number(req.query.dificultad || 1);
     const limit = Number(req.query.limit || 5);
+    const source = buildUnionSubquery(categorias);
 
-    // 1) Traer N correctas aleatorias de esa tabla/dificultad
+    // 1) Traer N correctas aleatorias de las categorias/dificultad
     const [correctRows] = await pool.query(
       `SELECT id, media_ruta, respuesta
-       FROM ${categoria}
+       FROM (${source}) AS src
        WHERE dificultad = ?
        ORDER BY RAND()
        LIMIT ?`,
@@ -54,11 +81,11 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
     for (const row of correctRows) {
       const [sameLevelWrongRows] = await pool.query(
         `SELECT respuesta
-         FROM ${categoria}
-         WHERE dificultad = ? AND id <> ?
+         FROM (${source}) AS src
+         WHERE dificultad = ? AND id <> ? AND respuesta <> ?
          ORDER BY RAND()
          LIMIT 3`,
-        [dificultad, row.id]
+        [dificultad, row.id, row.respuesta]
       );
 
       let wrongOptions = sameLevelWrongRows.map(r => r.respuesta);
@@ -71,7 +98,7 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
 
         const [fallbackWrongRows] = await pool.query(
           `SELECT respuesta
-           FROM ${categoria}
+           FROM (${source}) AS src
            WHERE id <> ? AND respuesta <> ? ${exclusionClause}
            ORDER BY RAND()
            LIMIT ?`,
@@ -111,16 +138,17 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
  */
 questionsRouter.get("/true-false", async (req, res) => {
   try {
-    const categoria = getAndValidateCategoria(req, res);
-    if (!categoria) return;
+    const categorias = getAndValidateCategorias(req, res);
+    if (!categorias) return;
 
     const dificultad = Number(req.query.dificultad || 1);
     const limit = Number(req.query.limit || 5);
+    const source = buildUnionSubquery(categorias);
 
     // Tomamos "limit" señas base (cada una con su respuesta correcta)
     const [rows] = await pool.query(
       `SELECT id, media_ruta, respuesta
-       FROM ${categoria}
+       FROM (${source}) AS src
        WHERE dificultad = ?
        ORDER BY RAND()
        LIMIT ?`,
@@ -143,11 +171,11 @@ questionsRouter.get("/true-false", async (req, res) => {
         // Falso: elegimos otra respuesta cualquiera distinta
         const [wrongRows] = await pool.query(
           `SELECT respuesta
-           FROM ${categoria}
-           WHERE dificultad = ? AND id <> ?
+           FROM (${source}) AS src
+           WHERE dificultad = ? AND id <> ? AND respuesta <> ?
            ORDER BY RAND()
            LIMIT 1`,
-          [dificultad, row.id]
+          [dificultad, row.id, row.respuesta]
         );
 
         const palabraIncorrecta = wrongRows?.[0]?.respuesta || "Otra palabra";
@@ -179,15 +207,16 @@ questionsRouter.get("/true-false", async (req, res) => {
  */
 questionsRouter.get("/text-input", async (req, res) => {
   try {
-    const categoria = getAndValidateCategoria(req, res);
-    if (!categoria) return;
+    const categorias = getAndValidateCategorias(req, res);
+    if (!categorias) return;
 
     const dificultad = Number(req.query.dificultad || 1);
     const limit = Number(req.query.limit || 5);
+    const source = buildUnionSubquery(categorias);
 
     const [rows] = await pool.query(
       `SELECT media_ruta, respuesta
-       FROM ${categoria}
+       FROM (${source}) AS src
        WHERE dificultad = ?
        ORDER BY RAND()
        LIMIT ?`,
