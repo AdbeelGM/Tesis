@@ -41,8 +41,14 @@ function resolveCategorias(cfg) {
   if (Array.isArray(cfg.categorias) && cfg.categorias.length > 0) {
     return cfg.categorias;
   }
+  if (Array.isArray(cfg.categoria) && cfg.categoria.length > 0) {
+    return cfg.categoria;
+  }
   if (typeof cfg.categoria === "string" && cfg.categoria.trim()) {
-    return [cfg.categoria.trim()];
+    return cfg.categoria
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean);
   }
   return [];
 }
