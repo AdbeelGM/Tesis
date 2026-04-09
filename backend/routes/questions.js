@@ -49,6 +49,27 @@ function buildUnionSubquery(categorias) {
     .join(" UNION ALL ");
 }
 
+function getAndValidateDificultades(req, res) {
+  const dificultadesRaw = req.query.dificultad ?? "1";
+  const dificultades = String(dificultadesRaw)
+    .split(",")
+    .map((d) => d.trim())
+    .filter(Boolean)
+    .map((d) => Number(d))
+    .filter((d) => Number.isInteger(d) && d > 0);
+
+  if (dificultades.length === 0) {
+    res.status(400).json({ error: "Dificultad inválida" });
+    return null;
+  }
+
+  return [...new Set(dificultades)];
+}
+
+function buildInClause(values) {
+  return values.map(() => "?").join(", ");
+}
+
 /**
  * GET /api/questions/multiple-choice?categoria=abecedario&dificultad=1&limit=5
  * Devuelve:
@@ -61,18 +82,20 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
     const categorias = getAndValidateCategorias(req, res);
     if (!categorias) return;
 
-    const dificultad = Number(req.query.dificultad || 1);
+    const dificultades = getAndValidateDificultades(req, res);
+    if (!dificultades) return;
     const limit = Number(req.query.limit || 5);
     const source = buildUnionSubquery(categorias);
+    const dificultadesIn = buildInClause(dificultades);
 
-    // 1) Traer N correctas aleatorias de las categorias/dificultad
+    // 1) Traer N correctas aleatorias de las categorias/dificultades
     const [correctRows] = await pool.query(
       `SELECT id, media_ruta, respuesta
        FROM (${source}) AS src
-       WHERE dificultad = ?
+       WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
        LIMIT ?`,
-      [dificultad, limit]
+      [...dificultades, limit]
     );
 
     // 2) Para cada correcta, traer 3 incorrectas aleatorias.
@@ -82,10 +105,10 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
       const [sameLevelWrongRows] = await pool.query(
         `SELECT respuesta
          FROM (${source}) AS src
-         WHERE dificultad = ? AND id <> ? AND respuesta <> ?
+         WHERE dificultad IN (${dificultadesIn}) AND id <> ? AND respuesta <> ?
          ORDER BY RAND()
          LIMIT 3`,
-        [dificultad, row.id, row.respuesta]
+        [...dificultades, row.id, row.respuesta]
       );
 
       let wrongOptions = sameLevelWrongRows.map(r => r.respuesta);
@@ -141,18 +164,20 @@ questionsRouter.get("/true-false", async (req, res) => {
     const categorias = getAndValidateCategorias(req, res);
     if (!categorias) return;
 
-    const dificultad = Number(req.query.dificultad || 1);
+    const dificultades = getAndValidateDificultades(req, res);
+    if (!dificultades) return;
     const limit = Number(req.query.limit || 5);
     const source = buildUnionSubquery(categorias);
+    const dificultadesIn = buildInClause(dificultades);
 
     // Tomamos "limit" señas base (cada una con su respuesta correcta)
     const [rows] = await pool.query(
       `SELECT id, media_ruta, respuesta
        FROM (${source}) AS src
-       WHERE dificultad = ?
+       WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
        LIMIT ?`,
-      [dificultad, limit]
+      [...dificultades, limit]
     );
 
     const questions = [];
@@ -172,10 +197,10 @@ questionsRouter.get("/true-false", async (req, res) => {
         const [wrongRows] = await pool.query(
           `SELECT respuesta
            FROM (${source}) AS src
-           WHERE dificultad = ? AND id <> ? AND respuesta <> ?
+           WHERE dificultad IN (${dificultadesIn}) AND id <> ? AND respuesta <> ?
            ORDER BY RAND()
            LIMIT 1`,
-          [dificultad, row.id, row.respuesta]
+          [...dificultades, row.id, row.respuesta]
         );
 
         const palabraIncorrecta = wrongRows?.[0]?.respuesta || "Otra palabra";
@@ -210,17 +235,19 @@ questionsRouter.get("/text-input", async (req, res) => {
     const categorias = getAndValidateCategorias(req, res);
     if (!categorias) return;
 
-    const dificultad = Number(req.query.dificultad || 1);
+    const dificultades = getAndValidateDificultades(req, res);
+    if (!dificultades) return;
     const limit = Number(req.query.limit || 5);
     const source = buildUnionSubquery(categorias);
+    const dificultadesIn = buildInClause(dificultades);
 
     const [rows] = await pool.query(
       `SELECT media_ruta, respuesta
        FROM (${source}) AS src
-       WHERE dificultad = ?
+       WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
        LIMIT ?`,
-      [dificultad, limit]
+      [...dificultades, limit]
     );
 
     const questions = rows.map(r => ({
