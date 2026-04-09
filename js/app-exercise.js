@@ -90,9 +90,28 @@ function resolveDificultades(cfg) {
 }
 
 (async function main() {
+  let level;
+  let cfg;
+  let btnSkip;
+  let btnCheck;
+  let feedback;
+  let actionsEl;
+  let optionsEl;
+  let promptText;
+  let promptSubtitle;
+  let imgEl;
+  let videoEl;
+  let progressFill;
+  let progressValue;
+  let livesEl;
+  let livesCountEl;
+  let state;
+  let levelStartedAt;
+  let timeReported = false;
+
   try {
-    const level = getLevelFromURL();
-    const cfg = await loadLevelConfig(level);
+    level = getLevelFromURL();
+    cfg = await loadLevelConfig(level);
 
   console.log("📌 Config cargada:", cfg);
   document.title = `Nivel ${cfg.level}`;
@@ -104,19 +123,19 @@ function resolveDificultades(cfg) {
     window.location.href = "index.html";
   };
 
-  const btnSkip = document.getElementById("btnSkip");
-  const btnCheck = document.getElementById("btnCheck");
-  const feedback = document.getElementById("feedback");
-  const actionsEl = document.getElementById("exerciseActions");
-  const optionsEl = document.getElementById("options");
-  const promptText = document.getElementById("promptText");
-  const promptSubtitle = document.getElementById("promptSubtitle");
-  const imgEl = document.getElementById("mediaImg");
-  const videoEl = document.getElementById("mediaVideo");
-  const progressFill = document.getElementById("progressFill");
-  const progressValue = document.getElementById("progressValue");
-  const livesEl = document.getElementById("lives");
-  const livesCountEl = document.getElementById("livesCount");
+  btnSkip = document.getElementById("btnSkip");
+  btnCheck = document.getElementById("btnCheck");
+  feedback = document.getElementById("feedback");
+  actionsEl = document.getElementById("exerciseActions");
+  optionsEl = document.getElementById("options");
+  promptText = document.getElementById("promptText");
+  promptSubtitle = document.getElementById("promptSubtitle");
+  imgEl = document.getElementById("mediaImg");
+  videoEl = document.getElementById("mediaVideo");
+  progressFill = document.getElementById("progressFill");
+  progressValue = document.getElementById("progressValue");
+  livesEl = document.getElementById("lives");
+  livesCountEl = document.getElementById("livesCount");
 
   const global = await loadState();
   if (Number(global.level) !== Number(level)) {
@@ -125,7 +144,7 @@ function resolveDificultades(cfg) {
     return;
   }
 
-  const state = {
+  state = {
     index: 0,
     lives: global.lives,
     maxLives: global.maxLives,
@@ -133,8 +152,7 @@ function resolveDificultades(cfg) {
     selected: null,
     queue: [],
   };
-  const levelStartedAt = Date.now();
-  let timeReported = false;
+  levelStartedAt = Date.now();
 
   updateLives();
 
