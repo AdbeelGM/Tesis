@@ -106,6 +106,7 @@ function resolveDificultades(cfg) {
   let progressValue;
   let livesEl;
   let livesCountEl;
+  const CHECK_LABEL = 'Comprobar<span class="material-symbols-outlined">arrow_forward</span>';
   let state;
   let levelStartedAt;
   let timeReported = false;
@@ -116,8 +117,6 @@ function resolveDificultades(cfg) {
 
   console.log("📌 Config cargada:", cfg);
   document.title = `Nivel ${cfg.level}`;
-
-  const CHECK_LABEL = 'Comprobar<span class="material-symbols-outlined">arrow_forward</span>';
 
   document.getElementById("btnExit").onclick = async () => {
     await reportTimeSpent();
