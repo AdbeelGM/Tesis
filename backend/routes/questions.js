@@ -8,13 +8,18 @@ questionsRouter.get("/", (req, res) => {
 });
 
 // Whitelist para evitar SQL injection por nombre de tabla
-const allowedTables = new Set([
+const allowedTableNames = new Set([
   "abecedario",
-  "palabras_comunes",
+  "palabrascomunes",
   "familia",
   "viajes",
   "comida"
 ]);
+
+const tableAliases = {
+  // compatibilidad hacia atrás
+  palabras_comunes: "palabrascomunes",
+};
 
 function getAndValidateCategorias(req, res) {
   const categoriasRaw = req.query.categoria;
@@ -33,8 +38,9 @@ function getAndValidateCategorias(req, res) {
     return null;
   }
 
-  const unicas = [...new Set(categorias)];
-  const invalida = unicas.find(c => !allowedTables.has(c));
+  const normalizadas = categorias.map((c) => tableAliases[c] || c);
+  const unicas = [...new Set(normalizadas)];
+  const invalida = unicas.find(c => !allowedTableNames.has(c));
   if (invalida) {
     res.status(400).json({ error: "Categoria no permitida" });
     return null;

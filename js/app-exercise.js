@@ -54,12 +54,13 @@ function resolveCategorias(cfg) {
 }
 
 const CATEGORIA_ALIASES = {
-  palabrascomunes: "palabras_comunes",
+  // compatibilidad hacia atrás
+  palabras_comunes: "palabrascomunes",
 };
 
 const ALLOWED_CATEGORIAS = new Set([
   "abecedario",
-  "palabras_comunes",
+  "palabrascomunes",
   "familia",
   "viajes",
   "comida",
