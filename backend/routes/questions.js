@@ -90,7 +90,7 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
 
     // 1) Traer N correctas aleatorias de las categorias/dificultades
     const [correctRows] = await pool.query(
-      `SELECT id, media_ruta, respuesta
+      `SELECT id, media_ruta, respuesta, dificultad
        FROM (${source}) AS src
        WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
@@ -105,10 +105,10 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
       const [sameLevelWrongRows] = await pool.query(
         `SELECT respuesta
          FROM (${source}) AS src
-         WHERE dificultad IN (${dificultadesIn}) AND id <> ? AND respuesta <> ?
+         WHERE dificultad = ? AND id <> ? AND respuesta <> ?
          ORDER BY RAND()
          LIMIT 3`,
-        [...dificultades, row.id, row.respuesta]
+        [row.dificultad, row.id, row.respuesta]
       );
 
       let wrongOptions = sameLevelWrongRows.map(r => r.respuesta);
@@ -122,10 +122,10 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
         const [fallbackWrongRows] = await pool.query(
           `SELECT respuesta
            FROM (${source}) AS src
-           WHERE id <> ? AND respuesta <> ? ${exclusionClause}
+           WHERE dificultad IN (${dificultadesIn}) AND id <> ? AND respuesta <> ? ${exclusionClause}
            ORDER BY RAND()
            LIMIT ?`,
-          [row.id, row.respuesta, ...wrongOptions, 3 - wrongOptions.length]
+          [...dificultades, row.id, row.respuesta, ...wrongOptions, 3 - wrongOptions.length]
         );
 
         wrongOptions = wrongOptions.concat(fallbackWrongRows.map(r => r.respuesta));
