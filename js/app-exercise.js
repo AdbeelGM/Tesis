@@ -53,9 +53,46 @@ function resolveCategorias(cfg) {
   return [];
 }
 
+const CATEGORIA_ALIASES = {
+  palabrascomunes: "palabras_comunes",
+};
+
+const ALLOWED_CATEGORIAS = new Set([
+  "abecedario",
+  "palabras_comunes",
+  "familia",
+  "viajes",
+  "comida",
+]);
+
+function normalizeCategorias(categorias) {
+  return categorias
+    .map((categoria) => String(categoria || "").trim())
+    .filter(Boolean)
+    .map((categoria) => CATEGORIA_ALIASES[categoria] || categoria);
+}
+
+function resolveDificultades(cfg) {
+  if (Array.isArray(cfg.dificultad)) {
+    return [...new Set(
+      cfg.dificultad
+        .map((d) => Number(d))
+        .filter((d) => Number.isInteger(d) && d > 0)
+    )];
+  }
+
+  const unica = Number(cfg.dificultad);
+  if (Number.isInteger(unica) && unica > 0) {
+    return [unica];
+  }
+
+  return [];
+}
+
 (async function main() {
-  const level = getLevelFromURL();
-  const cfg = await loadLevelConfig(level);
+  try {
+    const level = getLevelFromURL();
+    const cfg = await loadLevelConfig(level);
 
   console.log("📌 Config cargada:", cfg);
   document.title = `Nivel ${cfg.level}`;
@@ -101,79 +138,103 @@ function resolveCategorias(cfg) {
 
   updateLives();
 
-  const mix = cfg.mix || { multiple_choice: 1 };
-  const categorias = resolveCategorias(cfg);
-  if (categorias.length === 0) {
-    alert("Config inválida: define al menos una categoría.");
-    window.location.href = "index.html";
-    return;
-  }
-  const categoriasParam = categorias.join(",");
-  const [mc, vf, tx] = await Promise.all([
-    mix.multiple_choice
-      ? fetchJSON("/api/questions/multiple-choice", {
-          categoria: categoriasParam,
-          dificultad: cfg.dificultad,
-          limit: mix.multiple_choice,
-        })
-      : Promise.resolve([]),
-    mix.true_false
-      ? fetchJSON("/api/questions/true-false", {
-          categoria: categoriasParam,
-          dificultad: cfg.dificultad,
-          limit: mix.true_false,
-        })
-      : Promise.resolve([]),
-    mix.text_input
-      ? fetchJSON("/api/questions/text-input", {
-          categoria: categoriasParam,
-          dificultad: cfg.dificultad,
-          limit: mix.text_input,
-        })
-      : Promise.resolve([]),
-  ]);
-
-  state.queue = shuffle([
-    ...mc.map((q) => ({ tipo: "multiple_choice", ...q })),
-    ...vf.map((q) => ({ tipo: "true_false", ...q })),
-    ...tx.map((q) => ({ tipo: "text_input", ...q })),
-  ]);
-
-  if (state.queue.length === 0) {
-    alert("No hay preguntas para este nivel.");
-    window.location.href = "index.html";
-    return;
-  }
-
-  btnSkip.onclick = () => {
-    if (state.locked) return;
-    nextQuestion();
-  };
-
-  btnCheck.onclick = async () => {
-    if (state.locked) return;
-
-    const q = state.queue[state.index];
-    const ok = evaluateCurrent(q);
-
-    state.locked = true;
-    if (ok) {
-      showFeedback(true, buildFeedback(q, true));
-    } else {
-      const updated = await loseLifeGlobal(1);
-      state.lives = updated.lives;
-      updateLives();
-      showFeedback(false, buildFeedback(q, false));
-
-      if (state.lives <= 0) {
-        alert("❌ Sin vidas");
-        return endLevel(false);
-      }
+    const mix = cfg.mix || { multiple_choice: 1 };
+    const categorias = normalizeCategorias(resolveCategorias(cfg));
+    if (categorias.length === 0) {
+      alert("Config inválida: define al menos una categoría.");
+      window.location.href = "index.html";
+      return;
     }
 
-  };
+    const categoriasInvalidas = categorias.filter((c) => !ALLOWED_CATEGORIAS.has(c));
+    if (categoriasInvalidas.length > 0) {
+      alert(
+        `Config inválida: categoría no permitida (${categoriasInvalidas.join(", ")}).`
+      );
+      window.location.href = "index.html";
+      return;
+    }
 
-  renderCurrent();
+    const dificultades = resolveDificultades(cfg);
+    if (dificultades.length === 0) {
+      alert("Config inválida: dificultad debe ser un entero positivo o un arreglo de enteros positivos.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    const categoriasParam = categorias.join(",");
+    const dificultadParam = dificultades.join(",");
+    const [mc, vf, tx] = await Promise.all([
+      mix.multiple_choice
+        ? fetchJSON("/api/questions/multiple-choice", {
+            categoria: categoriasParam,
+            dificultad: dificultadParam,
+            limit: mix.multiple_choice,
+          })
+        : Promise.resolve([]),
+      mix.true_false
+        ? fetchJSON("/api/questions/true-false", {
+            categoria: categoriasParam,
+            dificultad: dificultadParam,
+            limit: mix.true_false,
+          })
+        : Promise.resolve([]),
+      mix.text_input
+        ? fetchJSON("/api/questions/text-input", {
+            categoria: categoriasParam,
+            dificultad: dificultadParam,
+            limit: mix.text_input,
+          })
+        : Promise.resolve([]),
+    ]);
+
+    state.queue = shuffle([
+      ...mc.map((q) => ({ tipo: "multiple_choice", ...q })),
+      ...vf.map((q) => ({ tipo: "true_false", ...q })),
+      ...tx.map((q) => ({ tipo: "text_input", ...q })),
+    ]);
+
+    if (state.queue.length === 0) {
+      alert("No hay preguntas para este nivel.");
+      window.location.href = "index.html";
+      return;
+    }
+
+    btnSkip.onclick = () => {
+      if (state.locked) return;
+      nextQuestion();
+    };
+
+    btnCheck.onclick = async () => {
+      if (state.locked) return;
+
+      const q = state.queue[state.index];
+      const ok = evaluateCurrent(q);
+
+      state.locked = true;
+      if (ok) {
+        showFeedback(true, buildFeedback(q, true));
+      } else {
+        const updated = await loseLifeGlobal(1);
+        state.lives = updated.lives;
+        updateLives();
+        showFeedback(false, buildFeedback(q, false));
+
+        if (state.lives <= 0) {
+          alert("❌ Sin vidas");
+          return endLevel(false);
+        }
+      }
+
+    };
+
+    renderCurrent();
+  } catch (err) {
+    console.error("Error al cargar el nivel:", err);
+    alert(`No se pudo cargar el nivel. Revisa la configuración. Detalle: ${err.message}`);
+    window.location.href = "index.html";
+    return;
+  }
 
   function renderCurrent() {
     state.selected = null;
