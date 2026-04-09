@@ -37,6 +37,16 @@ async function fetchJSON(path, params) {
   return await res.json();
 }
 
+function resolveCategorias(cfg) {
+  if (Array.isArray(cfg.categorias) && cfg.categorias.length > 0) {
+    return cfg.categorias;
+  }
+  if (typeof cfg.categoria === "string" && cfg.categoria.trim()) {
+    return [cfg.categoria.trim()];
+  }
+  return [];
+}
+
 (async function main() {
   const level = getLevelFromURL();
   const cfg = await loadLevelConfig(level);
@@ -86,24 +96,31 @@ async function fetchJSON(path, params) {
   updateLives();
 
   const mix = cfg.mix || { multiple_choice: 1 };
+  const categorias = resolveCategorias(cfg);
+  if (categorias.length === 0) {
+    alert("Config inválida: define al menos una categoría.");
+    window.location.href = "index.html";
+    return;
+  }
+  const categoriasParam = categorias.join(",");
   const [mc, vf, tx] = await Promise.all([
     mix.multiple_choice
       ? fetchJSON("/api/questions/multiple-choice", {
-          categoria: cfg.categoria,
+          categoria: categoriasParam,
           dificultad: cfg.dificultad,
           limit: mix.multiple_choice,
         })
       : Promise.resolve([]),
     mix.true_false
       ? fetchJSON("/api/questions/true-false", {
-          categoria: cfg.categoria,
+          categoria: categoriasParam,
           dificultad: cfg.dificultad,
           limit: mix.true_false,
         })
       : Promise.resolve([]),
     mix.text_input
       ? fetchJSON("/api/questions/text-input", {
-          categoria: cfg.categoria,
+          categoria: categoriasParam,
           dificultad: cfg.dificultad,
           limit: mix.text_input,
         })
