@@ -7,21 +7,34 @@ questionsRouter.get("/", (req, res) => {
   res.json({ ok: true, message: "questionsRouter funcionando" });
 });
 
-// Whitelist para evitar SQL injection por nombre de tabla
-const allowedTableNames = new Set([
-  "abecedario",
-  "palabrascomunes",
-  "familia",
-  "viajes",
-  "comida"
-]);
-
 const tableAliases = {
   // compatibilidad hacia atrás
   palabras_comunes: "palabrascomunes",
 };
 
-function getAndValidateCategorias(req, res) {
+function isSafeTableName(name) {
+  return /^[a-zA-Z0-9_]+$/.test(name);
+}
+
+async function getEligibleTables() {
+  const [rows] = await pool.query(
+    `SELECT c.table_name AS table_name
+     FROM information_schema.columns c
+     WHERE c.table_schema = DATABASE()
+     GROUP BY c.table_name
+     HAVING SUM(c.column_name = 'id') > 0
+        AND SUM(c.column_name = 'respuesta') > 0
+        AND SUM(c.column_name = 'dificultad') > 0
+        AND (
+          SUM(c.column_name = 'media_ruta') > 0
+          OR SUM(c.column_name = 'media_fuente') > 0
+        )`
+  );
+
+  return new Set(rows.map((row) => row.table_name));
+}
+
+async function getAndValidateCategorias(req, res) {
   const categoriasRaw = req.query.categoria;
   if (!categoriasRaw) {
     res.status(400).json({ error: "Falta categoria" });
@@ -38,20 +51,59 @@ function getAndValidateCategorias(req, res) {
     return null;
   }
 
-  const normalizadas = categorias.map((c) => tableAliases[c] || c);
+  const normalizadas = categorias.map((c) => tableAliases[c] || c).map((c) => c.trim());
+  const nombreInvalido = normalizadas.find((c) => !isSafeTableName(c));
+  if (nombreInvalido) {
+    res.status(400).json({ error: "Categoria inválida" });
+    return null;
+  }
+
   const unicas = [...new Set(normalizadas)];
+  const allowedTableNames = await getEligibleTables();
   const invalida = unicas.find(c => !allowedTableNames.has(c));
   if (invalida) {
-    res.status(400).json({ error: "Categoria no permitida" });
+    res.status(400).json({ error: `Categoria no disponible: ${invalida}` });
     return null;
   }
 
   return unicas;
 }
 
-function buildUnionSubquery(categorias) {
+async function buildUnionSubquery(categorias) {
+  const [columnRows] = await pool.query(
+    `SELECT table_name, column_name
+     FROM information_schema.columns
+     WHERE table_schema = DATABASE()
+       AND table_name IN (?)
+       AND column_name IN ('media_ruta', 'media_fuente', 'media_tipo')`,
+    [categorias]
+  );
+
+  const columnsByTable = new Map();
+  for (const row of columnRows) {
+    if (!columnsByTable.has(row.table_name)) {
+      columnsByTable.set(row.table_name, new Set());
+    }
+    columnsByTable.get(row.table_name).add(row.column_name);
+  }
+
   return categorias
-    .map((tabla) => `SELECT id, media_ruta, respuesta, dificultad FROM ${tabla}`)
+    .map((tabla) => {
+      const cols = columnsByTable.get(tabla) || new Set();
+      const mediaExpr = cols.has("media_fuente")
+        ? "media_fuente"
+        : "media_ruta";
+
+      const mediaTipoExpr = cols.has("media_tipo")
+        ? "media_tipo"
+        : `CASE
+             WHEN LOWER(${mediaExpr}) REGEXP '(^https?://)?(www\\.)?(youtube\\.com|youtu\\.be)/' THEN 'youtube'
+             WHEN LOWER(${mediaExpr}) REGEXP '\\\\.(mp4|webm|ogg)(\\\\?.*)?$' THEN 'video'
+             ELSE 'imagen'
+           END`;
+
+      return `SELECT id, ${mediaTipoExpr} AS media_tipo, ${mediaExpr} AS media_fuente, respuesta, dificultad FROM ${tabla}`;
+    })
     .join(" UNION ALL ");
 }
 
@@ -85,18 +137,18 @@ function buildInClause(values) {
  */
 questionsRouter.get("/multiple-choice", async (req, res) => {
   try {
-    const categorias = getAndValidateCategorias(req, res);
+    const categorias = await getAndValidateCategorias(req, res);
     if (!categorias) return;
 
     const dificultades = getAndValidateDificultades(req, res);
     if (!dificultades) return;
     const limit = Number(req.query.limit || 5);
-    const source = buildUnionSubquery(categorias);
+    const source = await buildUnionSubquery(categorias);
     const dificultadesIn = buildInClause(dificultades);
 
     // 1) Traer N correctas aleatorias de las categorias/dificultades
     const [correctRows] = await pool.query(
-      `SELECT id, media_ruta, respuesta, dificultad
+      `SELECT id, media_tipo, media_fuente, respuesta, dificultad
        FROM (${source}) AS src
        WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
@@ -139,7 +191,9 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
 
       const opciones = shuffle([row.respuesta, ...wrongOptions]).slice(0, 4);
       questions.push({
-        media_ruta: row.media_ruta,
+        media_tipo: row.media_tipo,
+        media_fuente: row.media_fuente,
+        media_ruta: row.media_fuente,
         correcta: row.respuesta,
         opciones
       });
@@ -167,18 +221,18 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
  */
 questionsRouter.get("/true-false", async (req, res) => {
   try {
-    const categorias = getAndValidateCategorias(req, res);
+    const categorias = await getAndValidateCategorias(req, res);
     if (!categorias) return;
 
     const dificultades = getAndValidateDificultades(req, res);
     if (!dificultades) return;
     const limit = Number(req.query.limit || 5);
-    const source = buildUnionSubquery(categorias);
+    const source = await buildUnionSubquery(categorias);
     const dificultadesIn = buildInClause(dificultades);
 
     // Tomamos "limit" señas base (cada una con su respuesta correcta)
     const [rows] = await pool.query(
-      `SELECT id, media_ruta, respuesta
+      `SELECT id, media_tipo, media_fuente, respuesta
        FROM (${source}) AS src
        WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
@@ -194,7 +248,9 @@ questionsRouter.get("/true-false", async (req, res) => {
       if (esVerdadero) {
         // Verdadero: usamos la respuesta correcta
         questions.push({
-          media_ruta: row.media_ruta,
+          media_tipo: row.media_tipo,
+          media_fuente: row.media_fuente,
+          media_ruta: row.media_fuente,
           pregunta: `¿Esta seña corresponde a la palabra "${row.respuesta}"?`,
           es_verdadero: 1
         });
@@ -212,7 +268,9 @@ questionsRouter.get("/true-false", async (req, res) => {
         const palabraIncorrecta = wrongRows?.[0]?.respuesta || "Otra palabra";
 
         questions.push({
-          media_ruta: row.media_ruta,
+          media_tipo: row.media_tipo,
+          media_fuente: row.media_fuente,
+          media_ruta: row.media_fuente,
           pregunta: `¿Esta seña corresponde a la palabra "${palabraIncorrecta}"?`,
           es_verdadero: 0
         });
@@ -238,17 +296,17 @@ questionsRouter.get("/true-false", async (req, res) => {
  */
 questionsRouter.get("/text-input", async (req, res) => {
   try {
-    const categorias = getAndValidateCategorias(req, res);
+    const categorias = await getAndValidateCategorias(req, res);
     if (!categorias) return;
 
     const dificultades = getAndValidateDificultades(req, res);
     if (!dificultades) return;
     const limit = Number(req.query.limit || 5);
-    const source = buildUnionSubquery(categorias);
+    const source = await buildUnionSubquery(categorias);
     const dificultadesIn = buildInClause(dificultades);
 
     const [rows] = await pool.query(
-      `SELECT media_ruta, respuesta
+      `SELECT media_tipo, media_fuente, respuesta
        FROM (${source}) AS src
        WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
@@ -257,7 +315,9 @@ questionsRouter.get("/text-input", async (req, res) => {
     );
 
     const questions = rows.map(r => ({
-      media_ruta: r.media_ruta,
+      media_tipo: r.media_tipo,
+      media_fuente: r.media_fuente,
+      media_ruta: r.media_fuente,
       pregunta: "Escribe la palabra que representa la seña:",
       correcta: r.respuesta
     }));

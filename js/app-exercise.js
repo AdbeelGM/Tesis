@@ -58,14 +58,6 @@ const CATEGORIA_ALIASES = {
   palabras_comunes: "palabrascomunes",
 };
 
-const ALLOWED_CATEGORIAS = new Set([
-  "abecedario",
-  "palabrascomunes",
-  "familia",
-  "viajes",
-  "comida",
-]);
-
 function normalizeCategorias(categorias) {
   return categorias
     .map((categoria) => String(categoria || "").trim())
@@ -102,6 +94,7 @@ function resolveDificultades(cfg) {
   let promptSubtitle;
   let imgEl;
   let videoEl;
+  let youtubeEl;
   let progressFill;
   let progressValue;
   let livesEl;
@@ -132,6 +125,7 @@ function resolveDificultades(cfg) {
   promptSubtitle = document.getElementById("promptSubtitle");
   imgEl = document.getElementById("mediaImg");
   videoEl = document.getElementById("mediaVideo");
+  youtubeEl = document.getElementById("mediaYoutube");
   progressFill = document.getElementById("progressFill");
   progressValue = document.getElementById("progressValue");
   livesEl = document.getElementById("lives");
@@ -160,15 +154,6 @@ function resolveDificultades(cfg) {
     const categorias = normalizeCategorias(resolveCategorias(cfg));
     if (categorias.length === 0) {
       alert("Config inválida: define al menos una categoría.");
-      window.location.href = "index.html";
-      return;
-    }
-
-    const categoriasInvalidas = categorias.filter((c) => !ALLOWED_CATEGORIAS.has(c));
-    if (categoriasInvalidas.length > 0) {
-      alert(
-        `Config inválida: categoría no permitida (${categoriasInvalidas.join(", ")}).`
-      );
       window.location.href = "index.html";
       return;
     }
@@ -266,18 +251,9 @@ function resolveDificultades(cfg) {
     updateProgress(Math.round((state.index / total) * 100));
 
     const q = state.queue[state.index];
-    const ruta = q.media_ruta || "";
-    const isVideo = /\.(mp4|webm|ogg)$/i.test(ruta);
-
-    if (isVideo) {
-      imgEl.style.display = "none";
-      videoEl.style.display = "block";
-      videoEl.src = ruta;
-    } else {
-      videoEl.style.display = "none";
-      imgEl.style.display = "block";
-      imgEl.src = ruta;
-    }
+    const mediaFuente = q.media_fuente || q.media_ruta || "";
+    const mediaTipo = inferMediaType(q.media_tipo, mediaFuente);
+    renderMedia(mediaTipo, mediaFuente);
 
     optionsEl.innerHTML = "";
     optionsEl.classList.remove("exercise__options--text");
@@ -457,5 +433,86 @@ function resolveDificultades(cfg) {
     `;
 
     document.getElementById("feedbackContinue")?.addEventListener("click", nextQuestion, { once: true });
+  }
+
+  function inferMediaType(rawType, source) {
+    const type = String(rawType || "").toLowerCase();
+    if (type === "youtube" || type === "video" || type === "imagen") {
+      return type;
+    }
+
+    if (isYouTubeUrl(source)) return "youtube";
+    if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(source)) return "video";
+    return "imagen";
+  }
+
+  function renderMedia(type, source) {
+    hideAllMedia();
+
+    if (type === "youtube") {
+      const embedUrl = toYouTubeEmbedURL(source);
+      if (!embedUrl) {
+        imgEl.style.display = "block";
+        imgEl.src = "";
+        imgEl.alt = "Video de YouTube no válido";
+        return;
+      }
+
+      youtubeEl.style.display = "block";
+      youtubeEl.src = embedUrl;
+      return;
+    }
+
+    if (type === "video") {
+      videoEl.style.display = "block";
+      videoEl.src = source;
+      return;
+    }
+
+    imgEl.style.display = "block";
+    imgEl.src = source;
+  }
+
+  function hideAllMedia() {
+    imgEl.style.display = "none";
+    videoEl.style.display = "none";
+    youtubeEl.style.display = "none";
+    videoEl.pause();
+    videoEl.removeAttribute("src");
+    videoEl.load();
+    youtubeEl.src = "";
+  }
+
+  function isYouTubeUrl(url) {
+    return /(^https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(String(url || ""));
+  }
+
+  function toYouTubeEmbedURL(url) {
+    try {
+      const candidate = String(url || "").trim();
+      if (!candidate) return "";
+      const normalized = /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`;
+      const parsed = new URL(normalized);
+      const host = parsed.hostname.toLowerCase();
+
+      if (host === "youtu.be") {
+        const id = parsed.pathname.split("/").filter(Boolean)[0];
+        return id ? `https://www.youtube.com/embed/${id}` : "";
+      }
+
+      if (host.endsWith("youtube.com")) {
+        if (parsed.pathname.startsWith("/embed/")) {
+          const id = parsed.pathname.split("/")[2];
+          return id ? `https://www.youtube.com/embed/${id}` : "";
+        }
+
+        const id = parsed.searchParams.get("v");
+        return id ? `https://www.youtube.com/embed/${id}` : "";
+      }
+
+      return "";
+    } catch {
+      return "";
+    }
   }
 })();
