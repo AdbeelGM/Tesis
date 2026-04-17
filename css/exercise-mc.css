@@ -218,11 +218,16 @@ button {
 }
 
 .exercise__media img,
-.exercise__media video {
+.exercise__media video,
+.exercise__media iframe {
   width: 100%;
   height: 100%;
-  object-fit: contain;
   display: block;
+}
+
+.exercise__media img,
+.exercise__media video {
+  object-fit: contain;
 }
 
 .exercise__copy {
