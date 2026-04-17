@@ -209,6 +209,7 @@ button {
 }
 
 .exercise__media {
+  --video-bottom-mask: 56px;
   width: min(100%, 640px);
   aspect-ratio: 16 / 9;
   border-radius: 20px;
@@ -221,13 +222,21 @@ button {
 .exercise__media video,
 .exercise__media iframe {
   width: 100%;
-  height: 100%;
   display: block;
 }
 
 .exercise__media img,
 .exercise__media video {
   object-fit: contain;
+}
+
+.exercise__media img {
+  height: 100%;
+}
+
+.exercise__media video,
+.exercise__media iframe {
+  height: calc(100% + var(--video-bottom-mask));
 }
 
 .exercise__copy {
