@@ -128,6 +128,28 @@ function buildInClause(values) {
   return values.map(() => "?").join(", ");
 }
 
+function normalizeRespuesta(value) {
+  return String(value || "")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function uniqueRespuestas(values) {
+  const seen = new Set();
+  const output = [];
+
+  for (const value of values) {
+    const normalized = normalizeRespuesta(value);
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    output.push(value);
+  }
+
+  return output;
+}
+
 /**
  * GET /api/questions/multiple-choice?categoria=abecedario&dificultad=1&limit=5
  * Devuelve:
@@ -169,7 +191,7 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
         [row.dificultad, row.id, row.respuesta]
       );
 
-      let wrongOptions = sameLevelWrongRows.map(r => r.respuesta);
+      let wrongOptions = uniqueRespuestas(sameLevelWrongRows.map(r => r.respuesta));
 
       if (wrongOptions.length < 3) {
         const placeholders = wrongOptions.map(() => "?").join(", ");
@@ -186,15 +208,18 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
           [...dificultades, row.id, row.respuesta, ...wrongOptions, 3 - wrongOptions.length]
         );
 
-        wrongOptions = wrongOptions.concat(fallbackWrongRows.map(r => r.respuesta));
+        wrongOptions = uniqueRespuestas(
+          wrongOptions.concat(fallbackWrongRows.map(r => r.respuesta))
+        );
       }
 
-      const opciones = shuffle([row.respuesta, ...wrongOptions]).slice(0, 4);
+      const correctAnswer = row.respuesta;
+      const opciones = shuffle(uniqueRespuestas([correctAnswer, ...wrongOptions])).slice(0, 4);
       questions.push({
         media_tipo: row.media_tipo,
         media_fuente: row.media_fuente,
         media_ruta: row.media_fuente,
-        correcta: row.respuesta,
+        correcta: correctAnswer,
         opciones
       });
     }
