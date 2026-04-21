@@ -95,6 +95,7 @@ function resolveDificultades(cfg) {
   let imgEl;
   let videoEl;
   let youtubeEl;
+  let btnRestartMedia;
   let progressFill;
   let progressValue;
   let livesEl;
@@ -103,6 +104,8 @@ function resolveDificultades(cfg) {
   let state;
   let levelStartedAt;
   let timeReported = false;
+  let currentMediaType = "imagen";
+  let currentMediaSource = "";
 
   try {
     level = getLevelFromURL();
@@ -126,10 +129,21 @@ function resolveDificultades(cfg) {
   imgEl = document.getElementById("mediaImg");
   videoEl = document.getElementById("mediaVideo");
   youtubeEl = document.getElementById("mediaYoutube");
+  btnRestartMedia = document.getElementById("btnRestartMedia");
   progressFill = document.getElementById("progressFill");
   progressValue = document.getElementById("progressValue");
   livesEl = document.getElementById("lives");
   livesCountEl = document.getElementById("livesCount");
+
+  videoEl.autoplay = true;
+  videoEl.loop = true;
+  videoEl.muted = true;
+  videoEl.playsInline = true;
+  videoEl.controls = false;
+  videoEl.setAttribute("controlsList", "nodownload noplaybackrate nofullscreen noremoteplayback");
+  videoEl.disablePictureInPicture = true;
+
+  btnRestartMedia?.addEventListener("click", restartMedia);
 
   const global = await loadState();
   if (Number(global.level) !== Number(level)) {
@@ -454,6 +468,8 @@ function resolveDificultades(cfg) {
   }
 
   function renderMedia(type, source) {
+    currentMediaType = type;
+    currentMediaSource = source;
     hideAllMedia();
 
     if (type === "youtube") {
@@ -466,28 +482,48 @@ function resolveDificultades(cfg) {
       }
 
       youtubeEl.style.display = "block";
-      youtubeEl.src = embedUrl;
+      youtubeEl.src = `${embedUrl}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&loop=1&playlist=${extractYouTubeId(source)}&playsinline=1`;
+      btnRestartMedia.style.display = "inline-flex";
       return;
     }
 
     if (type === "video") {
       videoEl.style.display = "block";
       videoEl.src = source;
+      videoEl.play().catch(() => {});
+      btnRestartMedia.style.display = "inline-flex";
       return;
     }
 
     imgEl.style.display = "block";
     imgEl.src = source;
+    btnRestartMedia.style.display = "none";
   }
 
   function hideAllMedia() {
     imgEl.style.display = "none";
     videoEl.style.display = "none";
     youtubeEl.style.display = "none";
+    btnRestartMedia.style.display = "none";
     videoEl.pause();
     videoEl.removeAttribute("src");
     videoEl.load();
     youtubeEl.src = "";
+  }
+
+  function restartMedia() {
+    if (currentMediaType === "video") {
+      videoEl.currentTime = 0;
+      videoEl.play().catch(() => {});
+      return;
+    }
+
+    if (currentMediaType === "youtube") {
+      const embedUrl = toYouTubeEmbedURL(currentMediaSource);
+      const id = extractYouTubeId(currentMediaSource);
+      if (!embedUrl || !id) return;
+      youtubeEl.src = `${embedUrl}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&loop=1&playlist=${id}&playsinline=1`;
+    }
   }
 
   function isYouTubeUrl(url) {
@@ -521,5 +557,11 @@ function resolveDificultades(cfg) {
     } catch {
       return "";
     }
+  }
+
+  function extractYouTubeId(url) {
+    const embedUrl = toYouTubeEmbedURL(url);
+    if (!embedUrl) return "";
+    return embedUrl.split("/").pop() || "";
   }
 })();
