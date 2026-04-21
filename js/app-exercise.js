@@ -335,8 +335,13 @@ function resolveDificultades(cfg) {
     if (q.tipo === "text_input") {
       const input = document.getElementById("answerInput");
       const userText = (input?.value || "").trim().toLowerCase();
-      const correct = (q.correcta || "").trim().toLowerCase();
-      return Boolean(userText) && userText === correct;
+      const correctas = Array.isArray(q.correctas) && q.correctas.length
+        ? q.correctas
+        : [q.correcta];
+      const normalizedCorrectas = correctas
+        .map((v) => String(v || "").trim().toLowerCase())
+        .filter(Boolean);
+      return Boolean(userText) && normalizedCorrectas.includes(userText);
     }
 
     return false;
@@ -402,7 +407,9 @@ function resolveDificultades(cfg) {
       };
     }
 
-    const answer = question.correcta ?? (question.es_verdadero ? "Verdadero" : "Falso");
+    const answer = Array.isArray(question.correctas) && question.correctas.length
+      ? question.correctas.join('" o "')
+      : (question.correcta ?? (question.es_verdadero ? "Verdadero" : "Falso"));
     return {
       title: "Respuesta incorrecta",
       message: `Solución: <strong>${answer}</strong>`,

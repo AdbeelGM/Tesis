@@ -102,7 +102,7 @@ async function buildUnionSubquery(categorias) {
              ELSE 'imagen'
            END`;
 
-      return `SELECT id, ${mediaTipoExpr} AS media_tipo, ${mediaExpr} AS media_fuente, respuesta, dificultad FROM ${tabla}`;
+      return `SELECT id, '${tabla}' AS categoria_origen, ${mediaTipoExpr} AS media_tipo, ${mediaExpr} AS media_fuente, respuesta, dificultad FROM ${tabla}`;
     })
     .join(" UNION ALL ");
 }
@@ -148,6 +148,40 @@ function uniqueRespuestas(values) {
   }
 
   return output;
+}
+
+const numeroTextoADigito = new Map([
+  ["cero", "0"],
+  ["uno", "1"],
+  ["una", "1"],
+  ["dos", "2"],
+  ["tres", "3"],
+  ["cuatro", "4"],
+  ["cinco", "5"],
+  ["seis", "6"],
+  ["siete", "7"],
+  ["ocho", "8"],
+  ["nueve", "9"],
+  ["diez", "10"]
+]);
+
+function getAcceptedAnswersForRow(respuesta, categoriaOrigen) {
+  const base = String(respuesta || "").trim();
+  if (!base) return [];
+  if (categoriaOrigen !== "numeros") return [base];
+
+  const normalizedBase = normalizeRespuesta(base);
+  const answers = [base];
+
+  if (/^\d+$/.test(base)) {
+    const texto = [...numeroTextoADigito.entries()].find(([, digito]) => digito === base)?.[0];
+    if (texto) answers.push(texto);
+  } else {
+    const asDigit = numeroTextoADigito.get(normalizedBase);
+    if (asDigit) answers.push(asDigit);
+  }
+
+  return uniqueRespuestas(answers);
 }
 
 /**
@@ -331,7 +365,7 @@ questionsRouter.get("/text-input", async (req, res) => {
     const dificultadesIn = buildInClause(dificultades);
 
     const [rows] = await pool.query(
-      `SELECT media_tipo, media_fuente, respuesta
+      `SELECT media_tipo, media_fuente, respuesta, categoria_origen
        FROM (${source}) AS src
        WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
@@ -339,13 +373,19 @@ questionsRouter.get("/text-input", async (req, res) => {
       [...dificultades, limit]
     );
 
-    const questions = rows.map(r => ({
-      media_tipo: r.media_tipo,
-      media_fuente: r.media_fuente,
-      media_ruta: r.media_fuente,
-      pregunta: "Escribe la palabra que representa la seña:",
-      correcta: r.respuesta
-    }));
+    const questions = rows.map((r) => {
+      const correctas = getAcceptedAnswersForRow(r.respuesta, r.categoria_origen);
+      const correcta = correctas[Math.floor(Math.random() * correctas.length)] || r.respuesta;
+
+      return {
+        media_tipo: r.media_tipo,
+        media_fuente: r.media_fuente,
+        media_ruta: r.media_fuente,
+        pregunta: "Escribe la palabra que representa la seña:",
+        correcta,
+        correctas
+      };
+    });
 
     res.json(questions);
   } catch (err) {
