@@ -48,14 +48,20 @@ export function runTextInput(cfg) {
       const q = state.questions[state.index];
       const input = document.getElementById("answerInput");
       const userText = (input?.value || "").trim().toLowerCase();
-      const correct = (q.correcta || "").trim().toLowerCase();
+      const correctas = Array.isArray(q.correctas) && q.correctas.length
+        ? q.correctas
+        : [q.correcta];
+      const normalizedCorrectas = correctas
+        .map((v) => String(v || "").trim().toLowerCase())
+        .filter(Boolean);
 
       state.locked = true;
 
-      const ok = userText && userText === correct;
+      const ok = Boolean(userText) && normalizedCorrectas.includes(userText);
+      const respuestaEsperada = correctas.join('" o "');
       feedback.style.display = "block";
       feedback.className = "exercise__feedback " + (ok ? "feedback--ok" : "feedback--bad");
-      feedback.textContent = ok ? "¡Correcto!" : `Incorrecto. Era: "${q.correcta}"`;
+      feedback.textContent = ok ? "¡Correcto!" : `Incorrecto. Era: "${respuestaEsperada}"`;
 
       btnCheck.textContent = "Siguiente";
       btnCheck.dataset.mode = "next";
