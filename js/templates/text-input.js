@@ -47,12 +47,12 @@ export function runTextInput(cfg) {
 
       const q = state.questions[state.index];
       const input = document.getElementById("answerInput");
-      const userText = (input?.value || "").trim().toLowerCase();
+      const userText = normalizeAnswer(input?.value || "");
       const correctas = Array.isArray(q.correctas) && q.correctas.length
         ? q.correctas
         : [q.correcta];
       const normalizedCorrectas = correctas
-        .map((v) => String(v || "").trim().toLowerCase())
+        .map((v) => normalizeAnswer(v))
         .filter(Boolean);
 
       state.locked = true;
@@ -117,6 +117,14 @@ export function runTextInput(cfg) {
       render();
     }
   });
+}
+
+function normalizeAnswer(value) {
+  return String(value || "")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 }
 
 async function fetchQuestionsText(cfg) {
