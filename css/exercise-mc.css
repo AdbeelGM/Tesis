@@ -209,6 +209,7 @@ button {
 }
 
 .exercise__media {
+  --video-top-mask: 44px;
   --video-bottom-mask: 56px;
   position: relative;
   width: min(100%, 640px);
@@ -237,7 +238,8 @@ button {
 
 .exercise__media video,
 .exercise__media iframe {
-  height: calc(100% + var(--video-bottom-mask));
+  height: calc(100% + var(--video-top-mask) + var(--video-bottom-mask));
+  transform: translateY(calc(-1 * var(--video-top-mask)));
 }
 
 .exercise__media video,
