@@ -75,7 +75,7 @@ async function buildUnionSubquery(categorias) {
      FROM information_schema.columns
      WHERE table_schema = DATABASE()
        AND table_name IN (?)
-       AND column_name IN ('media_ruta', 'media_fuente', 'media_tipo')`,
+       AND column_name IN ('media_ruta', 'media_fuente', 'media_tipo', 'respuesta_alt')`,
     [categorias]
   );
 
@@ -102,7 +102,9 @@ async function buildUnionSubquery(categorias) {
              ELSE 'imagen'
            END`;
 
-      return `SELECT id, '${tabla}' AS categoria_origen, ${mediaTipoExpr} AS media_tipo, ${mediaExpr} AS media_fuente, respuesta, dificultad FROM ${tabla}`;
+      const respuestaAltExpr = cols.has("respuesta_alt") ? "respuesta_alt" : "NULL";
+
+      return `SELECT id, '${tabla}' AS categoria_origen, ${mediaTipoExpr} AS media_tipo, ${mediaExpr} AS media_fuente, respuesta, ${respuestaAltExpr} AS respuesta_alt, dificultad FROM ${tabla}`;
     })
     .join(" UNION ALL ");
 }
@@ -150,38 +152,13 @@ function uniqueRespuestas(values) {
   return output;
 }
 
-const numeroTextoADigito = new Map([
-  ["cero", "0"],
-  ["uno", "1"],
-  ["una", "1"],
-  ["dos", "2"],
-  ["tres", "3"],
-  ["cuatro", "4"],
-  ["cinco", "5"],
-  ["seis", "6"],
-  ["siete", "7"],
-  ["ocho", "8"],
-  ["nueve", "9"],
-  ["diez", "10"]
-]);
-
-function getAcceptedAnswersForRow(respuesta, categoriaOrigen) {
+function getAcceptedAnswersForRow(respuesta, respuestaAlt, categoriaOrigen) {
   const base = String(respuesta || "").trim();
   if (!base) return [];
   if (categoriaOrigen !== "numeros") return [base];
 
-  const normalizedBase = normalizeRespuesta(base);
-  const answers = [base];
-
-  if (/^\d+$/.test(base)) {
-    const texto = [...numeroTextoADigito.entries()].find(([, digito]) => digito === base)?.[0];
-    if (texto) answers.push(texto);
-  } else {
-    const asDigit = numeroTextoADigito.get(normalizedBase);
-    if (asDigit) answers.push(asDigit);
-  }
-
-  return uniqueRespuestas(answers);
+  const alt = String(respuestaAlt || "").trim();
+  return uniqueRespuestas([base, alt].filter(Boolean));
 }
 
 /**
@@ -365,7 +342,7 @@ questionsRouter.get("/text-input", async (req, res) => {
     const dificultadesIn = buildInClause(dificultades);
 
     const [rows] = await pool.query(
-      `SELECT media_tipo, media_fuente, respuesta, categoria_origen
+      `SELECT media_tipo, media_fuente, respuesta, respuesta_alt, categoria_origen
        FROM (${source}) AS src
        WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
@@ -374,7 +351,7 @@ questionsRouter.get("/text-input", async (req, res) => {
     );
 
     const questions = rows.map((r) => {
-      const correctas = getAcceptedAnswersForRow(r.respuesta, r.categoria_origen);
+      const correctas = getAcceptedAnswersForRow(r.respuesta, r.respuesta_alt, r.categoria_origen);
       const correcta = correctas[Math.floor(Math.random() * correctas.length)] || r.respuesta;
 
       return {
