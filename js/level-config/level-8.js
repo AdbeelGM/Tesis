@@ -1,10 +1,10 @@
 export const LEVEL_CONFIG = {
-  level: 1,
-  categoria: "abecedario",
+  level: 8,
+  categoria: "colores",
   dificultad: 1,
   mix: {
     multiple_choice: 2,
-    true_false: 0,
+    true_false: 2,
     text_input: 0,
   },
 };

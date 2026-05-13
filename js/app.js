@@ -30,44 +30,57 @@ function getExperienceProgress(totalXp) {
   };
 }
 
-function renderLearnView() {
+const LEARN_UNITS = [
+  {
+    title: 'Sección 1: Abecedario',
+    subtitle: 'Reconoce letras, compara señas y escribe respuestas cortas.',
+    levels: [1, 2, 3, 4, 5],
+    offsets: [90, -80, 0, 100, -60],
+  },
+  {
+    title: 'Sección 2: Colores',
+    subtitle: 'Avanza desde identificación básica hasta escritura de colores.',
+    levels: [6, 7, 8, 9, 10],
+    offsets: [-70, 85, -15, 95, -55],
+  },
+  {
+    title: 'Sección 3: Continentes y países',
+    subtitle: 'Practica lugares con retos más largos y respuestas abiertas.',
+    levels: [11, 12, 13, 14, 15],
+    offsets: [80, -90, 10, 100, -65],
+  },
+];
+
+function renderLevelPath(levels, offsets) {
   return `
+    <section class="route__path">
+      <svg class="route__snake" viewBox="0 0 100 600" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M50,0 C80,100 20,200 50,300 C80,400 20,500 50,600"></path>
+      </svg>
+
+      ${levels.map((level, index) => `
+        <div class="level-item" style="--offset-x: ${offsets[index] || 0}px">
+          <button class="level-node" data-level="${level}" type="button"></button>
+        </div>
+      `).join('')}
+    </section>
+  `;
+}
+
+function renderLearnView() {
+  return LEARN_UNITS.map((unit) => `
     <section class="route__unit-card">
       <div>
-        <h1 class="route__title">Unit 1: Basics</h1>
-        <p class="route__subtitle">Greetings, Alphabet, and Numbers</p>
+        <h1 class="route__title">${unit.title}</h1>
+        <p class="route__subtitle">${unit.subtitle}</p>
       </div>
       <button class="route__guide btn-hover-elevate btn-active-press" type="button">Guide</button>
       <div class="route__orb route__orb--big"></div>
       <div class="route__orb route__orb--small"></div>
     </section>
 
-    <section class="route__path">
-      <svg class="route__snake" viewBox="0 0 100 600" preserveAspectRatio="none">
-        <path d="M50,0 C80,100 20,200 50,300 C80,400 20,500 50,600"></path>
-      </svg>
-
-      <div class="level-item" style="--offset-x: 90px">
-        <button class="level-node" data-level="1" type="button"></button>
-      </div>
-      <div class="level-item" style="--offset-x: -80px">
-        <button class="level-node" data-level="2" type="button"></button>
-      </div>
-      <div class="level-item" style="--offset-x: 0px">
-        <div class="start-badge">Start</div>
-        <button class="level-node" data-level="3" type="button"></button>
-      </div>
-      <div class="level-item" style="--offset-x: 100px">
-        <button class="level-node" data-level="4" type="button"></button>
-      </div>
-      <div class="level-item" style="--offset-x: -60px">
-        <button class="level-node" data-level="5" type="button"></button>
-      </div>
-      <div class="level-item" style="--offset-x: 0px">
-        <button class="level-node" data-level="6" type="button"></button>
-      </div>
-    </section>
-  `;
+    ${renderLevelPath(unit.levels, unit.offsets)}
+  `).join('');
 }
 
 function renderStoreView() {

@@ -6,7 +6,7 @@ export const userRouter = Router();
 const MAX_LIVES = 5;
 const LIFE_INTERVAL_MINUTES = 5;
 const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
-const TOTAL_LEVELS = 6;
+const TOTAL_LEVELS = 15;
 const STORE_PRODUCTS = {
   single_heart: { gems: 100, lives: 1, type: "lives" },
   heart_bundle: { gems: 450, lives: 5, type: "lives" },
