@@ -209,8 +209,8 @@ button {
 }
 
 .exercise__media {
-  --video-top-mask: 44px;
-  --video-bottom-mask: 56px;
+  --video-top-mask: 60px;
+  --video-bottom-mask: 120px;
   position: relative;
   width: min(100%, 640px);
   aspect-ratio: 16 / 9;
