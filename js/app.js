@@ -32,34 +32,37 @@ function getExperienceProgress(totalXp) {
 
 const LEARN_UNITS = [
   {
-    title: 'Sección 1: Abecedario',
+    eyebrow: 'Sección 1',
+    title: 'Abecedario',
     subtitle: 'Reconoce letras, compara señas y escribe respuestas cortas.',
     levels: [1, 2, 3, 4, 5],
     offsets: [90, -80, 0, 100, -60],
   },
   {
-    title: 'Sección 2: Colores',
+    eyebrow: 'Sección 2',
+    title: 'Colores',
     subtitle: 'Avanza desde identificación básica hasta escritura de colores.',
     levels: [6, 7, 8, 9, 10],
     offsets: [-70, 85, -15, 95, -55],
   },
   {
-    title: 'Sección 3: Continentes y países',
+    eyebrow: 'Sección 3',
+    title: 'Continentes y países',
     subtitle: 'Practica lugares con retos más largos y respuestas abiertas.',
     levels: [11, 12, 13, 14, 15],
     offsets: [80, -90, 10, 100, -65],
   },
 ];
 
-function renderLevelPath(levels, offsets) {
+function renderLevelPath(unit, unitIndex) {
   return `
-    <section class="route__path">
+    <section class="route__path" data-unit-index="${unitIndex}">
       <svg class="route__snake" viewBox="0 0 100 600" preserveAspectRatio="none" aria-hidden="true">
         <path d="M50,0 C80,100 20,200 50,300 C80,400 20,500 50,600"></path>
       </svg>
 
-      ${levels.map((level, index) => `
-        <div class="level-item" style="--offset-x: ${offsets[index] || 0}px">
+      ${unit.levels.map((level, index) => `
+        <div class="level-item" style="--offset-x: ${unit.offsets[index] || 0}px">
           <button class="level-node" data-level="${level}" type="button"></button>
         </div>
       `).join('')}
@@ -67,20 +70,82 @@ function renderLevelPath(levels, offsets) {
   `;
 }
 
-function renderLearnView() {
-  return LEARN_UNITS.map((unit) => `
-    <section class="route__unit-card">
-      <div>
-        <h1 class="route__title">${unit.title}</h1>
-        <p class="route__subtitle">${unit.subtitle}</p>
+function renderLearnUnitHeader(unit = LEARN_UNITS[0]) {
+  return `
+    <section class="route__unit-card route__unit-card--sticky" data-dynamic-unit-card aria-live="polite">
+      <div class="route__unit-copy">
+        <span class="route__eyebrow" data-dynamic-unit-eyebrow>${unit.eyebrow}</span>
+        <h1 class="route__title" data-dynamic-unit-title>${unit.title}</h1>
+        <p class="route__subtitle" data-dynamic-unit-subtitle>${unit.subtitle}</p>
       </div>
       <button class="route__guide btn-hover-elevate btn-active-press" type="button">Guide</button>
       <div class="route__orb route__orb--big"></div>
       <div class="route__orb route__orb--small"></div>
     </section>
+  `;
+}
 
-    ${renderLevelPath(unit.levels, unit.offsets)}
-  `).join('');
+function renderLearnView() {
+  return `
+    <div class="route__learn">
+      ${renderLearnUnitHeader()}
+      <div class="route__sections">
+        ${LEARN_UNITS.map((unit, index) => renderLevelPath(unit, index)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+
+function setDynamicUnitHeader(root, unitIndex) {
+  const unit = LEARN_UNITS[unitIndex] || LEARN_UNITS[0];
+  const card = root.querySelector('[data-dynamic-unit-card]');
+  const eyebrow = root.querySelector('[data-dynamic-unit-eyebrow]');
+  const title = root.querySelector('[data-dynamic-unit-title]');
+  const subtitle = root.querySelector('[data-dynamic-unit-subtitle]');
+
+  if (!card || !unit || card.dataset.activeUnitIndex === String(unitIndex)) return;
+
+  card.dataset.activeUnitIndex = String(unitIndex);
+  card.classList.add('route__unit-card--changing');
+
+  if (eyebrow) eyebrow.textContent = unit.eyebrow;
+  if (title) title.textContent = unit.title;
+  if (subtitle) subtitle.textContent = unit.subtitle;
+
+  window.setTimeout(() => card.classList.remove('route__unit-card--changing'), 180);
+}
+
+function initializeDynamicUnitHeader(root) {
+  const sections = [...root.querySelectorAll('.route__path[data-unit-index]')];
+  if (sections.length === 0) return null;
+
+  let frame = null;
+  const updateActiveUnit = () => {
+    frame = null;
+    const rootRect = root.getBoundingClientRect();
+    const switchLine = rootRect.top + Math.min(220, rootRect.height * 0.35);
+    const activeSection = sections.reduce((active, section) => {
+      const sectionTop = section.getBoundingClientRect().top;
+      return sectionTop <= switchLine ? section : active;
+    }, sections[0]);
+    setDynamicUnitHeader(root, Number(activeSection.dataset.unitIndex) || 0);
+  };
+
+  const requestUpdate = () => {
+    if (frame !== null) return;
+    frame = window.requestAnimationFrame(updateActiveUnit);
+  };
+
+  root.addEventListener('scroll', requestUpdate, { passive: true });
+  window.addEventListener('resize', requestUpdate);
+  updateActiveUnit();
+
+  return () => {
+    root.removeEventListener('scroll', requestUpdate);
+    window.removeEventListener('resize', requestUpdate);
+    if (frame !== null) window.cancelAnimationFrame(frame);
+  };
 }
 
 function renderStoreView() {
@@ -255,8 +320,16 @@ function mountView(viewName, mountNode) {
     perfil: renderProfileView,
   };
 
+  mountNode.dynamicUnitHeaderCleanup?.();
+  mountNode.dynamicUnitHeaderCleanup = null;
+
   const renderer = views[viewName] || views.aprender;
   mountNode.innerHTML = renderer();
+
+  if (viewName === 'aprender') {
+    mountNode.dynamicUnitHeaderCleanup = initializeDynamicUnitHeader(mountNode);
+  }
+
   document.dispatchEvent(new CustomEvent(`view:${viewName}:mounted`));
 }
 
