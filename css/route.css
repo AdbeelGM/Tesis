@@ -63,8 +63,8 @@
 
 .route__path {
   width: min(340px, 100%);
-  min-height: 900px;
-  margin: 0 auto;
+  min-height: 720px;
+  margin: 0 auto 44px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -207,4 +207,8 @@
 @keyframes float {
   from { transform: translateX(-50%) translateY(0); }
   to { transform: translateX(-50%) translateY(-8px); }
+}
+
+.route__path:last-child {
+  margin-bottom: 0;
 }

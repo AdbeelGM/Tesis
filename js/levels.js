@@ -29,9 +29,7 @@ function applyLevelNodeState(node, currentLevel) {
   }
 
   if (isLocked) {
-    node.innerHTML = level === 4
-      ? '<span class="material-symbols-outlined">redeem</span>'
-      : '<span class="material-symbols-outlined">lock</span>';
+    node.innerHTML = '<span class="material-symbols-outlined">lock</span>';
     node.setAttribute('aria-label', `Nivel ${level} bloqueado`);
     return;
   }

@@ -10,10 +10,19 @@ questionsRouter.get("/", (req, res) => {
 const tableAliases = {
   // compatibilidad hacia atrás
   palabras_comunes: "palabrascomunes",
+  continentespaises: "continentespaíses",
+  personajeshistoricos: "personajeshistóricos",
+  proteccioncivil: "proteccióncivil",
+  tecnologia: "tecnología",
+  ambitojuridico: "ámbitojurídico",
 };
 
 function isSafeTableName(name) {
-  return /^[a-zA-Z0-9_]+$/.test(name);
+  return /^[\p{L}\p{N}_]+$/u.test(name);
+}
+
+function quoteIdentifier(identifier) {
+  return `\`${String(identifier).replaceAll("`", "``")}\``;
 }
 
 async function getEligibleTables() {
@@ -104,7 +113,7 @@ async function buildUnionSubquery(categorias) {
 
       const respuestaAltExpr = cols.has("respuesta_alt") ? "respuesta_alt" : "NULL";
 
-      return `SELECT id, '${tabla}' AS categoria_origen, ${mediaTipoExpr} AS media_tipo, ${mediaExpr} AS media_fuente, respuesta, ${respuestaAltExpr} AS respuesta_alt, dificultad FROM ${tabla}`;
+      return `SELECT id, '${tabla}' AS categoria_origen, ${mediaTipoExpr} AS media_tipo, ${mediaExpr} AS media_fuente, respuesta, ${respuestaAltExpr} AS respuesta_alt, dificultad FROM ${quoteIdentifier(tabla)}`;
     })
     .join(" UNION ALL ");
 }
