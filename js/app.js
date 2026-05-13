@@ -118,17 +118,25 @@ function setDynamicUnitHeader(root, unitIndex) {
 
 function initializeDynamicUnitHeader(root) {
   const sections = [...root.querySelectorAll('.route__path[data-unit-index]')];
-  if (sections.length === 0) return null;
+  const card = root.querySelector('[data-dynamic-unit-card]');
+  if (sections.length === 0 || !card) return null;
 
   let frame = null;
+  const getSwitchLine = () => {
+    const rootRect = root.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const stickyOffset = Math.max(16, cardRect.top - rootRect.top);
+    return rootRect.top + stickyOffset + cardRect.height + 24;
+  };
+
   const updateActiveUnit = () => {
     frame = null;
-    const rootRect = root.getBoundingClientRect();
-    const switchLine = rootRect.top + Math.min(220, rootRect.height * 0.35);
+    const switchLine = getSwitchLine();
     const activeSection = sections.reduce((active, section) => {
       const sectionTop = section.getBoundingClientRect().top;
       return sectionTop <= switchLine ? section : active;
     }, sections[0]);
+
     setDynamicUnitHeader(root, Number(activeSection.dataset.unitIndex) || 0);
   };
 
@@ -138,11 +146,13 @@ function initializeDynamicUnitHeader(root) {
   };
 
   root.addEventListener('scroll', requestUpdate, { passive: true });
+  window.addEventListener('scroll', requestUpdate, { passive: true });
   window.addEventListener('resize', requestUpdate);
   updateActiveUnit();
 
   return () => {
     root.removeEventListener('scroll', requestUpdate);
+    window.removeEventListener('scroll', requestUpdate);
     window.removeEventListener('resize', requestUpdate);
     if (frame !== null) window.cancelAnimationFrame(frame);
   };
