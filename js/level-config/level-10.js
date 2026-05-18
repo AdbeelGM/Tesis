@@ -1,13 +1,32 @@
 export const LEVEL_CONFIG = {
   level: 10,
-  categoria: "colores",
+  categoria: "protección civil",
   dificultad: 1,
   totalEjercicios: 15,
-  enfoque: "Dominio autónomo de colores.",
-  objetivo: "Cerrar el bloque de colores con énfasis en escritura y repaso selectivo.",
-  mix: {
-    multiple_choice: 5,
-    true_false: 3,
-    text_input: 7,
-  },
+  enfoque: "Responder ante emergencias",
+  objetivo: "Usar protección civil después de salud para aprender vocabulario de riesgo, prevención y ayuda.",
+  plan: [
+    {
+      etapa: "Riesgos comunes",
+      categoria: "proteccioncivil",
+      dificultad: 1,
+      proposito: "Identifica vocabulario urgente de baja dificultad.",
+      mix: {
+        multiple_choice: 5,
+        true_false: 2,
+        text_input: 1,
+      },
+    },
+    {
+      etapa: "Acciones de respuesta",
+      categoria: "proteccioncivil",
+      dificultad: 2,
+      proposito: "Sube dificultad con términos de respuesta organizada.",
+      mix: {
+        multiple_choice: 4,
+        true_false: 2,
+        text_input: 1,
+      },
+    },
+  ],
 };

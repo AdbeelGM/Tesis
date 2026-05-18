@@ -1,13 +1,32 @@
 export const LEVEL_CONFIG = {
   level: 5,
-  categoria: "abecedario",
+  categoria: "colores y vestimenta",
   dificultad: 1,
   totalEjercicios: 15,
-  enfoque: "Dominio autónomo del abecedario.",
-  objetivo: "Evaluar dominio del abecedario priorizando respuestas escritas sin descuidar repaso.",
-  mix: {
-    multiple_choice: 5,
-    true_false: 3,
-    text_input: 7,
-  },
+  enfoque: "Describir objetos y ropa",
+  objetivo: "Combinar colores con vestimenta tiene propósito descriptivo: decir qué prenda es y cómo se ve.",
+  plan: [
+    {
+      etapa: "Colores como atributos",
+      categoria: "colores",
+      dificultad: 1,
+      proposito: "Reconoce colores para usarlos como descriptores.",
+      mix: {
+        multiple_choice: 5,
+        true_false: 2,
+        text_input: 1,
+      },
+    },
+    {
+      etapa: "Prendas cotidianas",
+      categoria: "vestimenta",
+      dificultad: 1,
+      proposito: "Nombra prendas para formar descripciones simples.",
+      mix: {
+        multiple_choice: 5,
+        true_false: 1,
+        text_input: 1,
+      },
+    },
+  ],
 };
