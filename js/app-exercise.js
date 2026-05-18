@@ -15,6 +15,16 @@ async function loadLevelConfig(level) {
   return mod.LEVEL_CONFIG;
 }
 
+
+function annotateQuestions(questions, tipo, segment = {}) {
+  return questions.map((q) => ({
+    tipo,
+    etapa: segment.etapa || segment.enfoque || "",
+    proposito: segment.proposito || segment.objetivo || "",
+    ...q,
+  }));
+}
+
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -54,8 +64,13 @@ function resolveCategorias(cfg) {
 }
 
 const CATEGORIA_ALIASES = {
-  // compatibilidad hacia atrás
+  // compatibilidad hacia atrás y nombres sin acentos en configs
   palabras_comunes: "palabrascomunes",
+  continentespaises: "continentespaises",
+  personajeshistoricos: "personajeshistoricos",
+  proteccioncivil: "proteccioncivil",
+  tecnologia: "tecnologia",
+  ambitojuridico: "ambitojuridico",
 };
 
 function normalizeCategorias(categorias) {
@@ -164,52 +179,7 @@ function resolveDificultades(cfg) {
 
   updateLives();
 
-    const mix = cfg.mix || { multiple_choice: 1 };
-    const categorias = normalizeCategorias(resolveCategorias(cfg));
-    if (categorias.length === 0) {
-      alert("Config inválida: define al menos una categoría.");
-      window.location.href = "index.html";
-      return;
-    }
-
-    const dificultades = resolveDificultades(cfg);
-    if (dificultades.length === 0) {
-      alert("Config inválida: dificultad debe ser un entero positivo o un arreglo de enteros positivos.");
-      window.location.href = "index.html";
-      return;
-    }
-
-    const categoriasParam = categorias.join(",");
-    const dificultadParam = dificultades.join(",");
-    const [mc, vf, tx] = await Promise.all([
-      mix.multiple_choice
-        ? fetchJSON("/api/questions/multiple-choice", {
-            categoria: categoriasParam,
-            dificultad: dificultadParam,
-            limit: mix.multiple_choice,
-          })
-        : Promise.resolve([]),
-      mix.true_false
-        ? fetchJSON("/api/questions/true-false", {
-            categoria: categoriasParam,
-            dificultad: dificultadParam,
-            limit: mix.true_false,
-          })
-        : Promise.resolve([]),
-      mix.text_input
-        ? fetchJSON("/api/questions/text-input", {
-            categoria: categoriasParam,
-            dificultad: dificultadParam,
-            limit: mix.text_input,
-          })
-        : Promise.resolve([]),
-    ]);
-
-    state.queue = shuffle([
-      ...mc.map((q) => ({ tipo: "multiple_choice", ...q })),
-      ...vf.map((q) => ({ tipo: "true_false", ...q })),
-      ...tx.map((q) => ({ tipo: "text_input", ...q })),
-    ]);
+    state.queue = await buildPedagogicalQueue(cfg);
 
     if (state.queue.length === 0) {
       alert("No hay preguntas para este nivel.");
@@ -253,6 +223,73 @@ function resolveDificultades(cfg) {
     return;
   }
 
+
+  async function fetchSegmentQuestions(segment) {
+    const mix = segment.mix || { multiple_choice: 1 };
+    const categorias = normalizeCategorias(resolveCategorias(segment));
+    if (categorias.length === 0) {
+      throw new Error("Config inválida: cada segmento debe definir al menos una categoría.");
+    }
+
+    const dificultades = resolveDificultades(segment);
+    if (dificultades.length === 0) {
+      throw new Error("Config inválida: dificultad debe ser un entero positivo o un arreglo de enteros positivos.");
+    }
+
+    const categoriasParam = categorias.join(",");
+    const dificultadParam = dificultades.join(",");
+    const [mc, vf, tx] = await Promise.all([
+      mix.multiple_choice
+        ? fetchJSON("/api/questions/multiple-choice", {
+            categoria: categoriasParam,
+            dificultad: dificultadParam,
+            limit: mix.multiple_choice,
+          })
+        : Promise.resolve([]),
+      mix.true_false
+        ? fetchJSON("/api/questions/true-false", {
+            categoria: categoriasParam,
+            dificultad: dificultadParam,
+            limit: mix.true_false,
+          })
+        : Promise.resolve([]),
+      mix.text_input
+        ? fetchJSON("/api/questions/text-input", {
+            categoria: categoriasParam,
+            dificultad: dificultadParam,
+            limit: mix.text_input,
+          })
+        : Promise.resolve([]),
+    ]);
+
+    return [
+      ...annotateQuestions(mc, "multiple_choice", segment),
+      ...annotateQuestions(vf, "true_false", segment),
+      ...annotateQuestions(tx, "text_input", segment),
+    ];
+  }
+
+  async function buildPedagogicalQueue(config) {
+    const plan = Array.isArray(config.plan) && config.plan.length > 0
+      ? config.plan
+      : [{
+          categoria: config.categoria,
+          categorias: config.categorias,
+          dificultad: config.dificultad,
+          mix: config.mix || { multiple_choice: 1 },
+          etapa: config.enfoque,
+          proposito: config.objetivo,
+        }];
+
+    const queue = [];
+    for (const segment of plan) {
+      const segmentQuestions = await fetchSegmentQuestions(segment);
+      queue.push(...shuffle(segmentQuestions));
+    }
+
+    return queue;
+  }
+
   function renderCurrent() {
     state.selected = null;
     state.locked = false;
@@ -274,8 +311,8 @@ function resolveDificultades(cfg) {
     delete optionsEl.dataset.count;
 
     if (q.tipo === "multiple_choice") {
-      promptText.textContent = q.pregunta || "What does this sign mean?";
-      promptSubtitle.textContent = "Select the correct translation";
+      promptText.textContent = q.pregunta || "¿Qué significa esta seña?";
+      promptSubtitle.textContent = q.proposito || "Selecciona la traducción correcta";
 
       const opciones = (q.opciones || []).slice(0, 4);
       optionsEl.dataset.count = String(opciones.length);
@@ -293,7 +330,7 @@ function resolveDificultades(cfg) {
 
     if (q.tipo === "true_false") {
       promptText.textContent = q.pregunta || "¿Esta seña significa 'Hola'?";
-      promptSubtitle.textContent = "Selecciona la opción correcta";
+      promptSubtitle.textContent = q.proposito || "Selecciona la opción correcta";
 
       [
         { label: "Verdadero", icon: "check_circle", modifier: "option--true-false-true" },
@@ -316,7 +353,7 @@ function resolveDificultades(cfg) {
 
     if (q.tipo === "text_input") {
       promptText.textContent = q.pregunta || "Escribe la palabra que representa la seña:";
-      promptSubtitle.textContent = "Escribe tu respuesta en español";
+      promptSubtitle.textContent = q.proposito || "Escribe tu respuesta en español";
       optionsEl.classList.add("exercise__options--text");
       optionsEl.innerHTML = '<input id="answerInput" class="text-input" type="text" placeholder="Escribe tu respuesta aquí..." autocomplete="off" />';
       document.getElementById("answerInput")?.focus();

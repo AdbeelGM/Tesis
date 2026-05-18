@@ -190,7 +190,7 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
 
     // 1) Traer N correctas aleatorias de las categorias/dificultades
     const [correctRows] = await pool.query(
-      `SELECT id, media_tipo, media_fuente, respuesta, dificultad
+      `SELECT id, categoria_origen, media_tipo, media_fuente, respuesta, dificultad
        FROM (${source}) AS src
        WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
@@ -205,10 +205,10 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
       const [sameLevelWrongRows] = await pool.query(
         `SELECT respuesta
          FROM (${source}) AS src
-         WHERE dificultad = ? AND id <> ? AND respuesta <> ?
+         WHERE categoria_origen = ? AND dificultad = ? AND NOT (categoria_origen = ? AND id = ?) AND respuesta <> ?
          ORDER BY RAND()
          LIMIT 3`,
-        [row.dificultad, row.id, row.respuesta]
+        [row.categoria_origen, row.dificultad, row.categoria_origen, row.id, row.respuesta]
       );
 
       let wrongOptions = uniqueRespuestas(sameLevelWrongRows.map(r => r.respuesta));
@@ -222,14 +222,34 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
         const [fallbackWrongRows] = await pool.query(
           `SELECT respuesta
            FROM (${source}) AS src
-           WHERE dificultad IN (${dificultadesIn}) AND id <> ? AND respuesta <> ? ${exclusionClause}
+           WHERE categoria_origen = ? AND dificultad IN (${dificultadesIn}) AND NOT (categoria_origen = ? AND id = ?) AND respuesta <> ? ${exclusionClause}
            ORDER BY RAND()
            LIMIT ?`,
-          [...dificultades, row.id, row.respuesta, ...wrongOptions, 3 - wrongOptions.length]
+          [row.categoria_origen, ...dificultades, row.categoria_origen, row.id, row.respuesta, ...wrongOptions, 3 - wrongOptions.length]
         );
 
         wrongOptions = uniqueRespuestas(
           wrongOptions.concat(fallbackWrongRows.map(r => r.respuesta))
+        );
+      }
+
+      if (wrongOptions.length < 3) {
+        const placeholders = wrongOptions.map(() => "?").join(", ");
+        const exclusionClause = placeholders
+          ? `AND respuesta NOT IN (${placeholders})`
+          : "";
+
+        const [crossCategoryWrongRows] = await pool.query(
+          `SELECT respuesta
+           FROM (${source}) AS src
+           WHERE dificultad IN (${dificultadesIn}) AND NOT (categoria_origen = ? AND id = ?) AND respuesta <> ? ${exclusionClause}
+           ORDER BY RAND()
+           LIMIT ?`,
+          [...dificultades, row.categoria_origen, row.id, row.respuesta, ...wrongOptions, 3 - wrongOptions.length]
+        );
+
+        wrongOptions = uniqueRespuestas(
+          wrongOptions.concat(crossCategoryWrongRows.map(r => r.respuesta))
         );
       }
 
@@ -239,6 +259,7 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
         media_tipo: row.media_tipo,
         media_fuente: row.media_fuente,
         media_ruta: row.media_fuente,
+        categoria_origen: row.categoria_origen,
         correcta: correctAnswer,
         opciones
       });
@@ -277,7 +298,7 @@ questionsRouter.get("/true-false", async (req, res) => {
 
     // Tomamos "limit" señas base (cada una con su respuesta correcta)
     const [rows] = await pool.query(
-      `SELECT id, media_tipo, media_fuente, respuesta
+      `SELECT id, categoria_origen, media_tipo, media_fuente, respuesta
        FROM (${source}) AS src
        WHERE dificultad IN (${dificultadesIn})
        ORDER BY RAND()
@@ -296,6 +317,7 @@ questionsRouter.get("/true-false", async (req, res) => {
           media_tipo: row.media_tipo,
           media_fuente: row.media_fuente,
           media_ruta: row.media_fuente,
+          categoria_origen: row.categoria_origen,
           pregunta: `¿Esta seña corresponde a la palabra "${row.respuesta}"?`,
           es_verdadero: 1
         });
@@ -304,18 +326,31 @@ questionsRouter.get("/true-false", async (req, res) => {
         const [wrongRows] = await pool.query(
           `SELECT respuesta
            FROM (${source}) AS src
-           WHERE dificultad IN (${dificultadesIn}) AND id <> ? AND respuesta <> ?
+           WHERE categoria_origen = ? AND dificultad IN (${dificultadesIn}) AND NOT (categoria_origen = ? AND id = ?) AND respuesta <> ?
            ORDER BY RAND()
            LIMIT 1`,
-          [...dificultades, row.id, row.respuesta]
+          [row.categoria_origen, ...dificultades, row.categoria_origen, row.id, row.respuesta]
         );
 
-        const palabraIncorrecta = wrongRows?.[0]?.respuesta || "Otra palabra";
+        let palabraIncorrecta = wrongRows?.[0]?.respuesta;
+
+        if (!palabraIncorrecta) {
+          const [fallbackWrongRows] = await pool.query(
+            `SELECT respuesta
+             FROM (${source}) AS src
+             WHERE dificultad IN (${dificultadesIn}) AND NOT (categoria_origen = ? AND id = ?) AND respuesta <> ?
+             ORDER BY RAND()
+             LIMIT 1`,
+            [...dificultades, row.categoria_origen, row.id, row.respuesta]
+          );
+          palabraIncorrecta = fallbackWrongRows?.[0]?.respuesta || "Otra palabra";
+        }
 
         questions.push({
           media_tipo: row.media_tipo,
           media_fuente: row.media_fuente,
           media_ruta: row.media_fuente,
+          categoria_origen: row.categoria_origen,
           pregunta: `¿Esta seña corresponde a la palabra "${palabraIncorrecta}"?`,
           es_verdadero: 0
         });
@@ -367,6 +402,7 @@ questionsRouter.get("/text-input", async (req, res) => {
         media_tipo: r.media_tipo,
         media_fuente: r.media_fuente,
         media_ruta: r.media_fuente,
+        categoria_origen: r.categoria_origen,
         pregunta: "Escribe la palabra que representa la seña:",
         correcta,
         correctas

@@ -1,13 +1,32 @@
 export const LEVEL_CONFIG = {
   level: 3,
-  categoria: "abecedario",
+  categoria: "saludos",
   dificultad: 1,
   totalEjercicios: 15,
-  enfoque: "Memoria y contraste del abecedario.",
-  objetivo: "Consolidar el alfabeto con más decisiones verdadero/falso y primeras respuestas recordadas.",
-  mix: {
-    multiple_choice: 7,
-    true_false: 5,
-    text_input: 3,
-  },
+  enfoque: "Primeras interacciones sociales",
+  objetivo: "Practicar frases útiles de contacto inicial antes de vocabulario descriptivo.",
+  plan: [
+    {
+      etapa: "Saludar y despedirse",
+      categoria: "saludos",
+      dificultad: 1,
+      proposito: "Reconoce saludos frecuentes en contextos cotidianos.",
+      mix: {
+        multiple_choice: 6,
+        true_false: 2,
+        text_input: 1,
+      },
+    },
+    {
+      etapa: "Cortesía básica",
+      categoria: "expresiones",
+      dificultad: 1,
+      proposito: "Añade expresiones cortas que completan una interacción simple.",
+      mix: {
+        multiple_choice: 3,
+        true_false: 2,
+        text_input: 1,
+      },
+    },
+  ],
 };
