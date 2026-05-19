@@ -1,7 +1,9 @@
 export const LEVEL_CONFIG = {
   level: 6,
+  seccion: 2,
+  bloque: "Comunicación cotidiana",
   categoria: "temporalidad",
-  dificultad: 1,
+  dificultad: 2,
   totalEjercicios: 15,
   enfoque: "Ubicar acciones en el tiempo",
   objetivo: "Ordenar meses y días para que el usuario pueda decir cuándo ocurre algo.",

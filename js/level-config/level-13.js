@@ -1,7 +1,9 @@
 export const LEVEL_CONFIG = {
   level: 13,
+  seccion: 3,
+  bloque: "Especialización temática",
   categoria: "ámbito jurídico",
-  dificultad: 1,
+  dificultad: 3,
   totalEjercicios: 15,
   enfoque: "Ciudadanía y trámites",
   objetivo: "Introducir vocabulario jurídico con cuidado, separando términos simples de conceptos abstractos.",
@@ -9,7 +11,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Términos jurídicos base",
       categoria: "ambitojuridico",
-      dificultad: 1,
+      dificultad: 3,
       proposito: "Reconoce palabras frecuentes en trámites o noticias.",
       mix: {
         multiple_choice: 6,

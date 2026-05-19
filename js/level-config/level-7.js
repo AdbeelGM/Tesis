@@ -1,7 +1,9 @@
 export const LEVEL_CONFIG = {
   level: 7,
+  seccion: 2,
+  bloque: "Comunicación cotidiana",
   categoria: "transportes y lugares",
-  dificultad: 1,
+  dificultad: 2,
   totalEjercicios: 15,
   enfoque: "Moverse y ubicar destinos",
   objetivo: "Relacionar transporte con países/continentes sirve para practicar desplazamientos y destinos, no como mezcla aleatoria.",
@@ -9,7 +11,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Medios de transporte",
       categoria: "transportes",
-      dificultad: 1,
+      dificultad: 2,
       proposito: "Reconoce cómo se traslada una persona.",
       mix: {
         multiple_choice: 5,
@@ -20,7 +22,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Destinos geográficos",
       categoria: "continentespaises",
-      dificultad: 1,
+      dificultad: 2,
       proposito: "Identifica lugares para completar la idea de viaje o ubicación.",
       mix: {
         multiple_choice: 4,

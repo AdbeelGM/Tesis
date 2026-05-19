@@ -1,7 +1,9 @@
 export const LEVEL_CONFIG = {
   level: 12,
+  seccion: 3,
+  bloque: "Especialización temática",
   categoria: "museo y arte",
-  dificultad: 1,
+  dificultad: 3,
   totalEjercicios: 15,
   enfoque: "Vocabulario cultural descriptivo",
   objetivo: "Trabajar arte para ampliar descripción visual con términos de forma, técnica y obra.",
@@ -9,7 +11,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Técnicas y elementos",
       categoria: "museoarte",
-      dificultad: 1,
+      dificultad: 3,
       proposito: "Reconoce términos visuales concretos.",
       mix: {
         multiple_choice: 6,

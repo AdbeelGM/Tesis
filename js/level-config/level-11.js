@@ -1,7 +1,9 @@
 export const LEVEL_CONFIG = {
   level: 11,
+  seccion: 3,
+  bloque: "Especialización temática",
   categoria: "tecnología",
-  dificultad: 1,
+  dificultad: 3,
   totalEjercicios: 15,
   enfoque: "Comunicación digital",
   objetivo: "Practicar tecnología para situaciones actuales como cuentas, correos y dispositivos.",
@@ -9,7 +11,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Herramientas digitales",
       categoria: "tecnologia",
-      dificultad: 1,
+      dificultad: 3,
       proposito: "Reconoce vocabulario tecnológico de uso diario.",
       mix: {
         multiple_choice: 8,

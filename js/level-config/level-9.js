@@ -1,7 +1,9 @@
 export const LEVEL_CONFIG = {
   level: 9,
+  seccion: 2,
+  bloque: "Comunicación cotidiana",
   categoria: "salud",
-  dificultad: 1,
+  dificultad: 2,
   totalEjercicios: 15,
   enfoque: "Necesidades médicas básicas",
   objetivo: "Priorizar vocabulario de salud porque permite expresar síntomas o pedir ayuda.",
@@ -9,7 +11,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Síntomas y atención",
       categoria: "salud",
-      dificultad: 1,
+      dificultad: 2,
       proposito: "Reconoce términos de salud comunes antes del recuerdo escrito.",
       mix: {
         multiple_choice: 8,

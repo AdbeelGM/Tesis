@@ -1,7 +1,9 @@
 export const LEVEL_CONFIG = {
   level: 10,
+  seccion: 2,
+  bloque: "Comunicación cotidiana",
   categoria: "protección civil",
-  dificultad: 1,
+  dificultad: 2,
   totalEjercicios: 15,
   enfoque: "Responder ante emergencias",
   objetivo: "Usar protección civil después de salud para aprender vocabulario de riesgo, prevención y ayuda.",
@@ -9,7 +11,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Riesgos comunes",
       categoria: "proteccioncivil",
-      dificultad: 1,
+      dificultad: 2,
       proposito: "Identifica vocabulario urgente de baja dificultad.",
       mix: {
         multiple_choice: 5,

@@ -1,5 +1,7 @@
 export const LEVEL_CONFIG = {
   level: 3,
+  seccion: 1,
+  bloque: "Fundamentos",
   categoria: "saludos",
   dificultad: 1,
   totalEjercicios: 15,

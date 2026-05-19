@@ -1,7 +1,9 @@
 export const LEVEL_CONFIG = {
   level: 8,
+  seccion: 2,
+  bloque: "Comunicación cotidiana",
   categoria: "profesiones",
-  dificultad: 1,
+  dificultad: 2,
   totalEjercicios: 15,
   enfoque: "Roles y ocupaciones",
   objetivo: "Aprender oficios y profesiones para ampliar conversaciones sobre identidad y actividades.",
@@ -9,7 +11,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Profesiones frecuentes",
       categoria: "profesiones",
-      dificultad: 1,
+      dificultad: 2,
       proposito: "Reconoce ocupaciones con apoyo gradual.",
       mix: {
         multiple_choice: 8,

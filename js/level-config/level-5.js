@@ -1,5 +1,7 @@
 export const LEVEL_CONFIG = {
   level: 5,
+  seccion: 1,
+  bloque: "Fundamentos",
   categoria: "colores y vestimenta",
   dificultad: 1,
   totalEjercicios: 15,

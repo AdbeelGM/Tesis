@@ -1,5 +1,7 @@
 export const LEVEL_CONFIG = {
   level: 4,
+  seccion: 1,
+  bloque: "Fundamentos",
   categoria: "pronombres y familia",
   dificultad: 1,
   totalEjercicios: 15,

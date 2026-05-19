@@ -1,7 +1,9 @@
 export const LEVEL_CONFIG = {
   level: 15,
+  seccion: 3,
+  bloque: "Especialización temática",
   categoria: "repaso integrador",
-  dificultad: 1,
+  dificultad: 3,
   totalEjercicios: 15,
   enfoque: "Usar vocabulario con intención comunicativa",
   objetivo: "Cerrar con bloques relacionados: presentarse, describir, ubicarse y pedir ayuda; cada mezcla tiene una función comunicativa.",
@@ -9,7 +11,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Presentarse",
       categorias: ["saludos", "pronombres", "familia"],
-      dificultad: 1,
+      dificultad: 3,
       proposito: "Integra saludos, personas y familia para una presentación básica.",
       mix: {
         multiple_choice: 3,
@@ -20,7 +22,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Describir",
       categorias: ["colores", "vestimenta", "profesiones"],
-      dificultad: 1,
+      dificultad: 3,
       proposito: "Combina atributos, ropa y roles para describir personas.",
       mix: {
         multiple_choice: 3,
@@ -31,7 +33,7 @@ export const LEVEL_CONFIG = {
     {
       etapa: "Orientarse y pedir ayuda",
       categorias: ["temporalidad", "transportes", "salud", "proteccioncivil"],
-      dificultad: 1,
+      dificultad: 3,
       proposito: "Relaciona tiempo, traslado y necesidad de apoyo en situaciones reales.",
       mix: {
         multiple_choice: 3,
