@@ -1,13 +1,13 @@
 export const LEVEL_CONFIG = {
   level: 15,
-  categoria: "continentespaises",
-  dificultad: 1,
+  categorias: ['continentespaises', 'transportes', 'tecnologia', 'proteccioncivil', 'ambitojuridico'],
+  dificultad: [1, 2, 3],
   totalEjercicios: 15,
-  enfoque: "Dominio autónomo de países y continentes.",
-  objetivo: "Evaluar el bloque de geografía priorizando respuestas escritas y reconocimiento final.",
+  enfoque: "Cierre integral por contexto.",
+  objetivo: "Evaluar dominio integral con énfasis en recuerdo activo de vocabulario social, geográfico y legal.",
   mix: {
-    multiple_choice: 5,
-    true_false: 3,
+    multiple_choice: 4,
+    true_false: 4,
     text_input: 7,
   },
 };

@@ -1,10 +1,10 @@
 export const LEVEL_CONFIG = {
   level: 14,
-  categoria: "continentespaises",
-  dificultad: 1,
+  categorias: ['continentespaises', 'transportes', 'tecnologia', 'proteccioncivil', 'ambitojuridico'],
+  dificultad: [1, 2, 3],
   totalEjercicios: 15,
-  enfoque: "Recuerdo activo de lugares.",
-  objetivo: "Exigir más recuerdo escrito de países y continentes manteniendo ejercicios de contraste.",
+  enfoque: "Vocabulario ciudadano avanzado.",
+  objetivo: "Escalar a términos jurídicos y de seguridad, manteniendo progresión pedagógica con apoyo parcial.",
   mix: {
     multiple_choice: 6,
     true_false: 4,

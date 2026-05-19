@@ -1,13 +1,13 @@
 export const LEVEL_CONFIG = {
   level: 5,
-  categoria: "abecedario",
-  dificultad: 1,
+  categorias: ['abecedario', 'numeros', 'colores'],
+  dificultad: [1, 2],
   totalEjercicios: 15,
-  enfoque: "Dominio autónomo del abecedario.",
-  objetivo: "Evaluar dominio del abecedario priorizando respuestas escritas sin descuidar repaso.",
+  enfoque: "Cierre autónomo de fundamentos.",
+  objetivo: "Cerrar sección básica con mayor recuerdo activo y escritura para comprobar dominio inicial.",
   mix: {
     multiple_choice: 5,
-    true_false: 3,
-    text_input: 7,
+    true_false: 4,
+    text_input: 6,
   },
 };

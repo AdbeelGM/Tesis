@@ -1,13 +1,13 @@
 export const LEVEL_CONFIG = {
   level: 10,
-  categoria: "colores",
-  dificultad: 1,
+  categorias: ['saludos', 'familia', 'pronombres', 'expresiones'],
+  dificultad: [1, 2],
   totalEjercicios: 15,
-  enfoque: "Dominio autónomo de colores.",
-  objetivo: "Cerrar el bloque de colores con énfasis en escritura y repaso selectivo.",
+  enfoque: "Dominio de comunicación cotidiana.",
+  objetivo: "Consolidar la sección priorizando recuerdo escrito de frases y vocabulario interpersonal.",
   mix: {
     multiple_choice: 5,
-    true_false: 3,
-    text_input: 7,
+    true_false: 4,
+    text_input: 6,
   },
 };
