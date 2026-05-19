@@ -85,12 +85,37 @@ function renderLearnUnitHeader(unit = LEARN_UNITS[0]) {
   `;
 }
 
+function renderSectionTransition(unit, index) {
+  return `
+    <div class="route__section-transition" aria-hidden="true">
+      <div class="route__section-divider">
+        <span class="route__section-line"></span>
+        <span class="route__section-text">${unit.title}</span>
+        <span class="route__section-line"></span>
+      </div>
+      <div class="route__section-marker">
+        <span class="material-symbols-outlined">lock_open</span>
+      </div>
+      <p class="route__section-label">Siguiente: ${LEARN_UNITS[index + 1].eyebrow}</p>
+    </div>
+  `;
+}
+
 function renderLearnView() {
+  const sectionsMarkup = LEARN_UNITS
+    .map((unit, index) => {
+      const pathMarkup = renderLevelPath(unit, index);
+      const hasNextUnit = index < LEARN_UNITS.length - 1;
+      if (!hasNextUnit) return pathMarkup;
+      return `${pathMarkup}${renderSectionTransition(unit, index)}`;
+    })
+    .join('');
+
   return `
     <div class="route__learn">
       ${renderLearnUnitHeader()}
       <div class="route__sections">
-        ${LEARN_UNITS.map((unit, index) => renderLevelPath(unit, index)).join('')}
+        ${sectionsMarkup}
       </div>
     </div>
   `;
