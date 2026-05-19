@@ -1,13 +1,13 @@
 export const LEVEL_CONFIG = {
   level: 7,
-  categoria: "colores",
-  dificultad: 1,
+  categorias: ['saludos', 'familia', 'pronombres'],
+  dificultad: [1],
   totalEjercicios: 15,
-  enfoque: "Discriminación de colores.",
-  objetivo: "Diferenciar colores similares usando más verificación y algunas respuestas escritas.",
+  enfoque: "Referencias personales y sociales.",
+  objetivo: "Agregar pronombres para formar relaciones básicas entre personas y contextos de saludo.",
   mix: {
-    multiple_choice: 8,
-    true_false: 5,
+    multiple_choice: 9,
+    true_false: 4,
     text_input: 2,
   },
 };

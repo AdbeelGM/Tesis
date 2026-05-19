@@ -1,13 +1,13 @@
 export const LEVEL_CONFIG = {
   level: 6,
-  categoria: "colores",
-  dificultad: 1,
+  categorias: ['saludos', 'familia'],
+  dificultad: [1],
   totalEjercicios: 15,
-  enfoque: "Reconocimiento inicial de colores.",
-  objetivo: "Presentar colores frecuentes con mayoría de opción múltiple para formar vocabulario base.",
+  enfoque: "Comunicación cotidiana inicial.",
+  objetivo: "Empezar interacción social con saludos y familia usando apoyo alto de reconocimiento.",
   mix: {
-    multiple_choice: 10,
-    true_false: 4,
+    multiple_choice: 11,
+    true_false: 3,
     text_input: 1,
   },
 };

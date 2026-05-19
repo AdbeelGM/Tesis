@@ -1,13 +1,13 @@
 export const LEVEL_CONFIG = {
   level: 3,
-  categoria: "abecedario",
-  dificultad: 1,
+  categorias: ['abecedario', 'numeros', 'colores'],
+  dificultad: [1],
   totalEjercicios: 15,
-  enfoque: "Memoria y contraste del abecedario.",
-  objetivo: "Consolidar el alfabeto con más decisiones verdadero/falso y primeras respuestas recordadas.",
+  enfoque: "Asociación de vocabulario inicial.",
+  objetivo: "Relacionar letras, números y colores para ampliar memoria visual y semántica.",
   mix: {
-    multiple_choice: 7,
+    multiple_choice: 8,
     true_false: 5,
-    text_input: 3,
+    text_input: 2,
   },
 };

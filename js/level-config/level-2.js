@@ -1,13 +1,13 @@
 export const LEVEL_CONFIG = {
   level: 2,
-  categoria: "abecedario",
-  dificultad: 1,
+  categorias: ['abecedario', 'numeros'],
+  dificultad: [1],
   totalEjercicios: 15,
-  enfoque: "Discriminación de señas parecidas.",
-  objetivo: "Reforzar letras vistas alternando identificación y verificación para mejorar discriminación visual.",
+  enfoque: "Transferencia a símbolos básicos.",
+  objetivo: "Combinar letras y números para fortalecer identificación rápida de señas frecuentes.",
   mix: {
-    multiple_choice: 9,
+    multiple_choice: 10,
     true_false: 4,
-    text_input: 2,
+    text_input: 1,
   },
 };

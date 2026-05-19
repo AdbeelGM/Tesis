@@ -1,10 +1,10 @@
 export const LEVEL_CONFIG = {
   level: 1,
-  categoria: "abecedario",
-  dificultad: 1,
+  categorias: ['abecedario'],
+  dificultad: [1],
   totalEjercicios: 15,
-  enfoque: "Reconocimiento inicial del alfabeto.",
-  objetivo: "Reconocer letras básicas de LSM con apoyo visual antes de pedir producción escrita.",
+  enfoque: "Base visual del alfabeto.",
+  objetivo: "Iniciar con reconocimiento de letras en LSM con apoyo visual alto y respuestas guiadas.",
   mix: {
     multiple_choice: 12,
     true_false: 3,

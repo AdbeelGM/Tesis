@@ -1,10 +1,10 @@
 export const LEVEL_CONFIG = {
   level: 12,
-  categoria: "continentespaises",
-  dificultad: 1,
+  categorias: ['continentespaises', 'transportes', 'tecnologia'],
+  dificultad: [1],
   totalEjercicios: 15,
-  enfoque: "Discriminación de países y continentes.",
-  objetivo: "Comparar señas de lugares y comenzar a escribir nombres cortos o familiares.",
+  enfoque: "Entorno moderno y movilidad.",
+  objetivo: "Combinar geografía, movilidad y tecnología para ampliar vocabulario contextual.",
   mix: {
     multiple_choice: 8,
     true_false: 5,
