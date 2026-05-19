@@ -35,6 +35,7 @@ const LEARN_UNITS = [
     eyebrow: 'Sección 1',
     title: 'Abecedario',
     subtitle: 'Reconoce letras, compara señas y escribe respuestas cortas.',
+    transitionText: 'Ahora describe colores en LSM',
     levels: [1, 2, 3, 4, 5],
     offsets: [90, -80, 0, 100, -60],
   },
@@ -42,6 +43,7 @@ const LEARN_UNITS = [
     eyebrow: 'Sección 2',
     title: 'Colores',
     subtitle: 'Avanza desde identificación básica hasta escritura de colores.',
+    transitionText: 'Ahora viaja por países y continentes',
     levels: [6, 7, 8, 9, 10],
     offsets: [-70, 85, -15, 95, -55],
   },
@@ -49,6 +51,7 @@ const LEARN_UNITS = [
     eyebrow: 'Sección 3',
     title: 'Continentes y países',
     subtitle: 'Practica lugares con retos más largos y respuestas abiertas.',
+    transitionText: '',
     levels: [11, 12, 13, 14, 15],
     offsets: [80, -90, 10, 100, -65],
   },
@@ -90,7 +93,10 @@ function renderLearnView() {
     <div class="route__learn">
       ${renderLearnUnitHeader()}
       <div class="route__sections">
-        ${LEARN_UNITS.map((unit, index) => renderLevelPath(unit, index)).join('')}
+        ${LEARN_UNITS.map((unit, index) => `
+          ${renderLevelPath(unit, index)}
+          ${unit.transitionText ? `<p class="route__transition-text">${unit.transitionText}</p>` : ''}
+        `).join('')}
       </div>
     </div>
   `;
