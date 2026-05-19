@@ -230,6 +230,14 @@
   gap: 18px;
 }
 
+.route__transition-text {
+  margin: -8px auto 28px;
+  text-align: center;
+  font-size: 30px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
 .route__unit-card--sticky {
   position: sticky;
   top: 18px;
