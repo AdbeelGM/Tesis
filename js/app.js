@@ -40,28 +40,14 @@ function showInfiniteHeartsAnimation() {
     'height: 100vh',
   ].join(';');
 
-  const caption = document.createElement('p');
-  caption.textContent = '💖 ¡Corazones infinitos activados!';
-  caption.style.cssText = [
-    'position: relative',
-    'margin: 0',
-    'padding: 12px 18px',
-    'border-radius: 999px',
-    'background: rgba(255, 255, 255, 0.9)',
-    'font-weight: 700',
-    'color: #be185d',
-    'box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18)',
-  ].join(';');
-
   overlay.appendChild(animation);
-  overlay.appendChild(caption);
   document.body.appendChild(overlay);
 
   const close = () => overlay.remove();
   overlay.addEventListener('click', (event) => {
     if (event.target === overlay) close();
   });
-  window.setTimeout(close, 3000);
+  window.setTimeout(close, 9000);
 }
 
 function xpNeededToAdvance(accountLevel) {
