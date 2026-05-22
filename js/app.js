@@ -22,11 +22,12 @@ function showInfiniteHeartsAnimation() {
   overlay.style.cssText = [
     'position: fixed',
     'inset: 0',
-    'background: rgba(15, 23, 42, 0.55)',
+    'background: transparent',
     'display: flex',
     'align-items: center',
     'justify-content: center',
     'z-index: 9999',
+    'pointer-events: none',
   ].join(';');
 
   const animation = document.createElement('dotlottie-wc');
@@ -44,9 +45,6 @@ function showInfiniteHeartsAnimation() {
   document.body.appendChild(overlay);
 
   const close = () => overlay.remove();
-  overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) close();
-  });
   window.setTimeout(close, 9000);
 }
 
