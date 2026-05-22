@@ -29,21 +29,32 @@ function showInfiniteHeartsAnimation() {
     'z-index: 9999',
   ].join(';');
 
-  const container = document.createElement('div');
-  container.style.cssText = [
-    'background: #ffffff',
-    'border-radius: 20px',
-    'padding: 18px',
-    'box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25)',
-    'text-align: center',
+  const animation = document.createElement('dotlottie-wc');
+  animation.setAttribute('src', 'https://lottie.host/dc359c7b-1c91-4240-8bbb-6875c10d318e/VneDkjaLX8.lottie');
+  animation.setAttribute('autoplay', '');
+  animation.setAttribute('loop', '');
+  animation.style.cssText = [
+    'position: absolute',
+    'inset: 0',
+    'width: 100vw',
+    'height: 100vh',
   ].join(';');
 
-  container.innerHTML = `
-    <dotlottie-wc src="https://lottie.host/dc359c7b-1c91-4240-8bbb-6875c10d318e/VneDkjaLX8.lottie" style="width: 300px;height: 300px" autoplay loop></dotlottie-wc>
-    <p style="margin: 8px 0 0; font-weight: 700; color: #be185d;">💖 ¡Corazones infinitos activados!</p>
-  `;
+  const caption = document.createElement('p');
+  caption.textContent = '💖 ¡Corazones infinitos activados!';
+  caption.style.cssText = [
+    'position: relative',
+    'margin: 0',
+    'padding: 12px 18px',
+    'border-radius: 999px',
+    'background: rgba(255, 255, 255, 0.9)',
+    'font-weight: 700',
+    'color: #be185d',
+    'box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18)',
+  ].join(';');
 
-  overlay.appendChild(container);
+  overlay.appendChild(animation);
+  overlay.appendChild(caption);
   document.body.appendChild(overlay);
 
   const close = () => overlay.remove();
