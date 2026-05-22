@@ -5,6 +5,54 @@ import { purchaseStoreItemGlobal, updateProfilePhotoGlobal } from './game-state.
 const LOGIN_URL = 'login.html';
 const XP_BASE_REQUIREMENT = 120;
 
+function ensureDotLottieScript() {
+  if (document.querySelector('script[data-dotlottie-wc]')) return;
+
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.14/dist/dotlottie-wc.js';
+  script.type = 'module';
+  script.dataset.dotlottieWc = 'true';
+  document.head.appendChild(script);
+}
+
+function showInfiniteHeartsAnimation() {
+  ensureDotLottieScript();
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = [
+    'position: fixed',
+    'inset: 0',
+    'background: rgba(15, 23, 42, 0.55)',
+    'display: flex',
+    'align-items: center',
+    'justify-content: center',
+    'z-index: 9999',
+  ].join(';');
+
+  const container = document.createElement('div');
+  container.style.cssText = [
+    'background: #ffffff',
+    'border-radius: 20px',
+    'padding: 18px',
+    'box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25)',
+    'text-align: center',
+  ].join(';');
+
+  container.innerHTML = `
+    <dotlottie-wc src="https://lottie.host/dc359c7b-1c91-4240-8bbb-6875c10d318e/VneDkjaLX8.lottie" style="width: 300px;height: 300px" autoplay loop></dotlottie-wc>
+    <p style="margin: 8px 0 0; font-weight: 700; color: #be185d;">💖 ¡Corazones infinitos activados!</p>
+  `;
+
+  overlay.appendChild(container);
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) close();
+  });
+  window.setTimeout(close, 3000);
+}
+
 function xpNeededToAdvance(accountLevel) {
   const level = Math.max(1, Number(accountLevel) || 1);
   return Math.round(XP_BASE_REQUIREMENT + (level * 32) + (Math.pow(level, 1.4) * 14));
@@ -439,6 +487,11 @@ function bindStoreActions() {
         updateStoreStatus(updated);
         updateStorePurchaseAvailability(updated);
         await refreshStatusBar();
+
+        if (productId === 'infinite_hearts_24h') {
+          showInfiniteHeartsAnimation();
+        }
+
         alert('✅ Compra realizada');
       } catch (err) {
         alert(`❌ ${err.message}`);
