@@ -274,8 +274,8 @@ function resolveDificultades(cfg) {
     delete optionsEl.dataset.count;
 
     if (q.tipo === "multiple_choice") {
-      promptText.textContent = q.pregunta || "What does this sign mean?";
-      promptSubtitle.textContent = "Select the correct translation";
+      promptText.textContent = q.pregunta || "¿Qué significa esta seña?";
+      promptSubtitle.textContent = "Selecciona la traducción correcta";
 
       const opciones = (q.opciones || []).slice(0, 4);
       optionsEl.dataset.count = String(opciones.length);
