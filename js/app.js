@@ -168,8 +168,8 @@ function renderStoreView() {
         <div class="store__banner">
           <div class="store__banner-content">
             <div>
-              <h1 class="store__title">LSM Quest Store</h1>
-              <p class="store__subtitle">Refill your lives and keep learning!</p>
+              <h1 class="store__title">Tienda LSM Quest</h1>
+              <p class="store__subtitle">Recarga tus vidas y sigue aprendiendo!</p>
             </div>
             <div class="store__counter">
               <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
@@ -185,40 +185,40 @@ function renderStoreView() {
             <div class="product-card__icon-wrap">
               <span class="material-symbols-outlined product-card__icon" style="font-variation-settings: 'FILL' 1;">favorite</span>
             </div>
-            <h3 class="product-card__title">Single Heart</h3>
-            <p class="product-card__description">One life to keep your streak alive</p>
+            <h3 class="product-card__title">Corazón individual</h3>
+            <p class="product-card__description">Una vida para mantener tu racha</p>
             <button class="product-card__buy btn-hover-elevate btn-active-press" data-product-id="single_heart" type="button">
               <span class="material-symbols-outlined">diamond</span>
-              <span>100 Gems</span>
+              <span>100 gemas</span>
             </button>
           </article>
 
           <article class="product-card product-card--featured btn-active-press">
-            <span class="product-card__badge">Most Popular</span>
+            <span class="product-card__badge">Más popular</span>
             <div class="product-card__icon-wrap product-card__icon-wrap--cluster">
               <span class="material-symbols-outlined product-card__icon product-card__icon--small top-left" style="font-variation-settings: 'FILL' 1;">favorite</span>
               <span class="material-symbols-outlined product-card__icon" style="font-variation-settings: 'FILL' 1;">favorite</span>
               <span class="material-symbols-outlined product-card__icon product-card__icon--small bottom-right" style="font-variation-settings: 'FILL' 1;">favorite</span>
             </div>
-            <h3 class="product-card__title">Heart Bundle</h3>
-            <p class="product-card__description">Full refill! Get 5 hearts instantly</p>
+            <h3 class="product-card__title">Paquete de corazones</h3>
+            <p class="product-card__description">¡Recarga completa! Obtén 5 corazones al instante</p>
             <button class="product-card__buy btn-3d-orange btn-hover-elevate btn-active-press" data-product-id="heart_bundle" type="button">
               <span class="material-symbols-outlined">diamond</span>
-              <span>450 Gems</span>
+              <span>450 gemas</span>
             </button>
           </article>
 
           <article class="product-card btn-active-press">
-            <span class="product-card__badge product-card__badge--teal">Special Offer</span>
+            <span class="product-card__badge product-card__badge--teal">Oferta especial</span>
             <div class="product-card__icon-wrap product-card__icon-wrap--teal">
               <span class="material-symbols-outlined product-card__icon product-card__icon--teal">all_inclusive</span>
               <span class="product-card__mini-heart material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
             </div>
-            <h3 class="product-card__title">Infinite Hearts</h3>
-            <p class="product-card__description">24 hours of unlimited learning</p>
+            <h3 class="product-card__title">Corazones infinitos</h3>
+            <p class="product-card__description">24 horas de aprendizaje ilimitado</p>
             <button class="product-card__buy btn-hover-elevate btn-active-press" data-product-id="infinite_hearts_24h" type="button">
               <span class="material-symbols-outlined">diamond</span>
-              <span>950 Gems</span>
+              <span>950 gemas</span>
             </button>
           </article>
         </div>
@@ -269,7 +269,7 @@ function renderProfileView() {
                 <div class="profile-progress-head">
                   <span class="profile-progress-title">
                     <span class="material-symbols-outlined">auto_awesome</span>
-                    Journey Progress
+                    Progreso del viaje
                   </span>
                   <span id="profile-progress-percent" class="profile-progress-percent">0%</span>
                 </div>
