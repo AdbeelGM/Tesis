@@ -18,7 +18,7 @@ function applyLevelNodeState(node, currentLevel) {
   if (item && !item.querySelector('.start-badge')) {
     const badge = document.createElement('div');
     badge.className = 'start-badge';
-    badge.textContent = 'Start';
+    badge.textContent = 'Inicio';
     item.insertBefore(badge, node);
   }
 
