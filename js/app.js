@@ -45,7 +45,18 @@ function showSingleHeartAnimation() {
   document.body.appendChild(overlay);
 
   const close = () => overlay.remove();
-  window.setTimeout(close, 3000);
+
+  let closeTimeoutId;
+  const startCloseTimer = () => {
+    if (closeTimeoutId) return;
+    closeTimeoutId = window.setTimeout(close, 3000);
+  };
+
+  animation.addEventListener('play', startCloseTimer, { once: true });
+  animation.addEventListener('load', startCloseTimer, { once: true });
+
+  // Fallback si el web component no emite eventos por compatibilidad.
+  window.setTimeout(startCloseTimer, 250);
 }
 
 function showInfiniteHeartsAnimation() {
