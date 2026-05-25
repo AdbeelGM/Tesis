@@ -34,16 +34,19 @@ function showSingleHeartAnimation() {
   animation.setAttribute('src', 'https://lottie.host/0e5d4362-f65d-40b6-85db-d50b4078a5ce/a9zyX0rECd.lottie');
   animation.setAttribute('autoplay', '');
   animation.setAttribute('loop', '');
+  animation.setAttribute('speed', '0.5');
   animation.style.cssText = [
-    'width: 300px',
-    'height: 300px',
+    'position: absolute',
+    'inset: 0',
+    'width: 100vw',
+    'height: 100vh',
   ].join(';');
 
   overlay.appendChild(animation);
   document.body.appendChild(overlay);
 
   const close = () => overlay.remove();
-  window.setTimeout(close, 2200);
+  window.setTimeout(close, 4400);
 }
 
 function showInfiniteHeartsAnimation() {
