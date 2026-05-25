@@ -33,6 +33,7 @@ function showSingleHeartAnimation() {
   const animation = document.createElement('dotlottie-wc');
   animation.setAttribute('src', 'https://lottie.host/b2f1bd3e-623b-46fa-bb8d-71c893e2402a/ndc3rkT2u7.lottie');
   animation.setAttribute('autoplay', '');
+  animation.setAttribute('loop', '');
   animation.style.cssText = [
     'position: absolute',
     'inset: 0',
@@ -43,8 +44,6 @@ function showSingleHeartAnimation() {
   overlay.appendChild(animation);
   document.body.appendChild(overlay);
 
-  const close = () => overlay.remove();
-  window.setTimeout(close, 3000);
 }
 
 function showInfiniteHeartsAnimation() {
