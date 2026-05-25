@@ -15,6 +15,37 @@ function ensureDotLottieScript() {
   document.head.appendChild(script);
 }
 
+function showSingleHeartAnimation() {
+  ensureDotLottieScript();
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = [
+    'position: fixed',
+    'inset: 0',
+    'background: transparent',
+    'display: flex',
+    'align-items: center',
+    'justify-content: center',
+    'z-index: 9999',
+    'pointer-events: none',
+  ].join(';');
+
+  const animation = document.createElement('dotlottie-wc');
+  animation.setAttribute('src', 'https://lottie.host/0e5d4362-f65d-40b6-85db-d50b4078a5ce/a9zyX0rECd.lottie');
+  animation.setAttribute('autoplay', '');
+  animation.setAttribute('loop', '');
+  animation.style.cssText = [
+    'width: 300px',
+    'height: 300px',
+  ].join(';');
+
+  overlay.appendChild(animation);
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  window.setTimeout(close, 2200);
+}
+
 function showInfiniteHeartsAnimation() {
   ensureDotLottieScript();
 
@@ -482,6 +513,10 @@ function bindStoreActions() {
         updateStoreStatus(updated);
         updateStorePurchaseAvailability(updated);
         await refreshStatusBar();
+
+        if (productId === 'single_heart') {
+          showSingleHeartAnimation();
+        }
 
         if (productId === 'infinite_hearts_24h') {
           showInfiniteHeartsAnimation();
