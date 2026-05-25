@@ -44,6 +44,8 @@ function showSingleHeartAnimation() {
   overlay.appendChild(animation);
   document.body.appendChild(overlay);
 
+  const close = () => overlay.remove();
+  window.setTimeout(close, 3000);
 }
 
 function showInfiniteHeartsAnimation() {
