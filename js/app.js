@@ -31,10 +31,8 @@ function showSingleHeartAnimation() {
   ].join(';');
 
   const animation = document.createElement('dotlottie-wc');
-  animation.setAttribute('src', 'https://lottie.host/0e5d4362-f65d-40b6-85db-d50b4078a5ce/a9zyX0rECd.lottie');
+  animation.setAttribute('src', 'https://lottie.host/b2f1bd3e-623b-46fa-bb8d-71c893e2402a/ndc3rkT2u7.lottie');
   animation.setAttribute('autoplay', '');
-  animation.setAttribute('loop', '');
-  animation.setAttribute('speed', '0.5');
   animation.style.cssText = [
     'position: absolute',
     'inset: 0',
@@ -46,7 +44,7 @@ function showSingleHeartAnimation() {
   document.body.appendChild(overlay);
 
   const close = () => overlay.remove();
-  window.setTimeout(close, 4400);
+  window.setTimeout(close, 3000);
 }
 
 function showInfiniteHeartsAnimation() {
