@@ -31,7 +31,7 @@ function showSingleHeartAnimation() {
   ].join(';');
 
   const animation = document.createElement('dotlottie-wc');
-  animation.setAttribute('src', 'https://lottie.host/b2f1bd3e-623b-46fa-bb8d-71c893e2402a/ndc3rkT2u7.lottie');
+  animation.setAttribute('src', 'https://lottie.host/e2fc8e96-98d3-4d67-b811-fe9ec9c9eea0/OnJgetAnKv.lottie');
   animation.setAttribute('autoplay', '');
   animation.setAttribute('loop', '');
   animation.style.cssText = [
@@ -45,18 +45,7 @@ function showSingleHeartAnimation() {
   document.body.appendChild(overlay);
 
   const close = () => overlay.remove();
-
-  let closeTimeoutId;
-  const startCloseTimer = () => {
-    if (closeTimeoutId) return;
-    closeTimeoutId = window.setTimeout(close, 3000);
-  };
-
-  animation.addEventListener('play', startCloseTimer, { once: true });
-  animation.addEventListener('load', startCloseTimer, { once: true });
-
-  // Fallback si el web component no emite eventos por compatibilidad.
-  window.setTimeout(startCloseTimer, 250);
+  window.setTimeout(close, 3000);
 }
 
 function showInfiniteHeartsAnimation() {
