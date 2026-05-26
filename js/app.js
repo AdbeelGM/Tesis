@@ -31,7 +31,7 @@ function showSingleHeartAnimation() {
   ].join(';');
 
   const animation = document.createElement('dotlottie-wc');
-  animation.setAttribute('src', 'https://lottie.host/e2fc8e96-98d3-4d67-b811-fe9ec9c9eea0/OnJgetAnKv.lottie');
+  animation.setAttribute('src', 'https://lottie.host/c0077715-2767-449b-b383-4cf82be31738/0yo1vd4TO9.lottie');
   animation.setAttribute('autoplay', '');
   animation.setAttribute('loop', '');
   animation.style.cssText = [
