@@ -60,6 +60,11 @@
   position: relative;
   overflow: hidden;
   justify-content: center;
+  min-width: 48px;
+  width: 48px;
+  height: 40px;
+  padding: 0;
+  gap: 0;
 }
 
 .status-pill--lives.has-infinite-hearts .status-pill__icon {
@@ -83,6 +88,6 @@
 .status-pill--lives .infinite-hearts-indicator dotlottie-wc {
   width: 34px;
   height: 34px;
-  max-width: calc(100% - 12px);
-  max-height: calc(100% - 6px);
+  max-width: calc(100% - 8px);
+  max-height: calc(100% - 4px);
 }
