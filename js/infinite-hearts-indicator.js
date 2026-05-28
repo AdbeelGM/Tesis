@@ -1,6 +1,6 @@
 const DOT_LOTTIE_SCRIPT_ID = "dotlottie-wc-loader";
 const DOT_LOTTIE_SCRIPT_SRC = "https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.14/dist/dotlottie-wc.js";
-const INFINITE_HEARTS_LOTTIE_SRC = "https://lottie.host/cb3a8682-d9a0-44b5-a3e8-306e83250ed0/6oQnGEP5ZN.lottie";
+const INFINITE_HEARTS_LOTTIE_SRC = "https://lottie.host/5d0296e4-75bf-4ea6-a91d-1a4ab9229cb4/jKw6JA4dDx.lottie";
 
 export function ensureInfiniteHeartsPlayer() {
   if (document.getElementById(DOT_LOTTIE_SCRIPT_ID)) return;
