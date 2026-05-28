@@ -321,13 +321,9 @@ function renderStoreView() {
 
           <article class="product-card btn-active-press">
             <span class="product-card__badge product-card__badge--teal">Oferta especial</span>
-            <div class="product-card__icon-wrap product-card__icon-wrap--teal product-card__icon-wrap--lottie">
-              <dotlottie-wc
-                class="product-card__lottie-icon"
-                src="${INFINITE_HEARTS_LOTTIE_SRC}"
-                autoplay
-                loop
-              ></dotlottie-wc>
+            <div class="product-card__icon-wrap product-card__icon-wrap--teal">
+              <span class="material-symbols-outlined product-card__icon product-card__icon--teal">all_inclusive</span>
+              <span class="product-card__mini-heart material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
             </div>
             <h3 class="product-card__title">Corazones infinitos</h3>
             <p class="product-card__description">24 horas de aprendizaje ilimitado</p>
@@ -456,10 +452,6 @@ function mountView(viewName, mountNode) {
 
   if (viewName === 'aprender') {
     mountNode.dynamicUnitHeaderCleanup = initializeDynamicUnitHeader(mountNode);
-  }
-
-  if (viewName === 'tienda') {
-    ensureDotLottieScript();
   }
 
   document.dispatchEvent(new CustomEvent(`view:${viewName}:mounted`));

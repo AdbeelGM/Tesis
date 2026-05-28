@@ -174,16 +174,6 @@
   background: #f0fdfa;
 }
 
-.product-card__icon-wrap--lottie {
-  overflow: hidden;
-}
-
-.product-card__lottie-icon {
-  width: 96px;
-  height: 96px;
-  display: block;
-}
-
 .product-card__icon {
   font-size: 56px;
   color: #fb7185;
