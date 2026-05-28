@@ -409,7 +409,7 @@ function resolveDificultades(cfg) {
 
   function updateLives() {
     livesEl.dataset.lives = String(state.lives);
-    if (livesCountEl) livesCountEl.textContent = state.infiniteHeartsActive ? "∞" : String(state.lives);
+    if (livesCountEl) livesCountEl.textContent = state.infiniteHeartsActive ? "" : String(state.lives);
     updateInfiniteHeartsIndicator(livesEl, state);
   }
 
