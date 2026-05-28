@@ -687,8 +687,8 @@ button {
 }
 
 .topbar__lives .infinite-hearts-indicator dotlottie-wc {
-  width: 68px;
-  height: 68px;
-  max-width: none;
-  max-height: none;
+  width: 36px;
+  height: 36px;
+  max-width: calc(100% - 12px);
+  max-height: calc(100% - 6px);
 }
