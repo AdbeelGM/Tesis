@@ -4,6 +4,7 @@ import { purchaseStoreItemGlobal, updateProfilePhotoGlobal } from './game-state.
 
 const LOGIN_URL = 'login.html';
 const XP_BASE_REQUIREMENT = 120;
+const INFINITE_HEARTS_LOTTIE_SRC = 'https://lottie.host/5d0296e4-75bf-4ea6-a91d-1a4ab9229cb4/jKw6JA4dDx.lottie';
 
 function ensureDotLottieScript() {
   if (document.querySelector('script[data-dotlottie-wc]')) return;
@@ -98,7 +99,7 @@ function showInfiniteHeartsAnimation() {
   ].join(';');
 
   const animation = document.createElement('dotlottie-wc');
-  animation.setAttribute('src', 'https://lottie.host/dc359c7b-1c91-4240-8bbb-6875c10d318e/VneDkjaLX8.lottie');
+  animation.setAttribute('src', INFINITE_HEARTS_LOTTIE_SRC);
   animation.setAttribute('autoplay', '');
   animation.setAttribute('loop', '');
   animation.style.cssText = [
@@ -320,9 +321,13 @@ function renderStoreView() {
 
           <article class="product-card btn-active-press">
             <span class="product-card__badge product-card__badge--teal">Oferta especial</span>
-            <div class="product-card__icon-wrap product-card__icon-wrap--teal">
-              <span class="material-symbols-outlined product-card__icon product-card__icon--teal">all_inclusive</span>
-              <span class="product-card__mini-heart material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+            <div class="product-card__icon-wrap product-card__icon-wrap--teal product-card__icon-wrap--lottie">
+              <dotlottie-wc
+                class="product-card__lottie-icon"
+                src="${INFINITE_HEARTS_LOTTIE_SRC}"
+                autoplay
+                loop
+              ></dotlottie-wc>
             </div>
             <h3 class="product-card__title">Corazones infinitos</h3>
             <p class="product-card__description">24 horas de aprendizaje ilimitado</p>
@@ -451,6 +456,10 @@ function mountView(viewName, mountNode) {
 
   if (viewName === 'aprender') {
     mountNode.dynamicUnitHeaderCleanup = initializeDynamicUnitHeader(mountNode);
+  }
+
+  if (viewName === 'tienda') {
+    ensureDotLottieScript();
   }
 
   document.dispatchEvent(new CustomEvent(`view:${viewName}:mounted`));
