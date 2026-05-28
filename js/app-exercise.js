@@ -1,4 +1,5 @@
 import { loadState, loseLifeGlobal } from "./game-state.js";
+import { updateInfiniteHeartsIndicator } from "./infinite-hearts-indicator.js";
 import { addTimeInvested, completeLevel } from "./api-user.js";
 import { loadSession } from "./user-session.js";
 
@@ -156,6 +157,8 @@ function resolveDificultades(cfg) {
     index: 0,
     lives: global.lives,
     maxLives: global.maxLives,
+    infiniteHeartsActive: global.infiniteHeartsActive,
+    infiniteHeartsRemainingSeconds: global.infiniteHeartsRemainingSeconds,
     locked: false,
     selected: null,
     queue: [],
@@ -234,6 +237,8 @@ function resolveDificultades(cfg) {
       } else {
         const updated = await loseLifeGlobal(1);
         state.lives = updated.lives;
+        state.infiniteHeartsActive = updated.infiniteHeartsActive;
+        state.infiniteHeartsRemainingSeconds = updated.infiniteHeartsRemainingSeconds;
         updateLives();
         showFeedback(false, buildFeedback(q, false));
 
@@ -404,7 +409,8 @@ function resolveDificultades(cfg) {
 
   function updateLives() {
     livesEl.dataset.lives = String(state.lives);
-    if (livesCountEl) livesCountEl.textContent = String(state.lives);
+    if (livesCountEl) livesCountEl.textContent = state.infiniteHeartsActive ? "∞" : String(state.lives);
+    updateInfiniteHeartsIndicator(livesEl, state);
   }
 
   function updateProgress(value) {

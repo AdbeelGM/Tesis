@@ -55,3 +55,36 @@
 .status-avatar .material-symbols-outlined {
   font-size: 26px;
 }
+
+.status-pill--lives.has-infinite-hearts {
+  position: relative;
+  overflow: visible;
+  background: linear-gradient(135deg, #ffe4e6 0%, #fef3c7 100%);
+  color: #be123c;
+}
+
+.status-pill--lives.has-infinite-hearts .status-pill__icon {
+  display: none;
+}
+
+.status-pill--lives.has-infinite-hearts .status-pill__text {
+  position: relative;
+  z-index: 1;
+  min-width: 24px;
+  text-align: center;
+}
+
+.status-pill--lives .infinite-hearts-indicator {
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: -8px -10px -8px -14px;
+  pointer-events: none;
+}
+
+.status-pill--lives .infinite-hearts-indicator dotlottie-wc {
+  width: 76px;
+  height: 76px;
+}

@@ -661,3 +661,36 @@ button {
     align-items: flex-start;
   }
 }
+
+.topbar__lives.has-infinite-hearts {
+  position: relative;
+  overflow: visible;
+  background: linear-gradient(135deg, #ffe4e6 0%, #fef3c7 100%);
+  color: #be123c;
+}
+
+.topbar__lives.has-infinite-hearts .topbar__lives-icon {
+  display: none;
+}
+
+.topbar__lives.has-infinite-hearts .topbar__lives-count {
+  position: relative;
+  z-index: 1;
+  min-width: 22px;
+  text-align: center;
+}
+
+.topbar__lives .infinite-hearts-indicator {
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: -8px -10px -8px -14px;
+  pointer-events: none;
+}
+
+.topbar__lives .infinite-hearts-indicator dotlottie-wc {
+  width: 76px;
+  height: 76px;
+}
