@@ -16,7 +16,7 @@ export async function refreshStatusBar() {
 
   try {
     const s = await loadState();
-    if (livesLabel) livesLabel.textContent = s.infiniteHeartsActive ? "∞" : `${s.lives}`;
+    if (livesLabel) livesLabel.textContent = s.infiniteHeartsActive ? "" : `${s.lives}`;
     updateInfiniteHeartsIndicator(livesLabel?.closest(".status-pill--lives"), s);
     if (gemsLabel) gemsLabel.textContent = `${s.gems}`;
     window.currentUserState = s;
