@@ -21,6 +21,7 @@ export function updateInfiniteHeartsIndicator(container, state) {
     "aria-label",
     active ? "Corazones infinitos activos" : "Vidas restantes"
   );
+  container.removeAttribute("title");
 
   let indicator = container.querySelector(".infinite-hearts-indicator");
 
@@ -44,20 +45,4 @@ export function updateInfiniteHeartsIndicator(container, state) {
     `;
     container.prepend(indicator);
   }
-
-  const remainingSeconds = Number(state?.infiniteHeartsRemainingSeconds) || 0;
-  if (remainingSeconds > 0) {
-    container.title = `Corazones infinitos activos: ${formatDuration(remainingSeconds)} restantes`;
-  } else {
-    container.title = "Corazones infinitos activos";
-  }
-}
-
-function formatDuration(seconds) {
-  const totalHours = Math.max(1, Math.ceil(Number(seconds) / 3600));
-  if (totalHours < 24) return `${totalHours}h`;
-
-  const days = Math.floor(totalHours / 24);
-  const hours = totalHours % 24;
-  return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
 }
