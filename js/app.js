@@ -4,7 +4,7 @@ import { purchaseStoreItemGlobal, updateProfilePhotoGlobal } from './game-state.
 
 const LOGIN_URL = 'login.html';
 const XP_BASE_REQUIREMENT = 120;
-const INFINITE_HEARTS_LOTTIE_SRC = 'https://lottie.host/5d0296e4-75bf-4ea6-a91d-1a4ab9229cb4/jKw6JA4dDx.lottie';
+const INFINITE_HEARTS_LOTTIE_SRC = 'https://lottie.host/dc359c7b-1c91-4240-8bbb-6875c10d318e/VneDkjaLX8.lottie';
 
 function ensureDotLottieScript() {
   if (document.querySelector('script[data-dotlottie-wc]')) return;
