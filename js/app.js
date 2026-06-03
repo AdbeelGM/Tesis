@@ -5,6 +5,7 @@ import { purchaseStoreItemGlobal, updateProfilePhotoGlobal } from './game-state.
 const LOGIN_URL = 'login.html';
 const XP_BASE_REQUIREMENT = 120;
 const INFINITE_HEARTS_LOTTIE_SRC = 'https://lottie.host/dc359c7b-1c91-4240-8bbb-6875c10d318e/VneDkjaLX8.lottie';
+const CHEST_LOTTIE_SRC = 'https://lottie.host/15b01aa0-3b82-4c5b-8486-512610b7a096/IYvwrrdLyw.lottie';
 
 function ensureDotLottieScript() {
   if (document.querySelector('script[data-dotlottie-wc]')) return;
@@ -116,6 +117,78 @@ function showInfiniteHeartsAnimation() {
   window.setTimeout(close, 9000);
 }
 
+function getGemCounterCenter() {
+  const gemsPill = document.querySelector('.status-pill--gems');
+  if (gemsPill) {
+    const rect = gemsPill.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  }
+
+  return { x: window.innerWidth - 120, y: 42 };
+}
+
+function showRouteChestAnimation() {
+  ensureDotLottieScript();
+
+  const target = getGemCounterCenter();
+  const overlay = document.createElement('div');
+  overlay.className = 'route-chest-reward';
+
+  const animation = document.createElement('dotlottie-wc');
+  animation.className = 'route-chest-reward__video';
+  animation.setAttribute('src', CHEST_LOTTIE_SRC);
+  animation.setAttribute('autoplay', '');
+  animation.setAttribute('loop', '');
+  animation.setAttribute('aria-hidden', 'true');
+
+  const burst = document.createElement('div');
+  burst.className = 'route-chest-reward__burst';
+
+  for (let i = 0; i < 20; i += 1) {
+    const gem = document.createElement('span');
+    gem.className = 'route-chest-reward__gem material-symbols-outlined';
+    gem.textContent = 'diamond';
+    gem.style.setProperty('--start-x', `${Math.random() * 220 - 110}px`);
+    gem.style.setProperty('--start-y', `${Math.random() * -155 - 25}px`);
+    gem.style.setProperty('--target-x', `${target.x - window.innerWidth / 2}px`);
+    gem.style.setProperty('--target-y', `${target.y - window.innerHeight / 2}px`);
+    gem.style.setProperty('--delay', `${0.35 + Math.random() * 0.65}s`);
+    gem.style.setProperty('--size', `${22 + Math.random() * 18}px`);
+    burst.appendChild(gem);
+  }
+
+  overlay.appendChild(animation);
+  overlay.appendChild(burst);
+  document.body.appendChild(overlay);
+  window.setTimeout(() => overlay.remove(), 3600);
+}
+
+function bindSectionChestClicks(root = document) {
+  const chests = [...root.querySelectorAll('[data-section-chest]')];
+  const currentLevel = Number(window.currentUserState?.level) || 1;
+
+  chests.forEach((chest) => {
+    const lastLevel = Number(chest.dataset.sectionLastLevel) || 0;
+    const unlocked = currentLevel > lastLevel;
+
+    chest.disabled = !unlocked;
+    chest.classList.toggle('route__section-chest--locked', !unlocked);
+    chest.classList.toggle('route__section-chest--ready', unlocked);
+    chest.setAttribute('aria-label', unlocked ? 'Abrir cofre de sección' : 'Cofre de sección bloqueado');
+
+    if (chest.dataset.boundChest === 'true') return;
+    chest.addEventListener('click', () => {
+      if (chest.disabled) {
+        alert('Completa todos los niveles de esta sección para abrir el cofre.');
+        return;
+      }
+
+      showRouteChestAnimation();
+    });
+    chest.dataset.boundChest = 'true';
+  });
+}
+
 function xpNeededToAdvance(accountLevel) {
   const level = Math.max(1, Number(accountLevel) || 1);
   return Math.round(XP_BASE_REQUIREMENT + (level * 32) + (Math.pow(level, 1.4) * 14));
@@ -177,6 +250,17 @@ function renderLevelPath(unit, unitIndex) {
           <button class="level-node" data-level="${level}" type="button"></button>
         </div>
       `).join('')}
+
+      <div class="level-item level-item--section-chest" style="--offset-x: 0px">
+        <button
+          class="route__section-chest"
+          data-section-chest="${unitIndex}"
+          data-section-last-level="${unit.levels[unit.levels.length - 1]}"
+          type="button"
+        >
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">treasure_chest</span>
+        </button>
+      </div>
     </section>
   `;
 }
@@ -452,6 +536,7 @@ function mountView(viewName, mountNode) {
 
   if (viewName === 'aprender') {
     mountNode.dynamicUnitHeaderCleanup = initializeDynamicUnitHeader(mountNode);
+    bindSectionChestClicks(mountNode);
   }
 
   document.dispatchEvent(new CustomEvent(`view:${viewName}:mounted`));
@@ -681,5 +766,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   await refreshStatusBar();
+  bindSectionChestClicks(document);
   document.dispatchEvent(new CustomEvent('user-state-ready', { detail: window.currentUserState }));
 });

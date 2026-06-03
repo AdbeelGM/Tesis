@@ -54,6 +54,33 @@ function resolveCategorias(cfg) {
   return [];
 }
 
+
+const DOT_LOTTIE_SCRIPT_SRC = "https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.14/dist/dotlottie-wc.js";
+const CHEST_LOTTIE_SRC = "https://lottie.host/15b01aa0-3b82-4c5b-8486-512610b7a096/IYvwrrdLyw.lottie";
+
+function ensureDotLottieScript() {
+  if (document.querySelector('script[data-dotlottie-wc]')) return;
+
+  const script = document.createElement("script");
+  script.src = DOT_LOTTIE_SCRIPT_SRC;
+  script.type = "module";
+  script.dataset.dotlottieWc = "true";
+  document.head.appendChild(script);
+}
+
+function getGemFlightTarget() {
+  const target = document.querySelector(".status-pill--gems, [data-gem-target]");
+  if (target) {
+    const rect = target.getBoundingClientRect();
+    return {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    };
+  }
+
+  return { x: window.innerWidth - 88, y: 44 };
+}
+
 const CATEGORIA_ALIASES = {
   // compatibilidad hacia atrás
   palabras_comunes: "palabrascomunes",
@@ -85,52 +112,64 @@ function resolveDificultades(cfg) {
 
 
 function showGemChestRewardAnimation(gemsEarned = 0) {
+  ensureDotLottieScript();
+
   const overlay = document.createElement("div");
   overlay.className = "gem-chest-reward";
   overlay.setAttribute("role", "status");
   overlay.setAttribute("aria-live", "polite");
 
+  const target = getGemFlightTarget();
+  overlay.style.setProperty("--gem-target-x", `${target.x}px`);
+  overlay.style.setProperty("--gem-target-y", `${target.y}px`);
+
+  const targetBadge = document.createElement("div");
+  targetBadge.className = "gem-chest-reward__target";
+  targetBadge.setAttribute("data-gem-target", "true");
+  targetBadge.style.left = `${target.x}px`;
+  targetBadge.style.top = `${target.y}px`;
+  targetBadge.innerHTML = '<span class="material-symbols-outlined">diamond</span>';
+
+  const chest = document.createElement("dotlottie-wc");
+  chest.className = "gem-chest-reward__video";
+  chest.setAttribute("src", CHEST_LOTTIE_SRC);
+  chest.setAttribute("autoplay", "");
+  chest.setAttribute("loop", "");
+  chest.setAttribute("aria-hidden", "true");
+
   const burst = document.createElement("div");
   burst.className = "gem-chest-reward__burst";
 
-  const chest = document.createElement("div");
-  chest.className = "gem-chest-reward__chest";
-  chest.setAttribute("aria-hidden", "true");
-  chest.innerHTML = `
-    <div class="gem-chest-reward__lid"></div>
-    <div class="gem-chest-reward__lock"></div>
-    <div class="gem-chest-reward__base"></div>
-  `;
-
   const title = document.createElement("p");
   title.className = "gem-chest-reward__title";
-  title.textContent = "¡Cofre desbloqueado!";
+  title.textContent = "¡Cofre abierto!";
 
   const reward = document.createElement("p");
   reward.className = "gem-chest-reward__amount";
   reward.innerHTML = `<span class="material-symbols-outlined">diamond</span> +${Number(gemsEarned) || 0} gemas`;
 
-  for (let i = 0; i < 22; i++) {
+  for (let i = 0; i < 24; i++) {
     const gem = document.createElement("span");
     gem.className = "gem-chest-reward__gem material-symbols-outlined";
     gem.textContent = "diamond";
-    gem.style.setProperty("--x", `${Math.random() * 320 - 160}px`);
-    gem.style.setProperty("--y", `${Math.random() * -250 - 80}px`);
-    gem.style.setProperty("--r", `${Math.random() * 220 - 110}deg`);
-    gem.style.setProperty("--delay", `${0.35 + Math.random() * 0.6}s`);
-    gem.style.setProperty("--size", `${24 + Math.random() * 22}px`);
+    gem.style.setProperty("--start-x", `${Math.random() * 240 - 120}px`);
+    gem.style.setProperty("--start-y", `${Math.random() * -170 - 30}px`);
+    gem.style.setProperty("--target-x", `${target.x - window.innerWidth / 2}px`);
+    gem.style.setProperty("--target-y", `${target.y - window.innerHeight / 2}px`);
+    gem.style.setProperty("--delay", `${0.4 + Math.random() * 0.75}s`);
+    gem.style.setProperty("--size", `${22 + Math.random() * 20}px`);
     burst.appendChild(gem);
   }
 
-  overlay.appendChild(burst);
+  overlay.appendChild(targetBadge);
   overlay.appendChild(chest);
+  overlay.appendChild(burst);
   overlay.appendChild(title);
   overlay.appendChild(reward);
   document.body.appendChild(overlay);
 
-  window.setTimeout(() => overlay.remove(), 3600);
+  window.setTimeout(() => overlay.remove(), 4200);
 }
-
 function wait(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
@@ -441,7 +480,7 @@ function wait(ms) {
       }
 
       showGemChestRewardAnimation(gemsEarned);
-      await wait(3600);
+      await wait(4200);
       window.location.href = "index.html";
       return;
     }
