@@ -258,7 +258,7 @@ function renderLevelPath(unit, unitIndex) {
           data-section-last-level="${unit.levels[unit.levels.length - 1]}"
           type="button"
         >
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">treasure_chest</span>
+          <span class="material-symbols-outlined">featured_seasonal_and_gifts</span>
         </button>
       </div>
     </section>
