@@ -7,6 +7,7 @@ const MAX_LIVES = 5;
 const LIFE_INTERVAL_MINUTES = 5;
 const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
 const TOTAL_LEVELS = 15;
+const BASE_GEMS_REWARD = 25;
 const STORE_PRODUCTS = {
   single_heart: { gems: 100, lives: 1, type: "lives" },
   heart_bundle: { gems: 450, lives: 5, type: "lives" },
@@ -19,6 +20,11 @@ function getExperienceRewardForLevel(levelNumber) {
   const linear = level * 25;
   const curve = Math.floor(Math.pow(level, 1.35) * 15);
   return base + linear + curve;
+}
+
+function getGemsRewardForLevel(levelNumber) {
+  const level = Math.max(1, Number(levelNumber) || 1);
+  return BASE_GEMS_REWARD + Math.floor(level / 3) * 5;
 }
 
 async function ensureSchema() {
@@ -373,6 +379,7 @@ userRouter.post("/complete-level", async (req, res) => {
     }
 
     const xpReward = getExperienceRewardForLevel(requestedLevel);
+    const gemsReward = getGemsRewardForLevel(requestedLevel);
     const nextLevel = currentLevel + 1;
     const nextProgress = Math.min(
       100,
@@ -383,14 +390,15 @@ userRouter.post("/complete-level", async (req, res) => {
       `UPDATE Usuarios
        SET nivel = nivel + 1,
            experiencia = experiencia + ?,
+           gemas = COALESCE(gemas, 0) + ?,
            lecciones_terminadas = lecciones_terminadas + 1,
            progreso = GREATEST(progreso, ?)
        WHERE usuario = ?`,
-      [xpReward, nextProgress, usuario]
+      [xpReward, gemsReward, nextProgress, usuario]
     );
 
     const updated = await getUserState(usuario);
-    return res.json({ ...updated, xp_ganada: xpReward });
+    return res.json({ ...updated, xp_ganada: xpReward, gemas_ganadas: gemsReward });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Error al completar nivel" });

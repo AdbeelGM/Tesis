@@ -83,6 +83,58 @@ function resolveDificultades(cfg) {
   return [];
 }
 
+
+function showGemChestRewardAnimation(gemsEarned = 0) {
+  const overlay = document.createElement("div");
+  overlay.className = "gem-chest-reward";
+  overlay.setAttribute("role", "status");
+  overlay.setAttribute("aria-live", "polite");
+
+  const burst = document.createElement("div");
+  burst.className = "gem-chest-reward__burst";
+
+  const chest = document.createElement("div");
+  chest.className = "gem-chest-reward__chest";
+  chest.setAttribute("aria-hidden", "true");
+  chest.innerHTML = `
+    <div class="gem-chest-reward__lid"></div>
+    <div class="gem-chest-reward__lock"></div>
+    <div class="gem-chest-reward__base"></div>
+  `;
+
+  const title = document.createElement("p");
+  title.className = "gem-chest-reward__title";
+  title.textContent = "¡Cofre desbloqueado!";
+
+  const reward = document.createElement("p");
+  reward.className = "gem-chest-reward__amount";
+  reward.innerHTML = `<span class="material-symbols-outlined">diamond</span> +${Number(gemsEarned) || 0} gemas`;
+
+  for (let i = 0; i < 22; i++) {
+    const gem = document.createElement("span");
+    gem.className = "gem-chest-reward__gem material-symbols-outlined";
+    gem.textContent = "diamond";
+    gem.style.setProperty("--x", `${Math.random() * 320 - 160}px`);
+    gem.style.setProperty("--y", `${Math.random() * -250 - 80}px`);
+    gem.style.setProperty("--r", `${Math.random() * 220 - 110}deg`);
+    gem.style.setProperty("--delay", `${0.35 + Math.random() * 0.6}s`);
+    gem.style.setProperty("--size", `${24 + Math.random() * 22}px`);
+    burst.appendChild(gem);
+  }
+
+  overlay.appendChild(burst);
+  overlay.appendChild(chest);
+  overlay.appendChild(title);
+  overlay.appendChild(reward);
+  document.body.appendChild(overlay);
+
+  window.setTimeout(() => overlay.remove(), 3600);
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
 (async function main() {
   let level;
   let cfg;
@@ -377,17 +429,24 @@ function resolveDificultades(cfg) {
     await reportTimeSpent();
 
     if (completed) {
+      let gemsEarned = 0;
       const session = loadSession();
       if (session?.usuario) {
         try {
-          await completeLevel(session.usuario, level);
+          const result = await completeLevel(session.usuario, level);
+          gemsEarned = Number(result?.gemas_ganadas) || 0;
         } catch (err) {
           console.warn("No se pudo actualizar avance de nivel:", err.message);
         }
       }
+
+      showGemChestRewardAnimation(gemsEarned);
+      await wait(3600);
+      window.location.href = "index.html";
+      return;
     }
 
-    alert(completed ? "✅ Nivel completado" : "❌ Nivel terminado sin vidas");
+    alert("❌ Nivel terminado sin vidas");
     window.location.href = "index.html";
   }
 
