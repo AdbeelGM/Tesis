@@ -149,28 +149,6 @@ button {
   gap: 14px;
 }
 
-.topbar__gems {
-  min-width: 52px;
-  height: 46px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #bae6fd;
-  border-radius: 999px;
-  background: #ecfeff;
-  color: #06b6d4;
-  box-shadow: 0 8px 18px rgba(8, 145, 178, 0.12);
-}
-
-.topbar__gems-icon {
-  font-size: 28px;
-  font-variation-settings:
-    "FILL" 1,
-    "wght" 700,
-    "GRAD" 0,
-    "opsz" 24;
-}
-
 .topbar__lives {
   display: inline-flex;
   align-items: center;

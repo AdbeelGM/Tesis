@@ -42,13 +42,13 @@ function renderLevelStates(root = document) {
   const userState = window.currentUserState;
   if (!userState) return;
 
-  const nodes = root.querySelectorAll('.level-node');
+  const nodes = root.querySelectorAll('.level-node[data-level]');
   const currentLevel = Number(userState.level) || 1;
   nodes.forEach((node) => applyLevelNodeState(node, currentLevel));
 }
 
 function bindLevelClicks(root = document) {
-  const nodes = root.querySelectorAll('.level-node');
+  const nodes = root.querySelectorAll('.level-node[data-level]');
 
   nodes.forEach((node) => {
     if (node.dataset.boundClick === 'true') return;

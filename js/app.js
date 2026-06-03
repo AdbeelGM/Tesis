@@ -253,7 +253,7 @@ function renderLevelPath(unit, unitIndex) {
 
       <div class="level-item level-item--section-chest" style="--offset-x: 0px">
         <button
-          class="route__section-chest"
+          class="level-node route__section-chest"
           data-section-chest="${unitIndex}"
           data-section-last-level="${unit.levels[unit.levels.length - 1]}"
           type="button"
