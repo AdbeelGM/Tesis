@@ -27,8 +27,17 @@
 }
 
 .status-pill--gems {
-  background: #fff2b8;
-  color: #e0aa00;
+  background: #e8fdff;
+  color: #75fbfd;
+}
+
+.status-pill--gems .status-pill__icon {
+  color: #75fbfd;
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
 }
 
 .status-pill--lives {
