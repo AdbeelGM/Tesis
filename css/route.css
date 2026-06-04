@@ -325,7 +325,7 @@
   place-items: center;
   overflow: hidden;
   pointer-events: none;
-  background: radial-gradient(circle at center, rgba(255, 247, 237, 0.85), rgba(15, 23, 42, 0.28));
+  background: radial-gradient(circle at center, rgba(224, 247, 255, 0.88), rgba(255, 241, 242, 0.62));
   animation: route-chest-fade-in 0.22s ease-out both, route-chest-fade-out 0.32s ease-in 3.75s forwards;
 }
 
@@ -350,8 +350,8 @@
   left: 0;
   top: 0;
   font-size: var(--size);
-  color: #38d6e8;
-  text-shadow: 0 3px 0 #0898ac, 0 10px 18px rgba(56, 214, 232, 0.24);
+  color: #7dd3fc;
+  text-shadow: 0 3px 0 rgba(186, 230, 253, 0.85), 0 10px 18px rgba(125, 211, 252, 0.28);
   font-variation-settings:
     "FILL" 0,
     "wght" 400,

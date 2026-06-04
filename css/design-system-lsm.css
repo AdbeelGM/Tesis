@@ -43,8 +43,8 @@
   font-size: 14px;
 }
 
-.status-pill--gems { background: #fef3c7; color: #38d6e8; }
-.status-pill--gems .status-pill__icon { color: #38d6e8; font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
+.status-pill--gems { background: #e0f7ff; color: #258eb5; border: 1px solid #bae6fd; box-shadow: 0 8px 18px rgba(125, 211, 252, 0.22); }
+.status-pill--gems .status-pill__icon { color: #7dd3fc; text-shadow: 0 2px 0 rgba(186, 230, 253, 0.8); font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
 .status-pill--lives { background: #ffe4e6; color: #fb7185; }
 .status-pill__popup { display: none; }
 
