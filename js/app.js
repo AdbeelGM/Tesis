@@ -6,6 +6,8 @@ const LOGIN_URL = 'login.html';
 const XP_BASE_REQUIREMENT = 120;
 const INFINITE_HEARTS_LOTTIE_SRC = 'https://lottie.host/dc359c7b-1c91-4240-8bbb-6875c10d318e/VneDkjaLX8.lottie';
 const CHEST_LOTTIE_SRC = 'https://lottie.host/15b01aa0-3b82-4c5b-8486-512610b7a096/IYvwrrdLyw.lottie';
+const ROUTE_CHEST_GEM_DELAY_SECONDS = 1.35;
+const ROUTE_CHEST_GEM_DELAY_VARIANCE_SECONDS = 0.45;
 
 function ensureDotLottieScript() {
   if (document.querySelector('script[data-dotlottie-wc]')) return;
@@ -152,7 +154,10 @@ function showRouteChestAnimation() {
     gem.style.setProperty('--start-y', `${Math.random() * -155 - 25}px`);
     gem.style.setProperty('--target-x', `${target.x - window.innerWidth / 2}px`);
     gem.style.setProperty('--target-y', `${target.y - window.innerHeight / 2}px`);
-    gem.style.setProperty('--delay', `${0.85 + Math.random() * 0.55}s`);
+    gem.style.setProperty(
+      '--delay',
+      `${ROUTE_CHEST_GEM_DELAY_SECONDS + Math.random() * ROUTE_CHEST_GEM_DELAY_VARIANCE_SECONDS}s`,
+    );
     gem.style.setProperty('--size', `${22 + Math.random() * 18}px`);
     burst.appendChild(gem);
   }
