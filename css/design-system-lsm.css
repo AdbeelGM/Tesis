@@ -43,7 +43,7 @@
   font-size: 14px;
 }
 
-.status-pill--gems { background: #e8fdff; color: #75fbfd; }
+.status-pill--gems { background: #fef3c7; color: #eab308; }
 .status-pill--gems .status-pill__icon { color: #75fbfd; font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
 .status-pill--lives { background: #ffe4e6; color: #fb7185; }
 .status-pill__popup { display: none; }
