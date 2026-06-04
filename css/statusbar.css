@@ -27,8 +27,10 @@
 }
 
 .status-pill--gems {
-  background: #fff2b8;
+  background: #7c2d12;
   color: #38d6e8;
+  border: 1px solid rgba(56, 214, 232, 0.28);
+  box-shadow: 0 8px 18px rgba(124, 45, 18, 0.18);
 }
 
 .status-pill--gems .status-pill__icon {
