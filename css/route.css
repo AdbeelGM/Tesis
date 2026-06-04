@@ -350,8 +350,8 @@
   left: 0;
   top: 0;
   font-size: var(--size);
-  color: #75fbfd;
-  text-shadow: 0 3px 0 #2dd4e6, 0 10px 18px rgba(117, 251, 253, 0.3);
+  color: #38d6e8;
+  text-shadow: 0 3px 0 #0898ac, 0 10px 18px rgba(56, 214, 232, 0.24);
   font-variation-settings:
     "FILL" 0,
     "wght" 400,
