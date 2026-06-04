@@ -152,7 +152,7 @@ function showRouteChestAnimation() {
     gem.style.setProperty('--start-y', `${Math.random() * -155 - 25}px`);
     gem.style.setProperty('--target-x', `${target.x - window.innerWidth / 2}px`);
     gem.style.setProperty('--target-y', `${target.y - window.innerHeight / 2}px`);
-    gem.style.setProperty('--delay', `${0.35 + Math.random() * 0.65}s`);
+    gem.style.setProperty('--delay', `${0.85 + Math.random() * 0.55}s`);
     gem.style.setProperty('--size', `${22 + Math.random() * 18}px`);
     burst.appendChild(gem);
   }
@@ -160,7 +160,7 @@ function showRouteChestAnimation() {
   overlay.appendChild(animation);
   overlay.appendChild(burst);
   document.body.appendChild(overlay);
-  window.setTimeout(() => overlay.remove(), 3600);
+  window.setTimeout(() => overlay.remove(), 4200);
 }
 
 function bindSectionChestClicks(root = document) {

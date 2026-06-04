@@ -326,7 +326,7 @@
   overflow: hidden;
   pointer-events: none;
   background: radial-gradient(circle at center, rgba(255, 247, 237, 0.85), rgba(15, 23, 42, 0.28));
-  animation: route-chest-fade-in 0.22s ease-out both, route-chest-fade-out 0.32s ease-in 3.25s forwards;
+  animation: route-chest-fade-in 0.22s ease-out both, route-chest-fade-out 0.32s ease-in 3.75s forwards;
 }
 
 .route-chest-reward__video {
