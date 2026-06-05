@@ -8,6 +8,7 @@ const INFINITE_HEARTS_LOTTIE_SRC = 'https://lottie.host/dc359c7b-1c91-4240-8bbb-
 const CHEST_LOTTIE_SRC = 'https://lottie.host/15b01aa0-3b82-4c5b-8486-512610b7a096/IYvwrrdLyw.lottie';
 const ROUTE_CHEST_GEM_DELAY_SECONDS = 1.35;
 const ROUTE_CHEST_GEM_DELAY_VARIANCE_SECONDS = 0.45;
+const DEFAULT_PROFILE_AVATAR_SRC = 'img/avatar.png';
 
 function ensureDotLottieScript() {
   if (document.querySelector('script[data-dotlottie-wc]')) return;
@@ -440,7 +441,7 @@ function renderProfileView() {
           <div class="profile-banner__content">
               <div class="profile-avatar-wrap">
                 <div class="profile-avatar-ring">
-                  <img id="profile-avatar" class="profile-avatar" src="https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80" alt="Foto de perfil">
+                  <img id="profile-avatar" class="profile-avatar" src="${DEFAULT_PROFILE_AVATAR_SRC}" alt="Foto de perfil">
                 </div>
               <span class="profile-pro-badge">PRO</span>
             </div>
@@ -681,7 +682,7 @@ function updateProfileView(state) {
   const routeLevel = Math.max(1, Number(state.level) || 1);
   const xpProgress = getExperienceProgress(xp);
   const time = formatTimeInvested(state.timeInvestedSeconds);
-  const avatarSrc = state.profilePhotoBase64 || state.profilePhotoUrl || 'https://images.unsplash.com/photo-1737048236257-c4f4d90f90d3?auto=format&fit=crop&w=400&q=80';
+  const avatarSrc = state.profilePhotoBase64 || state.profilePhotoUrl || DEFAULT_PROFILE_AVATAR_SRC;
 
   if (avatar) avatar.src = avatarSrc;
   if (profileName) profileName.textContent = state.usuario || 'Usuario';
