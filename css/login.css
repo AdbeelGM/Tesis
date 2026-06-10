@@ -53,9 +53,10 @@
 
 .auth-hero__image {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -5%;
+  width: 110%;
+  height: 110%;
+  max-width: none;
   object-fit: cover;
   object-position: center;
   filter: saturate(0.96) brightness(1.02);
