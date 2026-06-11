@@ -63,12 +63,12 @@ function bindLevelClicks(root = document) {
       }
 
       if (!userState) {
-        alert('Inicia sesión para acceder a los niveles.');
+        console.warn('Inicia sesión para acceder a los niveles.');
         return;
       }
 
       if (level > Number(userState.level)) {
-        alert('Este ejercicio está bloqueado por ahora.');
+        console.warn('Este ejercicio está bloqueado por ahora.');
         return;
       }
 

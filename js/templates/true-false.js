@@ -21,7 +21,7 @@ export function runTrueFalse(cfg) {
     try {
       state.questions = await fetchQuestionsTF(cfg);
     } catch (e) {
-      alert(e.message || "Error cargando VF");
+      console.error(e.message || "Error cargando VF");
       return resolve(); // ahora SÍ existe
     }
 
