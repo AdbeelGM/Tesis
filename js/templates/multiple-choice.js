@@ -24,7 +24,7 @@ export function runMultipleChoice(cfg) {
     try {
       state.questions = await fetchQuestionsMC(cfg);
     } catch (e) {
-      alert(e.message || "Error cargando preguntas");
+      console.error(e.message || "Error cargando preguntas");
       return resolve(); // termina el bloque para no romper todo
     }
 
@@ -54,7 +54,7 @@ export function runMultipleChoice(cfg) {
     updateLives();
     showFeedback(false, `Incorrecto. La respuesta correcta era: "${q.correcta}"`);
     if (state.lives <= 0) {
-      alert("❌ Sin vidas");
+      console.warn("Sin vidas");
       return resolve();
     }
   }
