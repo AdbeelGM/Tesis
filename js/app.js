@@ -185,7 +185,7 @@ function bindSectionChestClicks(root = document) {
     if (chest.dataset.boundChest === 'true') return;
     chest.addEventListener('click', () => {
       if (chest.disabled) {
-        alert('Completa todos los niveles de esta sección para abrir el cofre.');
+        console.info('Completa todos los niveles de esta sección para abrir el cofre.');
         return;
       }
 
@@ -621,12 +621,12 @@ function bindStoreActions() {
       const state = window.currentUserState || { lives: 0, maxLives: 5, infiniteHeartsActive: false };
       const livesAtMax = Number(state.lives) >= Number(state.maxLives);
       if ((productId === 'single_heart' || productId === 'heart_bundle') && livesAtMax) {
-        alert('⚠️ Ya tienes el máximo de corazones.');
+        console.info('Ya tienes el máximo de corazones.');
         updateStorePurchaseAvailability(state);
         return;
       }
       if (productId === 'infinite_hearts_24h' && state.infiniteHeartsActive) {
-        alert('⚠️ Ya tienes corazones ilimitados activos.');
+        console.info('Ya tienes corazones ilimitados activos.');
         updateStorePurchaseAvailability(state);
         return;
       }
@@ -654,9 +654,9 @@ function bindStoreActions() {
           showInfiniteHeartsAnimation();
         }
 
-        alert('✅ Compra realizada');
+        console.info('Compra realizada.');
       } catch (err) {
-        alert(`❌ ${err.message}`);
+        console.error(err.message);
       } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -713,12 +713,12 @@ function bindProfileActions() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('⚠️ Solo se permiten imágenes para la foto de perfil.');
+      console.warn('Solo se permiten imágenes para la foto de perfil.');
       input.value = '';
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      alert('⚠️ La foto de perfil debe ser de máximo 10 MB.');
+      console.warn('La foto de perfil debe ser de máximo 10 MB.');
       input.value = '';
       return;
     }
@@ -730,13 +730,13 @@ function bindProfileActions() {
         window.currentUserState = updated;
         updateProfileView(updated);
       } catch (err) {
-        alert(`❌ ${err.message}`);
+        console.error(err.message);
       } finally {
         input.value = '';
       }
     };
     reader.onerror = () => {
-      alert('❌ No se pudo leer la imagen seleccionada.');
+      console.error('No se pudo leer la imagen seleccionada.');
       input.value = '';
     };
     reader.readAsDataURL(file);

@@ -151,7 +151,7 @@ function resolveDificultades(cfg) {
 
   const global = await loadState();
   if (Number(global.level) !== Number(level)) {
-    alert(`No tienes acceso al nivel ${level}. Tu nivel actual es ${global.level}.`);
+    console.warn(`No tienes acceso al nivel ${level}. Tu nivel actual es ${global.level}.`);
     window.location.href = "index.html";
     return;
   }
@@ -173,14 +173,14 @@ function resolveDificultades(cfg) {
     const mix = cfg.mix || { multiple_choice: 1 };
     const categorias = normalizeCategorias(resolveCategorias(cfg));
     if (categorias.length === 0) {
-      alert("Config inválida: define al menos una categoría.");
+      console.error("Config inválida: define al menos una categoría.");
       window.location.href = "index.html";
       return;
     }
 
     const dificultades = resolveDificultades(cfg);
     if (dificultades.length === 0) {
-      alert("Config inválida: dificultad debe ser un entero positivo o un arreglo de enteros positivos.");
+      console.error("Config inválida: dificultad debe ser un entero positivo o un arreglo de enteros positivos.");
       window.location.href = "index.html";
       return;
     }
@@ -218,7 +218,7 @@ function resolveDificultades(cfg) {
     ]);
 
     if (state.queue.length === 0) {
-      alert("No hay preguntas para este nivel.");
+      console.warn("No hay preguntas para este nivel.");
       window.location.href = "index.html";
       return;
     }
@@ -246,7 +246,7 @@ function resolveDificultades(cfg) {
         showFeedback(false, buildFeedback(q, false));
 
         if (state.lives <= 0) {
-          alert("❌ Sin vidas");
+          console.info("Nivel terminado sin vidas.");
           return endLevel(false);
         }
       }
@@ -256,7 +256,7 @@ function resolveDificultades(cfg) {
     renderCurrent();
   } catch (err) {
     console.error("Error al cargar el nivel:", err);
-    alert(`No se pudo cargar el nivel. Revisa la configuración. Detalle: ${err.message}`);
+    console.error(`No se pudo cargar el nivel. Revisa la configuración. Detalle: ${err.message}`);
     window.location.href = "index.html";
     return;
   }
@@ -393,7 +393,7 @@ function resolveDificultades(cfg) {
       return;
     }
 
-    alert("❌ Nivel terminado sin vidas");
+    console.info("Nivel terminado sin vidas.");
     window.location.href = "index.html";
   }
 
