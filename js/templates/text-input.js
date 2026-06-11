@@ -22,12 +22,12 @@ export function runTextInput(cfg) {
       state.questions = await fetchQuestionsText(cfg);
       console.log("🟦 TextInput loaded:", state.questions);
     } catch (e) {
-      alert(e.message || "Error cargando Text Input");
+      console.error(e.message || "Error cargando Text Input");
       return resolve();
     }
 
     if (!Array.isArray(state.questions) || state.questions.length === 0) {
-      alert("No hay preguntas de Text Input.");
+      console.warn("No hay preguntas de Text Input.");
       return resolve();
     }
 
