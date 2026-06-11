@@ -223,22 +223,22 @@ function getExperienceProgress(totalXp) {
 const LEARN_UNITS = [
   {
     eyebrow: 'Sección 1',
-    title: 'Abecedario',
-    subtitle: 'Reconoce letras, compara señas y escribe respuestas cortas.',
+    title: 'Primeros pasos',
+    subtitle: 'Aprende el abecedario, los números y los colores en LSM.',
     levels: [1, 2, 3, 4, 5],
     offsets: [90, -80, 0, 100, -60],
   },
   {
     eyebrow: 'Sección 2',
-    title: 'Colores',
-    subtitle: 'Avanza desde identificación básica hasta escritura de colores.',
+    title: 'Hablando con otros',
+    subtitle: 'Practica saludos, familia, pronombres y expresiones del día a día.',
     levels: [6, 7, 8, 9, 10],
     offsets: [-70, 85, -15, 95, -55],
   },
   {
     eyebrow: 'Sección 3',
-    title: 'Continentes y países',
-    subtitle: 'Practica lugares con retos más largos y respuestas abiertas.',
+    title: 'El mundo y la vida cotidiana',
+    subtitle: 'Explora lugares, transportes, tecnología y más en LSM.',
     levels: [11, 12, 13, 14, 15],
     offsets: [80, -90, 10, 100, -65],
   },
