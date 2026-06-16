@@ -65,7 +65,13 @@
   line-height: 1.65;
 }
 
+.lsm-modal__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
 .lsm-modal__action {
+  flex: 1;
   width: 100%;
   padding: 1rem 1.5rem;
   color: #ffffff;
@@ -78,6 +84,12 @@
   transition: transform 120ms ease, border-bottom-width 120ms ease, filter 120ms ease;
 }
 
+.lsm-modal__action--secondary {
+  color: #64748b;
+  background: #f1f5f9;
+  border-bottom-color: #cbd5e1;
+}
+
 .lsm-modal__action:hover {
   filter: brightness(1.03);
 }
@@ -85,6 +97,12 @@
 .lsm-modal__action:active {
   transform: translateY(4px);
   border-bottom-width: 0;
+}
+
+@media (max-width: 420px) {
+  .lsm-modal__actions {
+    flex-direction: column;
+  }
 }
 
 @keyframes lsm-modal-fade-in {
