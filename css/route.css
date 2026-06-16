@@ -282,11 +282,11 @@
   cursor: pointer;
 }
 
-.route__section-chest:hover:not(:disabled) {
+.route__section-chest:hover:not([aria-disabled="true"]) {
   transform: translateY(-8px) scale(1.05);
 }
 
-.route__section-chest:active:not(:disabled) {
+.route__section-chest:active:not([aria-disabled="true"]) {
   transform: translateY(0) scale(1);
 }
 

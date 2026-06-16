@@ -151,7 +151,7 @@ function resolveDificultades(cfg) {
 
   const global = await loadState();
   if (Number(global.level) !== Number(level)) {
-    console.warn(`No tienes acceso al nivel ${level}. Tu nivel actual es ${global.level}.`);
+    window.showLsmModal?.({ message: `¡Nivel Bloqueado! Tu nivel actual es ${global.level}. Completa las lecciones anteriores para desbloquear el nivel ${level}.` });
     window.location.href = "index.html";
     return;
   }
@@ -173,14 +173,14 @@ function resolveDificultades(cfg) {
     const mix = cfg.mix || { multiple_choice: 1 };
     const categorias = normalizeCategorias(resolveCategorias(cfg));
     if (categorias.length === 0) {
-      console.error("Config inválida: define al menos una categoría.");
+      window.showLsmModal?.({ title: '¡Ups!', message: 'No se encontró contenido para este nivel. Intenta más tarde.' });
       window.location.href = "index.html";
       return;
     }
 
     const dificultades = resolveDificultades(cfg);
     if (dificultades.length === 0) {
-      console.error("Config inválida: dificultad debe ser un entero positivo o un arreglo de enteros positivos.");
+      window.showLsmModal?.({ title: '¡Ups!', message: 'La dificultad de este nivel no está configurada correctamente.' });
       window.location.href = "index.html";
       return;
     }
@@ -218,7 +218,7 @@ function resolveDificultades(cfg) {
     ]);
 
     if (state.queue.length === 0) {
-      console.warn("No hay preguntas para este nivel.");
+      window.showLsmModal?.({ title: '¡Ups!', message: 'No hay preguntas disponibles para este nivel por ahora.' });
       window.location.href = "index.html";
       return;
     }
@@ -246,7 +246,7 @@ function resolveDificultades(cfg) {
         showFeedback(false, buildFeedback(q, false));
 
         if (state.lives <= 0) {
-          console.info("Nivel terminado sin vidas.");
+          window.showLsmModal?.({ message: '¡Sin corazones! Vuelve a intentarlo cuando recuperes vidas.' });
           return endLevel(false);
         }
       }
@@ -256,7 +256,7 @@ function resolveDificultades(cfg) {
     renderCurrent();
   } catch (err) {
     console.error("Error al cargar el nivel:", err);
-    console.error(`No se pudo cargar el nivel. Revisa la configuración. Detalle: ${err.message}`);
+    window.showLsmModal?.({ title: '¡Ups!', message: `No se pudo cargar el nivel. Detalle: ${err.message}` });
     window.location.href = "index.html";
     return;
   }
@@ -393,7 +393,7 @@ function resolveDificultades(cfg) {
       return;
     }
 
-    console.info("Nivel terminado sin vidas.");
+    window.showLsmModal?.({ message: '¡Sin corazones! Vuelve a intentarlo cuando recuperes vidas.' });
     window.location.href = "index.html";
   }
 

@@ -177,15 +177,16 @@ function bindSectionChestClicks(root = document) {
     const lastLevel = Number(chest.dataset.sectionLastLevel) || 0;
     const unlocked = currentLevel > lastLevel;
 
-    chest.disabled = !unlocked;
+    chest.disabled = false;
+    chest.setAttribute('aria-disabled', String(!unlocked));
     chest.classList.toggle('route__section-chest--locked', !unlocked);
     chest.classList.toggle('route__section-chest--ready', unlocked);
     chest.setAttribute('aria-label', unlocked ? 'Abrir cofre de sección' : 'Cofre de sección bloqueado');
 
     if (chest.dataset.boundChest === 'true') return;
     chest.addEventListener('click', () => {
-      if (chest.disabled) {
-        console.info('Completa todos los niveles de esta sección para abrir el cofre.');
+      if (chest.getAttribute('aria-disabled') === 'true') {
+        window.showLsmModal?.({ message: '¡Cofre Bloqueado! Completa todos los niveles de esta sección para abrirlo.' });
         return;
       }
 
@@ -594,7 +595,8 @@ function updateStorePurchaseAvailability(state) {
     const isInfiniteProduct = productId === 'infinite_hearts_24h';
     const blocked = (isLivesProduct && livesAtMax) || (isInfiniteProduct && infiniteActive);
 
-    btn.disabled = blocked;
+    btn.disabled = false;
+    btn.setAttribute('aria-disabled', String(blocked));
     if (isLivesProduct && livesAtMax) {
       btn.title = 'Ya tienes el máximo de corazones';
     } else if (isInfiniteProduct && infiniteActive) {
@@ -621,12 +623,12 @@ function bindStoreActions() {
       const state = window.currentUserState || { lives: 0, maxLives: 5, infiniteHeartsActive: false };
       const livesAtMax = Number(state.lives) >= Number(state.maxLives);
       if ((productId === 'single_heart' || productId === 'heart_bundle') && livesAtMax) {
-        console.info('Ya tienes el máximo de corazones.');
+        window.showLsmModal?.({ message: '¡Corazones al máximo! Ya tienes todas tus vidas disponibles.' });
         updateStorePurchaseAvailability(state);
         return;
       }
       if (productId === 'infinite_hearts_24h' && state.infiniteHeartsActive) {
-        console.info('Ya tienes corazones ilimitados activos.');
+        window.showLsmModal?.({ message: '¡Poder activo! Ya tienes corazones ilimitados en este momento.' });
         updateStorePurchaseAvailability(state);
         return;
       }
@@ -654,9 +656,9 @@ function bindStoreActions() {
           showInfiniteHeartsAnimation();
         }
 
-        console.info('Compra realizada.');
+        window.showLsmModal?.({ title: '¡Listo!', message: 'Compra realizada correctamente. Tu recompensa ya está disponible.' });
       } catch (err) {
-        console.error(err.message);
+        window.showLsmModal?.({ title: '¡Ups!', message: err.message || 'No pudimos completar la acción. Inténtalo de nuevo.' });
       } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -713,12 +715,12 @@ function bindProfileActions() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      console.warn('Solo se permiten imágenes para la foto de perfil.');
+      window.showLsmModal?.({ message: 'Solo se permiten imágenes para la foto de perfil.' });
       input.value = '';
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      console.warn('La foto de perfil debe ser de máximo 10 MB.');
+      window.showLsmModal?.({ message: 'La foto de perfil debe ser de máximo 10 MB.' });
       input.value = '';
       return;
     }
@@ -730,13 +732,13 @@ function bindProfileActions() {
         window.currentUserState = updated;
         updateProfileView(updated);
       } catch (err) {
-        console.error(err.message);
+        window.showLsmModal?.({ title: '¡Ups!', message: err.message || 'No pudimos completar la acción. Inténtalo de nuevo.' });
       } finally {
         input.value = '';
       }
     };
     reader.onerror = () => {
-      console.error('No se pudo leer la imagen seleccionada.');
+      window.showLsmModal?.({ title: '¡Ups!', message: 'No se pudo leer la imagen seleccionada.' });
       input.value = '';
     };
     reader.readAsDataURL(file);
