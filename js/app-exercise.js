@@ -68,6 +68,19 @@ function normalizeCategorias(categorias) {
     .map((categoria) => CATEGORIA_ALIASES[categoria] || categoria);
 }
 
+function redirectAfterModal(options, target = "index.html") {
+  const modal = window.showLsmModal?.({
+    ...options,
+    onClose: () => {
+      window.location.href = target;
+    },
+  });
+
+  if (!modal) {
+    window.location.href = target;
+  }
+}
+
 function resolveDificultades(cfg) {
   if (Array.isArray(cfg.dificultad)) {
     return [...new Set(
@@ -150,9 +163,8 @@ function resolveDificultades(cfg) {
   btnRestartMedia?.addEventListener("click", restartMedia);
 
   const global = await loadState();
-  if (Number(global.level) !== Number(level)) {
-    window.showLsmModal?.({ message: `¡Nivel Bloqueado! Tu nivel actual es ${global.level}. Completa las lecciones anteriores para desbloquear el nivel ${level}.` });
-    window.location.href = "index.html";
+  if (Number(level) > Number(global.level)) {
+    redirectAfterModal({ message: `¡Nivel Bloqueado! Tu nivel actual es ${global.level}. Completa las lecciones anteriores para desbloquear el nivel ${level}.` });
     return;
   }
 
@@ -173,15 +185,13 @@ function resolveDificultades(cfg) {
     const mix = cfg.mix || { multiple_choice: 1 };
     const categorias = normalizeCategorias(resolveCategorias(cfg));
     if (categorias.length === 0) {
-      window.showLsmModal?.({ title: '¡Ups!', message: 'No se encontró contenido para este nivel. Intenta más tarde.' });
-      window.location.href = "index.html";
+      redirectAfterModal({ title: '¡Ups!', message: 'No se encontró contenido para este nivel. Intenta más tarde.' });
       return;
     }
 
     const dificultades = resolveDificultades(cfg);
     if (dificultades.length === 0) {
-      window.showLsmModal?.({ title: '¡Ups!', message: 'La dificultad de este nivel no está configurada correctamente.' });
-      window.location.href = "index.html";
+      redirectAfterModal({ title: '¡Ups!', message: 'La dificultad de este nivel no está configurada correctamente.' });
       return;
     }
 
@@ -218,8 +228,7 @@ function resolveDificultades(cfg) {
     ]);
 
     if (state.queue.length === 0) {
-      window.showLsmModal?.({ title: '¡Ups!', message: 'No hay preguntas disponibles para este nivel por ahora.' });
-      window.location.href = "index.html";
+      redirectAfterModal({ title: '¡Ups!', message: 'No hay preguntas disponibles para este nivel por ahora.' });
       return;
     }
 
@@ -256,8 +265,7 @@ function resolveDificultades(cfg) {
     renderCurrent();
   } catch (err) {
     console.error("Error al cargar el nivel:", err);
-    window.showLsmModal?.({ title: '¡Ups!', message: `No se pudo cargar el nivel. Detalle: ${err.message}` });
-    window.location.href = "index.html";
+    redirectAfterModal({ title: '¡Ups!', message: `No se pudo cargar el nivel. Detalle: ${err.message}` });
     return;
   }
 
@@ -393,8 +401,7 @@ function resolveDificultades(cfg) {
       return;
     }
 
-    window.showLsmModal?.({ message: '¡Sin corazones! Vuelve a intentarlo cuando recuperes vidas.' });
-    window.location.href = "index.html";
+    redirectAfterModal({ message: '¡Sin corazones! Vuelve a intentarlo cuando recuperes vidas.' });
   }
 
   async function reportTimeSpent() {

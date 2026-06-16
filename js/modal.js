@@ -5,9 +5,14 @@
     buttonText: '¡ENTENDIDO!',
   };
 
-  function closeModal(overlay) {
+  function closeModal(overlay, onClose) {
+    if (overlay.dataset.closing === 'true') return;
+    overlay.dataset.closing = 'true';
     overlay.classList.add('lsm-modal-overlay--closing');
-    window.setTimeout(() => overlay.remove(), 160);
+    window.setTimeout(() => {
+      overlay.remove();
+      onClose?.();
+    }, 160);
   }
 
   function showLsmModal(options = {}) {
@@ -54,7 +59,7 @@
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
-    const handleClose = () => closeModal(overlay);
+    const handleClose = () => closeModal(overlay, settings.onClose);
     closeButton.addEventListener('click', handleClose);
     actionButton.addEventListener('click', handleClose);
     overlay.addEventListener('click', (event) => {
