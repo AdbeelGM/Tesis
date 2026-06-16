@@ -73,6 +73,26 @@ function bindLevelClicks(root = document) {
       }
 
       const target = `plantilla.html?level=${encodeURIComponent(level)}`;
+
+      if (level < Number(userState.level)) {
+        const modal = window.showLsmModal?.({
+          title: '¿Repetir nivel?',
+          message: `Ya completaste el nivel ${level}. ¿Seguro que quieres repetirlo?`,
+          buttonText: 'Sí, repetir',
+          secondaryButtonText: 'No',
+          onConfirm: () => {
+            window.location.href = target;
+          },
+        });
+
+        if (!modal) {
+          const shouldRepeat = window.confirm(`Ya completaste el nivel ${level}. ¿Seguro que quieres repetirlo?`);
+          if (shouldRepeat) window.location.href = target;
+        }
+
+        return;
+      }
+
       window.location.href = target;
     });
 

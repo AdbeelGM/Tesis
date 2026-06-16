@@ -3,6 +3,7 @@
     title: '¡Atención!',
     message: 'Revisa la acción e intenta de nuevo.',
     buttonText: '¡ENTENDIDO!',
+    secondaryButtonText: '',
   };
 
   function closeModal(overlay, onClose) {
@@ -49,19 +50,34 @@
     message.id = 'lsm-modal-message';
     message.textContent = settings.message;
 
+    const actions = document.createElement('div');
+    actions.className = 'lsm-modal__actions';
+
     const actionButton = document.createElement('button');
     actionButton.className = 'lsm-modal__action';
     actionButton.type = 'button';
     actionButton.textContent = settings.buttonText;
 
-    content.append(title, message, actionButton);
+    let secondaryButton = null;
+    if (settings.secondaryButtonText) {
+      secondaryButton = document.createElement('button');
+      secondaryButton.className = 'lsm-modal__action lsm-modal__action--secondary';
+      secondaryButton.type = 'button';
+      secondaryButton.textContent = settings.secondaryButtonText;
+      actions.appendChild(secondaryButton);
+    }
+
+    actions.appendChild(actionButton);
+    content.append(title, message, actions);
     modal.append(closeButton, content);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
     const handleClose = () => closeModal(overlay, settings.onClose);
+    const handleAction = () => closeModal(overlay, settings.onConfirm || settings.onClose);
     closeButton.addEventListener('click', handleClose);
-    actionButton.addEventListener('click', handleClose);
+    secondaryButton?.addEventListener('click', handleClose);
+    actionButton.addEventListener('click', handleAction);
     overlay.addEventListener('click', (event) => {
       if (event.target === overlay) handleClose();
     });
