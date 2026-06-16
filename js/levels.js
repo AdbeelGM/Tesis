@@ -58,17 +58,17 @@ function bindLevelClicks(root = document) {
       const userState = window.currentUserState;
 
       if (!level) {
-        console.warn('Este botón no tiene data-level:', node);
+        window.showLsmModal?.({ message: 'No pudimos identificar este nivel. Intenta actualizar la página.' });
         return;
       }
 
       if (!userState) {
-        console.warn('Inicia sesión para acceder a los niveles.');
+        window.showLsmModal?.({ message: 'Inicia sesión para acceder a tus niveles y continuar tu ruta.' });
         return;
       }
 
       if (level > Number(userState.level)) {
-        console.info('Este ejercicio está bloqueado por ahora.');
+        window.showLsmModal?.({ message: '¡Nivel Bloqueado! Completa las lecciones anteriores para desbloquear este camino.' });
         return;
       }
 
