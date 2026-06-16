@@ -76,9 +76,9 @@ function bindLevelClicks(root = document) {
 
       if (level < Number(userState.level)) {
         const modal = window.showLsmModal?.({
-          title: '¿Repetir nivel?',
+          title: '¡Atención!',
           message: `Ya completaste el nivel ${level}. ¿Seguro que quieres repetirlo?`,
-          buttonText: 'Sí, repetir',
+          buttonText: 'Sí',
           secondaryButtonText: 'No',
           onConfirm: () => {
             window.location.href = target;
