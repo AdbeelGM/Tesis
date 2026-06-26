@@ -19,22 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const registerForm = document.getElementById("register-form");
 
-  const loginError = document.getElementById("login-error");
-  const loginOk = document.getElementById("login-ok");
-  const registerError = document.getElementById("register-error");
-  const registerOk = document.getElementById("register-ok");
-
-  const clearMessages = () => {
-    loginError.textContent = "";
-    loginOk.textContent = "";
-    registerError.textContent = "";
-    registerOk.textContent = "";
-  };
-
   const normalizeUserValue = (value) => value.trim();
 
   const setTab = (tab) => {
-    clearMessages();
     const showLogin = tab === "login";
 
     loginForm.classList.toggle("auth-form--hidden", !showLogin);
@@ -67,13 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    clearMessages();
-
     const usuario = normalizeUserValue(document.getElementById("login-usuario").value);
     const password = document.getElementById("login-password").value.trim();
 
     if (!usuario || !password) {
-      loginError.textContent = "Ingresa tu usuario y contraseña para continuar.";
+      window.showLsmModal?.({ message: "Ingresa tu usuario y contraseña para continuar." });
       return;
     }
 
@@ -82,19 +67,17 @@ document.addEventListener("DOMContentLoaded", () => {
       saveSession({ usuario: state.usuario });
       window.location.replace(APP_URL);
     } catch (err) {
-      loginError.textContent = err.message;
+      window.showLsmModal?.({ title: "¡Ups!", message: err.message });
     }
   });
 
   registerForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    clearMessages();
-
     const usuario = normalizeUserValue(document.getElementById("register-usuario").value);
     const password = document.getElementById("register-password").value.trim();
 
     if (!usuario || !password) {
-      registerError.textContent = "Completa todos los campos para crear tu cuenta.";
+      window.showLsmModal?.({ message: "Completa todos los campos para crear tu cuenta." });
       return;
     }
 
@@ -103,9 +86,12 @@ document.addEventListener("DOMContentLoaded", () => {
       registerForm.reset();
       setTab("login");
       document.getElementById("login-usuario").value = usuario;
-      loginOk.textContent = `Usuario ${usuario} creado. Ahora puedes iniciar sesión.`;
+      window.showLsmModal?.({
+        title: "¡Cuenta creada!",
+        message: `Usuario ${usuario} creado. Ahora puedes iniciar sesión.`,
+      });
     } catch (err) {
-      registerError.textContent = err.message;
+      window.showLsmModal?.({ title: "¡Ups!", message: err.message });
     }
   });
 });
