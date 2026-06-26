@@ -8,23 +8,68 @@ import { applyLifeRegen } from "./lives.js";
 
 export const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
 
+const USER_COLUMNS = [
+  { name: "vidas_actualizado_en", definition: "DATETIME NULL" },
+  { name: "corazones_ilimitados_desde", definition: "DATETIME NULL" },
+  { name: "corazones_ilimitados_hasta", definition: "DATETIME NULL" },
+  { name: "creado_en", definition: "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP" },
+  { name: "foto_perfil_url", definition: "VARCHAR(500) NULL" },
+  { name: "foto_perfil", definition: "LONGBLOB NULL" },
+  { name: "foto_perfil_mime", definition: "VARCHAR(100) NULL" },
+  { name: "experiencia", definition: "INT NOT NULL DEFAULT 0" },
+  { name: "progreso", definition: "INT NOT NULL DEFAULT 0" },
+  { name: "dias_racha", definition: "INT NOT NULL DEFAULT 0" },
+  { name: "lecciones_terminadas", definition: "INT NOT NULL DEFAULT 0" },
+  { name: "tiempo_invertido_segundos", definition: "INT NOT NULL DEFAULT 0" },
+];
+
+let userSchemaPromise = null;
+
 /**
  * Asegura que la tabla Usuarios tenga las columnas requeridas por progreso, perfil y tienda.
- * @returns {Promise<void>} No devuelve valor; ejecuta alteraciones idempotentes de esquema.
+ * @returns {Promise<void>} No devuelve valor; ejecuta creación y alteraciones idempotentes de esquema.
  */
 export async function ensureUserSchema() {
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS vidas_actualizado_en DATETIME NULL`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS corazones_ilimitados_desde DATETIME NULL`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS corazones_ilimitados_hasta DATETIME NULL`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS foto_perfil_url VARCHAR(500) NULL`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS foto_perfil LONGBLOB NULL`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS foto_perfil_mime VARCHAR(100) NULL`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS experiencia INT NOT NULL DEFAULT 0`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS progreso INT NOT NULL DEFAULT 0`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS dias_racha INT NOT NULL DEFAULT 0`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS lecciones_terminadas INT NOT NULL DEFAULT 0`);
-  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS tiempo_invertido_segundos INT NOT NULL DEFAULT 0`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS Usuarios (
+      usuario VARCHAR(100) NOT NULL PRIMARY KEY,
+      \`contraseña\` VARCHAR(255) NOT NULL,
+      vidas INT NOT NULL DEFAULT 5,
+      gemas INT NOT NULL DEFAULT 0,
+      etapa INT NOT NULL DEFAULT 1,
+      nivel INT NOT NULL DEFAULT 1
+    )
+  `);
+
+  const [columns] = await pool.query(
+    `SELECT column_name
+     FROM information_schema.columns
+     WHERE table_schema = DATABASE() AND table_name = 'Usuarios'`
+  );
+
+  const existingColumns = new Set(columns.map((column) => column.COLUMN_NAME || column.column_name));
+
+  for (const column of USER_COLUMNS) {
+    if (!existingColumns.has(column.name)) {
+      await pool.query(`ALTER TABLE Usuarios ADD COLUMN \`${column.name}\` ${column.definition}`);
+      existingColumns.add(column.name);
+    }
+  }
+}
+
+/**
+ * Ejecuta la validación de esquema una sola vez y comparte la promesa entre rutas concurrentes.
+ * @returns {Promise<void>} Promesa de esquema listo para consultas de usuario.
+ */
+export function ensureUserSchemaReady() {
+  if (!userSchemaPromise) {
+    userSchemaPromise = ensureUserSchema().catch((err) => {
+      userSchemaPromise = null;
+      throw err;
+    });
+  }
+
+  return userSchemaPromise;
 }
 
 /**
