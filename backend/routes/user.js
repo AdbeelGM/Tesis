@@ -1,200 +1,19 @@
 /*
  * Nombre: user.js
- * Descripción: Gestiona autenticación, progreso, vidas, tienda y perfil del usuario.
+ * Descripción: Expone rutas de autenticación, progreso, vidas, tienda y perfil del usuario.
  * Módulo: Backend / API de usuario
  */
 import { Router } from "express";
 import { pool } from "../db.js";
+import { MAX_LIVES } from "../services/lives.js";
+import { STORE_PRODUCTS, TOTAL_LEVELS, getExperienceRewardForLevel, getGemsRewardForLevel } from "../services/rewards.js";
+import { ensureUserSchema, getUserState, parseProfilePhotoPayload } from "../services/profile.js";
 
 export const userRouter = Router();
 
-const MAX_LIVES = 5;
-const LIFE_INTERVAL_MINUTES = 5;
-const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
-const TOTAL_LEVELS = 15;
-const BASE_GEMS_REWARD = 25;
-const STORE_PRODUCTS = {
-  single_heart: { gems: 100, lives: 1, type: "lives" },
-  heart_bundle: { gems: 450, lives: 5, type: "lives" },
-  infinite_hearts_24h: { gems: 950, hours: 24, type: "infinite" },
-};
-
-function getExperienceRewardForLevel(levelNumber) {
-  const level = Math.max(1, Number(levelNumber) || 1);
-  const base = 40;
-  const linear = level * 25;
-  const curve = Math.floor(Math.pow(level, 1.35) * 15);
-  return base + linear + curve;
-}
-
-function getGemsRewardForLevel(levelNumber) {
-  const level = Math.max(1, Number(levelNumber) || 1);
-  return BASE_GEMS_REWARD + Math.floor(level / 3) * 5;
-}
-
-async function ensureSchema() {
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS vidas_actualizado_en DATETIME NULL
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS corazones_ilimitados_desde DATETIME NULL
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS corazones_ilimitados_hasta DATETIME NULL
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS foto_perfil_url VARCHAR(500) NULL
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS foto_perfil LONGBLOB NULL
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS foto_perfil_mime VARCHAR(100) NULL
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS experiencia INT NOT NULL DEFAULT 0
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS progreso INT NOT NULL DEFAULT 0
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS dias_racha INT NOT NULL DEFAULT 0
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS lecciones_terminadas INT NOT NULL DEFAULT 0
-  `);
-
-  await pool.query(`
-    ALTER TABLE Usuarios
-    ADD COLUMN IF NOT EXISTS tiempo_invertido_segundos INT NOT NULL DEFAULT 0
-  `);
-}
-
-ensureSchema().catch((err) => {
-  console.error("No se pudo asegurar la columna vidas_actualizado_en:", err.message);
+ensureUserSchema().catch((err) => {
+  console.error("No se pudo asegurar el esquema de usuario:", err.message);
 });
-
-async function applyLifeRegen(usuario) {
-  const [rows] = await pool.query(
-    `SELECT usuario, vidas, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta
-     FROM Usuarios
-     WHERE usuario = ?
-     LIMIT 1`,
-    [usuario]
-  );
-
-  const user = rows[0];
-  if (!user) return null;
-
-  const now = new Date();
-  const unlimitedUntil = user.corazones_ilimitados_hasta ? new Date(user.corazones_ilimitados_hasta) : null;
-  const hasUnlimited = unlimitedUntil && unlimitedUntil > now;
-
-  if (hasUnlimited) {
-    if (user.vidas < MAX_LIVES || !user.vidas_actualizado_en) {
-      await pool.query(
-        `UPDATE Usuarios
-         SET vidas = ?, vidas_actualizado_en = ?
-         WHERE usuario = ?`,
-        [MAX_LIVES, now, usuario]
-      );
-      return { ...user, vidas: MAX_LIVES, vidas_actualizado_en: now };
-    }
-    return user;
-  }
-
-  const lastUpdate = user.vidas_actualizado_en ? new Date(user.vidas_actualizado_en) : now;
-
-  if (!user.vidas_actualizado_en) {
-    await pool.query(
-      `UPDATE Usuarios SET vidas_actualizado_en = ? WHERE usuario = ?`,
-      [now, usuario]
-    );
-    return { ...user, vidas_actualizado_en: now };
-  }
-
-  if (user.vidas >= MAX_LIVES) {
-    await pool.query(
-      `UPDATE Usuarios SET vidas = ?, vidas_actualizado_en = ? WHERE usuario = ?`,
-      [MAX_LIVES, now, usuario]
-    );
-    return { ...user, vidas: MAX_LIVES, vidas_actualizado_en: now };
-  }
-
-  const elapsedMinutes = Math.floor((now - lastUpdate) / (1000 * 60));
-  const recoverable = Math.floor(elapsedMinutes / LIFE_INTERVAL_MINUTES);
-
-  if (recoverable <= 0) {
-    return user;
-  }
-
-  const nextLives = Math.min(MAX_LIVES, user.vidas + recoverable);
-  const minutesUsed = (nextLives - user.vidas) * LIFE_INTERVAL_MINUTES;
-  const nextUpdate = new Date(lastUpdate.getTime() + minutesUsed * 60 * 1000);
-
-  await pool.query(
-    `UPDATE Usuarios
-     SET vidas = ?, vidas_actualizado_en = ?
-     WHERE usuario = ?`,
-    [nextLives, nextUpdate, usuario]
-  );
-
-  return { ...user, vidas: nextLives, vidas_actualizado_en: nextUpdate };
-}
-
-async function getUserState(usuario) {
-  await applyLifeRegen(usuario);
-  const [rows] = await pool.query(
-    `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta,
-            creado_en, foto_perfil_url, foto_perfil, foto_perfil_mime, experiencia, progreso, dias_racha, lecciones_terminadas, tiempo_invertido_segundos
-     FROM Usuarios
-     WHERE usuario = ?
-     LIMIT 1`,
-    [usuario]
-  );
-  const user = rows[0] || null;
-  if (!user) return null;
-
-  const now = new Date();
-  const unlimitedUntil = user.corazones_ilimitados_hasta ? new Date(user.corazones_ilimitados_hasta) : null;
-  const unlimitedActive = Boolean(unlimitedUntil && unlimitedUntil > now);
-  const unlimitedRemainingSeconds = unlimitedActive
-    ? Math.floor((unlimitedUntil.getTime() - now.getTime()) / 1000)
-    : 0;
-
-  return {
-    ...user,
-    foto_perfil_base64: user.foto_perfil && user.foto_perfil_mime
-      ? `data:${user.foto_perfil_mime};base64,${Buffer.from(user.foto_perfil).toString("base64")}`
-      : null,
-    corazones_ilimitados_activos: unlimitedActive,
-    corazones_ilimitados_segundos_restantes: Math.max(0, unlimitedRemainingSeconds),
-  };
-}
 
 userRouter.post("/login", async (req, res) => {
   try {
@@ -223,7 +42,6 @@ userRouter.post("/login", async (req, res) => {
     return res.status(500).json({ error: "Error al iniciar sesión" });
   }
 });
-
 
 userRouter.post("/register", async (req, res) => {
   try {
@@ -447,22 +265,7 @@ userRouter.post("/profile-photo", async (req, res) => {
       return res.status(400).json({ error: "Falta foto de perfil" });
     }
 
-    let photoBuffer = null;
-    let mimeType = null;
-
-    if (dataUrl) {
-      const dataUrlMatch = String(dataUrl).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
-      if (!dataUrlMatch) {
-        return res.status(400).json({ error: "Formato de imagen inválido" });
-      }
-
-      mimeType = dataUrlMatch[1];
-      const b64 = dataUrlMatch[2];
-      photoBuffer = Buffer.from(b64, "base64");
-      if (photoBuffer.length > MAX_PROFILE_PHOTO_BYTES) {
-        return res.status(400).json({ error: "La foto de perfil excede 10 MB" });
-      }
-    }
+    const { photoBuffer, mimeType } = parseProfilePhotoPayload({ dataUrl, photoUrl });
 
     await pool.query(
       `UPDATE Usuarios
@@ -475,6 +278,6 @@ userRouter.post("/profile-photo", async (req, res) => {
     return res.json(updated);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Error al guardar foto de perfil" });
+    return res.status(err.status || 500).json({ error: err.status ? err.message : "Error al guardar foto de perfil" });
   }
 });
