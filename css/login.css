@@ -319,21 +319,6 @@
   filter: brightness(1.02);
 }
 
-
-.auth-message {
-  min-height: 1.1rem;
-  font-size: 0.94rem;
-  font-weight: 600;
-}
-
-.auth-message--error {
-  color: #dc2626;
-}
-
-.auth-message--ok {
-  color: #0f766e;
-}
-
 .auth-register-hint {
   text-align: center;
   color: #64748b;
