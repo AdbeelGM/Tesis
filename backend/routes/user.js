@@ -7,12 +7,18 @@ import { Router } from "express";
 import { pool } from "../db.js";
 import { MAX_LIVES } from "../services/lives.js";
 import { STORE_PRODUCTS, TOTAL_LEVELS, getExperienceRewardForLevel, getGemsRewardForLevel } from "../services/rewards.js";
-import { ensureUserSchema, getUserState, parseProfilePhotoPayload } from "../services/profile.js";
+import { ensureUserSchemaReady, getUserState, parseProfilePhotoPayload } from "../services/profile.js";
 
 export const userRouter = Router();
 
-ensureUserSchema().catch((err) => {
-  console.error("No se pudo asegurar el esquema de usuario:", err.message);
+userRouter.use(async (req, res, next) => {
+  try {
+    await ensureUserSchemaReady();
+    next();
+  } catch (err) {
+    console.error("No se pudo asegurar el esquema de usuario:", err.message);
+    res.status(500).json({ error: "Error al preparar la base de datos" });
+  }
 });
 
 userRouter.post("/login", async (req, res) => {
