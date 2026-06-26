@@ -1,7 +1,7 @@
-/*
- * Nombre: server.js
- * Descripción: Configura Express, middlewares, rutas API y archivos estáticos del frontend.
- * Módulo: Backend / Servidor HTTP
+/**
+ * @file server.js
+ * @description Inicializa el servidor Express, configura CORS y JSON, sirve el frontend estático y monta las APIs de preguntas y usuarios.
+ * @module ServidorHTTP
  */
 import express from "express";
 import path from "path";

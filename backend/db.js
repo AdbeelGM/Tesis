@@ -1,7 +1,7 @@
-/*
- * Nombre: db.js
- * Descripción: Centraliza el pool de conexión a MySQL usado por las rutas backend.
- * Módulo: Backend / Acceso a datos
+/**
+ * @file db.js
+ * @description Crea y exporta el pool de conexiones MySQL compartido por las rutas y servicios del backend de LSM Gamificada.
+ * @module AccesoADatos
  */
 import mysql from "mysql2/promise";
 

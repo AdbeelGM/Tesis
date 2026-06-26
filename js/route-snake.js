@@ -1,7 +1,7 @@
-/*
- * Nombre: route-snake.js
- * Descripción: Contiene estilos o lógica de soporte para route-snake.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file route-snake.js
+ * @description Conserva los desplazamientos horizontales declarados en cada nodo de nivel para que la ruta visual mantenga su forma serpenteante al cargar la página.
+ * @module Ruta
  */
 document.addEventListener('DOMContentLoaded', () => {
   const items = document.querySelectorAll('.level-item');

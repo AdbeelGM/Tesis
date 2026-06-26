@@ -1,13 +1,17 @@
-/*
- * Nombre: rewards.js
- * Descripción: Centraliza animaciones visuales de recompensas y cofres.
- * Módulo: Frontend / Recompensas
+/**
+ * @file rewards.js
+ * @description Centraliza las animaciones de recompensa usadas por compras y cofres de ruta, incluyendo corazones, corazones infinitos y gemas que vuelan al contador.
+ * @module Recompensas
  */
 const INFINITE_HEARTS_LOTTIE_SRC = 'https://lottie.host/dc359c7b-1c91-4240-8bbb-6875c10d318e/VneDkjaLX8.lottie';
 const CHEST_LOTTIE_SRC = 'https://lottie.host/15b01aa0-3b82-4c5b-8486-512610b7a096/IYvwrrdLyw.lottie';
 const ROUTE_CHEST_GEM_DELAY_SECONDS = 1.35;
 const ROUTE_CHEST_GEM_DELAY_VARIANCE_SECONDS = 0.45;
 
+/**
+ * Carga el componente DotLottie una sola vez para reproducir animaciones de recompensa.
+ * @returns {void} No devuelve valor; añade el script al head si falta.
+ */
 function ensureDotLottieScript() {
   if (document.querySelector('script[data-dotlottie-wc]')) return;
 
@@ -18,6 +22,12 @@ function ensureDotLottieScript() {
   document.head.appendChild(script);
 }
 
+/**
+ * Presenta una animación Lottie a pantalla completa durante un tiempo definido.
+ * @param {string} src - URL del archivo Lottie que se reproducirá.
+ * @param {number} durationMs - Duración en milisegundos antes de retirar el overlay.
+ * @returns {void} No devuelve valor; crea y elimina elementos visuales temporales.
+ */
 function showFullscreenLottieAnimation(src, durationMs) {
   // Centraliza la creación del overlay para evitar repetir estilos entre recompensas.
   ensureDotLottieScript();
@@ -50,6 +60,10 @@ function showFullscreenLottieAnimation(src, durationMs) {
   window.setTimeout(() => overlay.remove(), durationMs);
 }
 
+/**
+ * Muestra la animación de recompensa para la compra de un corazón individual.
+ * @returns {void} No devuelve valor; dispara un overlay temporal.
+ */
 function showSingleHeartAnimation() {
   showFullscreenLottieAnimation(
     'https://lottie.host/b379f4f2-26d2-4b45-b598-5091c88a7d5b/PgQYbpR93Z.lottie',
@@ -57,6 +71,10 @@ function showSingleHeartAnimation() {
   );
 }
 
+/**
+ * Muestra la animación de recompensa para el paquete completo de corazones.
+ * @returns {void} No devuelve valor; dispara un overlay temporal.
+ */
 function showHeartBundleAnimation() {
   showFullscreenLottieAnimation(
     'https://lottie.host/a256014a-c9f6-4f21-8f89-ddb63470231b/4NIEBugTnF.lottie',
@@ -64,10 +82,18 @@ function showHeartBundleAnimation() {
   );
 }
 
+/**
+ * Muestra la animación especial de activación de corazones infinitos.
+ * @returns {void} No devuelve valor; reproduce la recompensa de mayor duración.
+ */
 function showInfiniteHeartsAnimation() {
   showFullscreenLottieAnimation(INFINITE_HEARTS_LOTTIE_SRC, 9000);
 }
 
+/**
+ * Calcula el punto de destino de las gemas animadas hacia el contador superior.
+ * @returns {{x:number,y:number}} Coordenadas centrales del contador de gemas o posición de respaldo.
+ */
 function getGemCounterCenter() {
   const gemsPill = document.querySelector('.status-pill--gems');
   if (gemsPill) {
@@ -78,6 +104,10 @@ function getGemCounterCenter() {
   return { x: window.innerWidth - 120, y: 42 };
 }
 
+/**
+ * Reproduce la apertura de cofre de sección y anima gemas hacia el contador del usuario.
+ * @returns {void} No devuelve valor; inserta una animación temporal en la página.
+ */
 function showRouteChestAnimation() {
   ensureDotLottieScript();
 

@@ -1,11 +1,15 @@
-/*
- * Nombre: game-state.js
- * Descripción: Contiene estilos o lógica de soporte para game-state.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file game-state.js
+ * @description Adapta el estado persistido del usuario a un modelo de frontend y expone operaciones globales para perder vidas, comprar recompensas y actualizar la foto de perfil usando la sesión activa.
+ * @module EstadoDelJuego
  */
 import { fetchUserState, loseLife, purchaseStoreItem, updateProfilePhoto } from "./api-user.js";
 import { loadSession } from "./user-session.js";
 
+/**
+ * Obtiene el usuario de la sesión activa o detiene la operación si no existe autenticación.
+ * @returns {string} Nombre del usuario autenticado que se usará en llamadas al backend.
+ */
 function getUser() {
   const session = loadSession();
   if (!session?.usuario) {
@@ -14,12 +18,21 @@ function getUser() {
   return session.usuario;
 }
 
+/**
+ * Carga el estado completo del jugador desde la API y lo adapta al formato usado por la interfaz.
+ * @returns {Promise<Object>} Estado normalizado con vidas, gemas, avance, perfil y poderes activos.
+ */
 export async function loadState() {
   const usuario = getUser();
   const state = await fetchUserState(usuario);
   return normalizeState(state);
 }
 
+/**
+ * Convierte los nombres y valores crudos del backend al modelo consistente del frontend.
+ * @param {Object} state - Registro de estado devuelto por la API de usuarios.
+ * @returns {Object} Estado normalizado para componentes de ruta, tienda, perfil y ejercicios.
+ */
 function normalizeState(state) {
   return {
     lives: Number(state.vidas) || 0,
@@ -41,18 +54,33 @@ function normalizeState(state) {
   };
 }
 
+/**
+ * Descuenta vidas del usuario autenticado y devuelve el estado resultante.
+ * @param {number} n - Cantidad de vidas que deben retirarse.
+ * @returns {Promise<Object>} Estado normalizado después de la penalización.
+ */
 export async function loseLifeGlobal(n = 1) {
   const usuario = getUser();
   const state = await loseLife(usuario, n);
   return normalizeState(state);
 }
 
+/**
+ * Ejecuta una compra de tienda para el usuario autenticado.
+ * @param {string} productId - Identificador del producto seleccionado.
+ * @returns {Promise<Object>} Estado normalizado después de aplicar la compra.
+ */
 export async function purchaseStoreItemGlobal(productId) {
   const usuario = getUser();
   const state = await purchaseStoreItem(usuario, productId);
   return normalizeState(state);
 }
 
+/**
+ * Actualiza la foto de perfil del usuario autenticado.
+ * @param {string} dataUrl - Imagen codificada como Data URL lista para persistirse.
+ * @returns {Promise<Object>} Estado normalizado con la foto actualizada.
+ */
 export async function updateProfilePhotoGlobal(dataUrl) {
   const usuario = getUser();
   const state = await updateProfilePhoto(usuario, dataUrl);

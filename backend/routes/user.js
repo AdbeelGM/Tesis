@@ -1,7 +1,7 @@
-/*
- * Nombre: user.js
- * Descripción: Expone rutas de autenticación, progreso, vidas, tienda y perfil del usuario.
- * Módulo: Backend / API de usuario
+/**
+ * @file user.js
+ * @description Expone la API de usuarios para autenticación, registro, consulta de estado, pérdida de vidas, compras, progreso, tiempo invertido y foto de perfil.
+ * @module APIUsuario
  */
 import { Router } from "express";
 import { pool } from "../db.js";

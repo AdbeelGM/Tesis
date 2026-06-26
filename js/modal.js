@@ -1,7 +1,7 @@
-/*
- * Nombre: modal.js
- * Descripción: Contiene estilos o lógica de soporte para modal.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file modal.js
+ * @description Define el modal global de LSM Gamificada para mostrar avisos, confirmaciones y errores accesibles con acciones primaria y secundaria opcional.
+ * @module Interfaz
  */
 (function () {
   const DEFAULTS = {
@@ -11,7 +11,13 @@
     secondaryButtonText: '',
   };
 
-  function closeModal(overlay, onClose) {
+  /**
+   * Cierra un modal con animación y ejecuta la acción final asociada.
+   * @param {HTMLElement} overlay - Capa del modal que será retirada del DOM.
+   * @param {Function} onClose - Callback opcional que se ejecuta después del cierre.
+   * @returns {void} No devuelve valor; programa la eliminación del modal.
+   */
+function closeModal(overlay, onClose) {
     if (overlay.dataset.closing === 'true') return;
     overlay.dataset.closing = 'true';
     overlay.classList.add('lsm-modal-overlay--closing');
@@ -21,7 +27,12 @@
     }, 160);
   }
 
-  function showLsmModal(options = {}) {
+  /**
+   * Muestra un modal accesible para avisos o confirmaciones de LSM Gamificada.
+   * @param {Object} options - Textos y callbacks que personalizan el modal.
+   * @returns {HTMLElement} Overlay creado para que el llamador pueda verificar que el modal existe.
+   */
+function showLsmModal(options = {}) {
     const settings = { ...DEFAULTS, ...options };
     document.querySelectorAll('.lsm-modal-overlay').forEach((modal) => modal.remove());
 

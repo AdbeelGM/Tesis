@@ -1,7 +1,7 @@
-/*
- * Nombre: base.css
- * Descripción: Contiene estilos o lógica de soporte para base.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file base.css
+ * @description Define variables visuales, reset global, estructura principal y utilidades de interacción compartidas por toda la aplicación LSM Gamificada.
+ * @module DiseñoBase
  */
 :root {
   --bg-light: #fff5ed;

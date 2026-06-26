@@ -1,7 +1,7 @@
-/*
- * Nombre: level-3.js
- * Descripción: Contiene estilos o lógica de soporte para level-3.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file level-3.js
+ * @description Define la configuración pedagógica del nivel 3: categorías de vocabulario LSM, dificultad, cantidad total de ejercicios, objetivo didáctico y mezcla de tipos de pregunta.
+ * @module ConfiguraciónDeNiveles
  */
 export const LEVEL_CONFIG = {
   level: 3,

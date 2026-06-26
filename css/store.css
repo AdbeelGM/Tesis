@@ -1,7 +1,7 @@
-/*
- * Nombre: store.css
- * Descripción: Contiene estilos o lógica de soporte para store.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file store.css
+ * @description Estiliza la tienda de recompensas, tarjetas de productos, contador de vidas, estados destacados y botones de compra.
+ * @module Tienda
  */
 .btn-hover-elevate {
   transition: all 0.2s ease-in-out;

@@ -1,18 +1,28 @@
-/*
- * Nombre: profile.js
- * Descripción: Renderiza y actualiza el perfil del usuario.
- * Módulo: Frontend / Perfil
+/**
+ * @file profile.js
+ * @description Renderiza el perfil del usuario, calcula progreso por experiencia, muestra estadísticas de aprendizaje y permite actualizar la foto de perfil.
+ * @module Perfil
  */
 import { updateProfilePhotoGlobal } from '../game-state.js';
 
 const XP_BASE_REQUIREMENT = 120;
 const DEFAULT_PROFILE_AVATAR_SRC = 'img/avatar.png';
 
+/**
+ * Calcula la experiencia requerida para subir desde un nivel de cuenta específico.
+ * @param {number} accountLevel - Nivel de cuenta cuyo requisito se desea calcular.
+ * @returns {number} XP necesario para avanzar al siguiente nivel de cuenta.
+ */
 function xpNeededToAdvance(accountLevel) {
   const level = Math.max(1, Number(accountLevel) || 1);
   return Math.round(XP_BASE_REQUIREMENT + (level * 32) + (Math.pow(level, 1.4) * 14));
 }
 
+/**
+ * Distribuye la experiencia total entre niveles de cuenta y porcentaje de progreso actual.
+ * @param {number} totalXp - Experiencia acumulada por el usuario.
+ * @returns {Object} Nivel de cuenta, XP dentro del nivel, XP requerido y porcentaje.
+ */
 function getExperienceProgress(totalXp) {
   let xp = Math.max(0, Number(totalXp) || 0);
   let accountLevel = 1;
@@ -33,6 +43,10 @@ function getExperienceProgress(totalXp) {
   };
 }
 
+/**
+ * Genera el HTML de la vista de perfil con avatar, progreso y estadísticas del jugador.
+ * @returns {string} Marcado HTML que se inyecta en el contenedor principal.
+ */
 function renderProfileView() {
   return `
     <section class="profile-view">
@@ -131,6 +145,11 @@ function renderProfileView() {
   `;
 }
 
+/**
+ * Formatea la fecha de creación de la cuenta en español de México.
+ * @param {string|Date|null} dateValue - Fecha persistida de alta del usuario.
+ * @returns {string} Texto legible para mostrar cuándo se unió el usuario.
+ */
 function formatJoinedDate(dateValue) {
   if (!dateValue) return 'Se unió recientemente';
   const date = new Date(dateValue);
@@ -138,6 +157,11 @@ function formatJoinedDate(dateValue) {
   return `Se unió el ${new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(date)}`;
 }
 
+/**
+ * Convierte segundos acumulados de práctica a una etiqueta compacta de días y horas.
+ * @param {number} seconds - Tiempo invertido guardado en segundos.
+ * @returns {string} Duración formateada para la tarjeta de perfil.
+ */
 function formatTimeInvested(seconds) {
   const clamped = Math.max(0, Number(seconds) || 0);
   const totalHours = Math.floor(clamped / 3600);
@@ -146,6 +170,11 @@ function formatTimeInvested(seconds) {
   return `${days}d ${hours}h`;
 }
 
+/**
+ * Rellena la vista de perfil con los datos actuales del estado del jugador.
+ * @param {Object} state - Estado normalizado con usuario, XP, gemas, racha, lecciones y foto.
+ * @returns {void} No devuelve valor; actualiza los nodos del perfil.
+ */
 function updateProfileView(state) {
   const avatar = document.getElementById('profile-avatar');
   const profileName = document.getElementById('profile-name');
@@ -181,6 +210,10 @@ function updateProfileView(state) {
   if (timeHours) timeHours.textContent = time;
 }
 
+/**
+ * Enlaza el cambio de foto de perfil, valida el archivo y sincroniza el resultado con el backend.
+ * @returns {void} No devuelve valor; registra listeners sobre el botón y el input de archivo.
+ */
 function bindProfileActions() {
   updateProfileView(window.currentUserState || {});
   const editBtn = document.getElementById('profile-edit-btn');

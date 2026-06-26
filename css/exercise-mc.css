@@ -1,7 +1,7 @@
-/*
- * Nombre: exercise-mc.css
- * Descripción: Contiene estilos o lógica de soporte para exercise-mc.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file exercise-mc.css
+ * @description Ajusta la disposición responsive de ejercicios de opción múltiple y componentes heredados de la plantilla de práctica.
+ * @module Ejercicios
  */
 :root {
   --page-bg: #fff5ed;

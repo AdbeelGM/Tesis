@@ -1,7 +1,7 @@
-/*
- * Nombre: level-8.js
- * Descripción: Contiene estilos o lógica de soporte para level-8.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file level-8.js
+ * @description Define la configuración pedagógica del nivel 8: categorías de vocabulario LSM, dificultad, cantidad total de ejercicios, objetivo didáctico y mezcla de tipos de pregunta.
+ * @module ConfiguraciónDeNiveles
  */
 export const LEVEL_CONFIG = {
   level: 8,
