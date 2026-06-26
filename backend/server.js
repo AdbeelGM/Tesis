@@ -13,6 +13,7 @@ import { questionsRouter } from "./routes/questions.js";
 import { userRouter } from "./routes/user.js";
 
 const app = express();
+const PORT = Number(process.env.PORT || 3000);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,6 +37,11 @@ app.use(express.static(FRONTEND_DIR));
 app.use("/api/questions", questionsRouter);
 app.use("/api/user", userRouter);
 
+// ✅ healthcheck para Railway y otros proveedores
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 // ✅ ruta principal
 app.get("/", (req, res) => {
   res.sendFile(path.join(FRONTEND_DIR, "login.html"));
@@ -55,4 +61,4 @@ app.use((req, res) => {
 });
 
 
-app.listen(3000, () => console.log("Servidor en http://localhost:3000"));
+app.listen(PORT, "0.0.0.0", () => console.log(`Servidor escuchando en http://0.0.0.0:${PORT}`));
