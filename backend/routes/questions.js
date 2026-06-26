@@ -8,6 +8,12 @@ import { pool } from "../db.js";
 
 export const questionsRouter = Router();
 
+/**
+ * Verifica que el router de preguntas esté montado.
+ * @param {import("express").Request} req - Petición HTTP de verificación.
+ * @param {import("express").Response} res - Respuesta con estado del router.
+ * @returns {void}
+ */
 questionsRouter.get("/", (req, res) => {
   res.json({ ok: true, message: "questionsRouter funcionando" });
 });
@@ -255,11 +261,10 @@ function getAcceptedAnswersForRow(respuesta, respuestaAlt, categoriaOrigen) {
 }
 
 /**
- * GET /api/questions/multiple-choice?categoria=abecedario&dificultad=1&limit=5
- * Devuelve:
- * [
- *  { media_ruta, correcta, opciones:[...4] }
- * ]
+ * Genera preguntas de opción múltiple desde una o varias categorías y dificultades.
+ * @param {import("express").Request} req - Petición con categoria, dificultad y limit opcionales en query.
+ * @param {import("express").Response} res - Respuesta con media, respuesta correcta y opciones mezcladas.
+ * @returns {Promise<void>} Envía el arreglo de preguntas o un error HTTP.
  */
 questionsRouter.get("/multiple-choice", async (req, res) => {
   try {
@@ -336,17 +341,10 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
 });
 
 /**
- * GET /api/questions/true-false?categoria=abecedario&dificultad=1&limit=5
- * Devuelve:
- * [
- *  { media_ruta, pregunta, es_verdadero }
- * ]
- *
- * Lógica:
- * - Si es_verdadero = 1 → la palabra mostrada coincide con la seña (correcta).
- * - Si es_verdadero = 0 → mostramos una palabra distinta (incorrecta).
- *
- * Nota: "pregunta" la construimos con texto para que el front pueda mostrarla.
+ * Genera preguntas de verdadero/falso mezclando coincidencias correctas y distractores.
+ * @param {import("express").Request} req - Petición con categoria, dificultad y limit opcionales en query.
+ * @param {import("express").Response} res - Respuesta con media, texto de pregunta y bandera es_verdadero.
+ * @returns {Promise<void>} Envía el arreglo de preguntas o un error HTTP.
  */
 questionsRouter.get("/true-false", async (req, res) => {
   try {
@@ -414,14 +412,10 @@ questionsRouter.get("/true-false", async (req, res) => {
 });
 
 /**
- * GET /api/questions/text-input?categoria=abecedario&dificultad=1&limit=5
- * Devuelve:
- * [
- *   { media_ruta, pregunta, correcta }
- * ]
- *
- * Lógica:
- * - Muestra la seña y el usuario escribe la palabra (respuesta).
+ * Genera ejercicios de escritura con respuestas aceptadas, incluyendo alternativas para números.
+ * @param {import("express").Request} req - Petición con categoria, dificultad y limit opcionales en query.
+ * @param {import("express").Response} res - Respuesta con media, pregunta, respuesta mostrada y respuestas aceptadas.
+ * @returns {Promise<void>} Envía el arreglo de preguntas o un error HTTP.
  */
 questionsRouter.get("/text-input", async (req, res) => {
   try {

@@ -11,6 +11,13 @@ import { ensureUserSchemaReady, getUserState, hasUserColumn, parseProfilePhotoPa
 
 export const userRouter = Router();
 
+/**
+ * Valida el esquema de usuarios antes de atender cualquier endpoint del router.
+ * @param {import("express").Request} req - Petición entrante.
+ * @param {import("express").Response} res - Respuesta usada si falla la preparación de base de datos.
+ * @param {import("express").NextFunction} next - Continúa al siguiente manejador cuando el esquema está listo.
+ * @returns {Promise<void>}
+ */
 userRouter.use(async (req, res, next) => {
   try {
     await ensureUserSchemaReady();
@@ -21,6 +28,12 @@ userRouter.use(async (req, res, next) => {
   }
 });
 
+/**
+ * Autentica credenciales y devuelve el estado normalizado del usuario.
+ * @param {import("express").Request} req - Petición con usuario y password en body.
+ * @param {import("express").Response} res - Respuesta con estado de usuario o error de autenticación.
+ * @returns {Promise<void>}
+ */
 userRouter.post("/login", async (req, res) => {
   try {
     const { usuario, password } = req.body;
@@ -49,6 +62,12 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
+/**
+ * Registra un usuario nuevo en el esquema mínimo y devuelve su estado inicial.
+ * @param {import("express").Request} req - Petición con usuario y password en body.
+ * @param {import("express").Response} res - Respuesta con estado creado o error de validación.
+ * @returns {Promise<void>}
+ */
 userRouter.post("/register", async (req, res) => {
   try {
     const { usuario, password } = req.body;
@@ -87,6 +106,12 @@ userRouter.post("/register", async (req, res) => {
   }
 });
 
+/**
+ * Consulta el estado actual de un usuario existente.
+ * @param {import("express").Request} req - Petición con usuario en query.
+ * @param {import("express").Response} res - Respuesta con estado normalizado o error 404.
+ * @returns {Promise<void>}
+ */
 userRouter.get("/state", async (req, res) => {
   try {
     const { usuario } = req.query;
@@ -102,6 +127,12 @@ userRouter.get("/state", async (req, res) => {
   }
 });
 
+/**
+ * Descuenta vidas respetando corazones ilimitados y columnas opcionales del esquema.
+ * @param {import("express").Request} req - Petición con usuario y amount opcional en body.
+ * @param {import("express").Response} res - Respuesta con estado actualizado del usuario.
+ * @returns {Promise<void>}
+ */
 userRouter.post("/lose-life", async (req, res) => {
   try {
     const { usuario, amount = 1 } = req.body;
@@ -132,6 +163,12 @@ userRouter.post("/lose-life", async (req, res) => {
   }
 });
 
+/**
+ * Procesa compras de tienda para vidas o corazones ilimitados cuando existen las columnas requeridas.
+ * @param {import("express").Request} req - Petición con usuario y productId en body.
+ * @param {import("express").Response} res - Respuesta con estado actualizado o error de compra.
+ * @returns {Promise<void>}
+ */
 userRouter.post("/purchase", async (req, res) => {
   try {
     const { usuario, productId } = req.body;
@@ -199,6 +236,12 @@ userRouter.post("/purchase", async (req, res) => {
   }
 });
 
+/**
+ * Completa el nivel actual del usuario y suma experiencia, gemas, progreso y lecciones terminadas si el esquema lo permite.
+ * @param {import("express").Request} req - Petición con usuario y level en body.
+ * @param {import("express").Response} res - Respuesta con estado actualizado y recompensas ganadas.
+ * @returns {Promise<void>}
+ */
 userRouter.post("/complete-level", async (req, res) => {
   try {
     const { usuario, level } = req.body;
@@ -245,6 +288,12 @@ userRouter.post("/complete-level", async (req, res) => {
   }
 });
 
+/**
+ * Acumula segundos de tiempo invertido para el usuario cuando la columna existe.
+ * @param {import("express").Request} req - Petición con usuario y seconds en body.
+ * @param {import("express").Response} res - Respuesta con estado actualizado del usuario.
+ * @returns {Promise<void>}
+ */
 userRouter.post("/time-invested", async (req, res) => {
   try {
     const { usuario, seconds } = req.body;
@@ -275,6 +324,12 @@ userRouter.post("/time-invested", async (req, res) => {
   }
 });
 
+/**
+ * Guarda foto de perfil binaria y URL opcional después de validar las columnas de perfil.
+ * @param {import("express").Request} req - Petición con usuario, dataUrl y/o photoUrl en body.
+ * @param {import("express").Response} res - Respuesta con estado actualizado o error de validación de imagen.
+ * @returns {Promise<void>}
+ */
 userRouter.post("/profile-photo", async (req, res) => {
   try {
     const { usuario, dataUrl, photoUrl = null } = req.body;
