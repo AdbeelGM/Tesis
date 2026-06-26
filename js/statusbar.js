@@ -7,8 +7,6 @@ import { loadState } from "./game-state.js";
 import { updateInfiniteHeartsIndicator } from "./infinite-hearts-indicator.js";
 
 const FALLBACK_STATE = {
-  level: 3,
-  gems: 450,
   lives: 5,
   maxLives: 5,
   infiniteHeartsActive: false,
@@ -32,8 +30,8 @@ export async function refreshStatusBar() {
   } catch {
     if (livesLabel) livesLabel.textContent = `${FALLBACK_STATE.lives}`;
     updateInfiniteHeartsIndicator(livesLabel?.closest(".status-pill--lives"), FALLBACK_STATE);
-    if (gemsLabel) gemsLabel.textContent = `${FALLBACK_STATE.gems}`;
-    window.currentUserState = FALLBACK_STATE;
+    if (gemsLabel) gemsLabel.textContent = "";
+    window.currentUserState = { ...FALLBACK_STATE };
   }
 }
 
