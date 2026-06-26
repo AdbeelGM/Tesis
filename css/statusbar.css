@@ -1,3 +1,8 @@
+/*
+ * Nombre: statusbar.css
+ * Descripción: Contiene estilos o lógica de soporte para statusbar.
+ * Módulo: Proyecto LSM Gamificada
+ */
 .status-bar {
   display: flex;
   align-items: center;

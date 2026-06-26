@@ -1,3 +1,8 @@
+/*
+ * Nombre: user.js
+ * Descripción: Gestiona autenticación, progreso, vidas, tienda y perfil del usuario.
+ * Módulo: Backend / API de usuario
+ */
 import { Router } from "express";
 import { pool } from "../db.js";
 

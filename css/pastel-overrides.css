@@ -1,3 +1,8 @@
+/*
+ * Nombre: pastel-overrides.css
+ * Descripción: Contiene estilos o lógica de soporte para pastel-overrides.
+ * Módulo: Proyecto LSM Gamificada
+ */
 /* Conflict-safe overrides moved out of core CSS files */
 .sidebar {
   width: 256px;

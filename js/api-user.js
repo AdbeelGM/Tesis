@@ -1,3 +1,8 @@
+/*
+ * Nombre: api-user.js
+ * Descripción: Contiene estilos o lógica de soporte para api-user.
+ * Módulo: Proyecto LSM Gamificada
+ */
 const API_BASE = window.API_BASE || window.location.origin;
 
 async function request(path, options = {}) {

@@ -1,3 +1,8 @@
+/*
+ * Nombre: level-2.js
+ * Descripción: Contiene estilos o lógica de soporte para level-2.
+ * Módulo: Proyecto LSM Gamificada
+ */
 export const LEVEL_CONFIG = {
   level: 2,
   categorias: ['abecedario', 'numeros'],

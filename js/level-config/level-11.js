@@ -1,3 +1,8 @@
+/*
+ * Nombre: level-11.js
+ * Descripción: Contiene estilos o lógica de soporte para level-11.
+ * Módulo: Proyecto LSM Gamificada
+ */
 export const LEVEL_CONFIG = {
   level: 11,
   categorias: ['continentespaises', 'transportes'],

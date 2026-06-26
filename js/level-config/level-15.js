@@ -1,3 +1,8 @@
+/*
+ * Nombre: level-15.js
+ * Descripción: Contiene estilos o lógica de soporte para level-15.
+ * Módulo: Proyecto LSM Gamificada
+ */
 export const LEVEL_CONFIG = {
   level: 15,
   categorias: ['continentespaises', 'transportes', 'tecnologia', 'proteccioncivil', 'ambitojuridico'],

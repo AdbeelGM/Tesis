@@ -1,3 +1,8 @@
+/*
+ * Nombre: level-4.js
+ * Descripción: Contiene estilos o lógica de soporte para level-4.
+ * Módulo: Proyecto LSM Gamificada
+ */
 export const LEVEL_CONFIG = {
   level: 4,
   categorias: ['abecedario', 'numeros', 'colores'],

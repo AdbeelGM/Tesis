@@ -1,3 +1,8 @@
+/*
+ * Nombre: game-state.js
+ * Descripción: Contiene estilos o lógica de soporte para game-state.
+ * Módulo: Proyecto LSM Gamificada
+ */
 import { fetchUserState, loseLife, purchaseStoreItem, updateProfilePhoto } from "./api-user.js";
 import { loadSession } from "./user-session.js";
 

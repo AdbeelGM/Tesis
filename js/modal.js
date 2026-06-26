@@ -1,3 +1,8 @@
+/*
+ * Nombre: modal.js
+ * Descripción: Contiene estilos o lógica de soporte para modal.
+ * Módulo: Proyecto LSM Gamificada
+ */
 (function () {
   const DEFAULTS = {
     title: '¡Atención!',
