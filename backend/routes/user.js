@@ -25,7 +25,7 @@ userRouter.post("/login", async (req, res) => {
 
     const [rows] = await pool.query(
       `SELECT usuario
-       FROM Usuarios
+       FROM usuarios
        WHERE usuario = ? AND \`contraseña\` = ?
        LIMIT 1`,
       [usuario, password]
@@ -59,7 +59,7 @@ userRouter.post("/register", async (req, res) => {
     }
 
     const [exists] = await pool.query(
-      `SELECT usuario FROM Usuarios WHERE usuario = ? LIMIT 1`,
+      `SELECT usuario FROM usuarios WHERE usuario = ? LIMIT 1`,
       [username]
     );
 
@@ -70,7 +70,7 @@ userRouter.post("/register", async (req, res) => {
     const now = new Date();
 
     await pool.query(
-      `INSERT INTO Usuarios (usuario, \`contraseña\`, vidas, gemas, etapa, nivel, vidas_actualizado_en)
+      `INSERT INTO usuarios (usuario, \`contraseña\`, vidas, gemas, etapa, nivel, vidas_actualizado_en)
        VALUES (?, ?, ?, DEFAULT, DEFAULT, DEFAULT, ?)`,
       [username, pass, MAX_LIVES, now]
     );
@@ -114,7 +114,7 @@ userRouter.post("/lose-life", async (req, res) => {
     const now = new Date();
 
     await pool.query(
-      `UPDATE Usuarios SET vidas = ?, vidas_actualizado_en = ? WHERE usuario = ?`,
+      `UPDATE usuarios SET vidas = ?, vidas_actualizado_en = ? WHERE usuario = ?`,
       [nextLives, now, usuario]
     );
 
@@ -161,7 +161,7 @@ userRouter.post("/purchase", async (req, res) => {
       const nextLifeUpdatedAt = nextLives >= MAX_LIVES ? now : state.vidas_actualizado_en || now;
 
       await pool.query(
-        `UPDATE Usuarios
+        `UPDATE usuarios
          SET gemas = ?, vidas = ?, vidas_actualizado_en = ?
          WHERE usuario = ?`,
         [nextGems, nextLives, nextLifeUpdatedAt, usuario]
@@ -171,7 +171,7 @@ userRouter.post("/purchase", async (req, res) => {
       const endsAt = new Date(startsAt.getTime() + product.hours * 60 * 60 * 1000);
 
       await pool.query(
-        `UPDATE Usuarios
+        `UPDATE usuarios
          SET gemas = ?, vidas = ?, vidas_actualizado_en = ?, corazones_ilimitados_desde = ?, corazones_ilimitados_hasta = ?
          WHERE usuario = ?`,
         [nextGems, MAX_LIVES, now, now, endsAt, usuario]
@@ -210,7 +210,7 @@ userRouter.post("/complete-level", async (req, res) => {
     );
 
     await pool.query(
-      `UPDATE Usuarios
+      `UPDATE usuarios
        SET nivel = nivel + 1,
            experiencia = experiencia + ?,
            gemas = COALESCE(gemas, 0) + ?,
@@ -241,7 +241,7 @@ userRouter.post("/time-invested", async (req, res) => {
     }
 
     await pool.query(
-      `UPDATE Usuarios
+      `UPDATE usuarios
        SET tiempo_invertido_segundos = tiempo_invertido_segundos + ?
        WHERE usuario = ?`,
       [increment, usuario]
@@ -268,7 +268,7 @@ userRouter.post("/profile-photo", async (req, res) => {
     const { photoBuffer, mimeType } = parseProfilePhotoPayload({ dataUrl, photoUrl });
 
     await pool.query(
-      `UPDATE Usuarios
+      `UPDATE usuarios
        SET foto_perfil = ?, foto_perfil_mime = ?, foto_perfil_url = ?
        WHERE usuario = ?`,
       [photoBuffer, mimeType, photoUrl, usuario]
