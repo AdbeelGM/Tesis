@@ -136,8 +136,8 @@ async function buildUnionSubquery(categorias) {
       const mediaTipoExpr = cols.has("media_tipo")
         ? "media_tipo"
         : `CASE
-             WHEN LOWER(${mediaExpr}) REGEXP '(^https?://)?(www\\.)?(youtube\\.com|youtu\\.be)/' THEN 'youtube'
-             WHEN LOWER(${mediaExpr}) REGEXP '\\\\.(mp4|webm|ogg)(\\\\?.*)?$' THEN 'video'
+             WHEN LOWER(${mediaExpr}) REGEXP '^(https://|http://|)(www\\.|)(youtube\\.com|youtu\\.be)/' THEN 'youtube'
+             WHEN SUBSTRING_INDEX(LOWER(${mediaExpr}), CHAR(63), 1) REGEXP '\\\\.(mp4|webm|ogg)$' THEN 'video'
              ELSE 'imagen'
            END`;
 
