@@ -1,7 +1,7 @@
-/*
- * Nombre: statusbar.js
- * Descripción: Contiene estilos o lógica de soporte para statusbar.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file statusbar.js
+ * @description Sincroniza la barra superior con vidas, gemas y poderes activos del usuario, dejando el estado normalizado disponible para el resto de vistas.
+ * @module EstadoDelJuego
  */
 import { loadState } from "./game-state.js";
 import { updateInfiniteHeartsIndicator } from "./infinite-hearts-indicator.js";
@@ -15,6 +15,10 @@ const FALLBACK_STATE = {
   infiniteHeartsRemainingSeconds: 0,
 };
 
+/**
+ * Refresca vidas, gemas y estado global del usuario en la barra superior.
+ * @returns {Promise<void>} No devuelve valor; actualiza el DOM y window.currentUserState.
+ */
 export async function refreshStatusBar() {
   const livesLabel = document.getElementById("lives-label");
   const gemsLabel = document.getElementById("gems-label");

@@ -1,7 +1,7 @@
-/*
- * Nombre: statusbar.css
- * Descripción: Contiene estilos o lógica de soporte para statusbar.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file statusbar.css
+ * @description Estiliza la barra superior de estado que muestra vidas, gemas y el indicador de corazones infinitos del jugador.
+ * @module EstadoDelJuego
  */
 .status-bar {
   display: flex;

@@ -1,7 +1,7 @@
-/*
- * Nombre: design-system-lsm.css
- * Descripción: Contiene estilos o lógica de soporte para design-system-lsm.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file design-system-lsm.css
+ * @description Centraliza tokens de color, sombras, radios, gradientes y patrones reutilizables del lenguaje visual de LSM Gamificada.
+ * @module SistemaDeDiseño
  */
 .sidebar {
   width: 294px;

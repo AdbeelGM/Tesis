@@ -1,7 +1,7 @@
-/*
- * Nombre: route.js
- * Descripción: Renderiza y enlaza la ruta de aprendizaje.
- * Módulo: Frontend / Ruta
+/**
+ * @file route.js
+ * @description Construye la ruta de aprendizaje por secciones, niveles y cofres, y actualiza dinámicamente el encabezado de unidad según el desplazamiento del usuario.
+ * @module Ruta
  */
 import { showRouteChestAnimation } from '../rewards/rewards.js';
 
@@ -56,6 +56,12 @@ const LEARN_UNITS = [
   },
 ];
 
+/**
+ * Construye el tramo serpenteante de una unidad con sus niveles y cofre final.
+ * @param {Object} unit - Unidad de aprendizaje con niveles y desplazamientos visuales.
+ * @param {number} unitIndex - Índice de la unidad dentro de la ruta.
+ * @returns {string} HTML de la sección de ruta correspondiente.
+ */
 function renderLevelPath(unit, unitIndex) {
   return `
     <section class="route__path" data-unit-index="${unitIndex}">
@@ -83,6 +89,11 @@ function renderLevelPath(unit, unitIndex) {
   `;
 }
 
+/**
+ * Genera la tarjeta fija que resume la unidad actualmente visible.
+ * @param {Object} unit - Unidad cuyos textos se mostrarán en el encabezado.
+ * @returns {string} HTML del encabezado dinámico de la ruta.
+ */
 function renderLearnUnitHeader(unit = LEARN_UNITS[0]) {
   return `
     <section class="route__unit-card route__unit-card--sticky" data-dynamic-unit-card aria-live="polite">
@@ -98,6 +109,10 @@ function renderLearnUnitHeader(unit = LEARN_UNITS[0]) {
   `;
 }
 
+/**
+ * Renderiza la ruta completa con sus tres secciones de aprendizaje y transiciones.
+ * @returns {string} Marcado HTML de la vista Aprender.
+ */
 function renderLearnView() {
   return `
     <div class="route__learn">
@@ -113,6 +128,12 @@ function renderLearnView() {
 }
 
 
+/**
+ * Cambia los textos del encabezado fijo cuando el usuario entra a otra unidad.
+ * @param {HTMLElement} root - Contenedor desplazable de la vista de aprendizaje.
+ * @param {number} unitIndex - Índice de la unidad que debe quedar activa.
+ * @returns {void} No devuelve valor; actualiza textos y animación del encabezado.
+ */
 function setDynamicUnitHeader(root, unitIndex) {
   const unit = LEARN_UNITS[unitIndex] || LEARN_UNITS[0];
   const card = root.querySelector('[data-dynamic-unit-card]');
@@ -132,6 +153,11 @@ function setDynamicUnitHeader(root, unitIndex) {
   window.setTimeout(() => card.classList.remove('route__unit-card--changing'), 180);
 }
 
+/**
+ * Observa scroll y resize para mantener el encabezado sincronizado con la sección visible.
+ * @param {HTMLElement} root - Contenedor donde están las secciones de ruta.
+ * @returns {Function|null} Función de limpieza de listeners o null si la vista no está lista.
+ */
 function initializeDynamicUnitHeader(root) {
   const sections = [...root.querySelectorAll('.route__path[data-unit-index]')];
   const card = root.querySelector('[data-dynamic-unit-card]');

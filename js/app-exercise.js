@@ -1,7 +1,7 @@
-/*
- * Nombre: app-exercise.js
- * Descripción: Contiene estilos o lógica de soporte para app-exercise.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file app-exercise.js
+ * @description Controla la pantalla de ejercicios de un nivel: carga su configuración, obtiene preguntas del backend, renderiza medios y respuestas, evalúa intentos, actualiza vidas, registra tiempo y marca el nivel como completado.
+ * @module Ejercicios
  */
 import { loadState, loseLifeGlobal } from "./game-state.js";
 import { updateInfiniteHeartsIndicator } from "./infinite-hearts-indicator.js";
@@ -10,17 +10,31 @@ import { loadSession } from "./user-session.js";
 
 console.log("✅ app-exercise.js cargado");
 
+/**
+ * Lee el parámetro level de la URL para decidir qué lección debe cargarse.
+ * @returns {number} Número de nivel solicitado o 1 cuando el parámetro no es válido.
+ */
 function getLevelFromURL() {
   const params = new URLSearchParams(window.location.search);
   const level = Number(params.get("level") || 1);
   return Number.isFinite(level) ? level : 1;
 }
 
+/**
+ * Importa dinámicamente la configuración del nivel indicado.
+ * @param {number} level - Número de nivel cuyo archivo de configuración se cargará.
+ * @returns {Promise<Object>} Configuración pedagógica y mezcla de ejercicios del nivel.
+ */
 async function loadLevelConfig(level) {
   const mod = await import(`./level-config/level-${level}.js`);
   return mod.LEVEL_CONFIG;
 }
 
+/**
+ * Mezcla una lista sin modificar el arreglo original para variar el orden de preguntas.
+ * @param {Array} arr - Elementos que se desean reordenar aleatoriamente.
+ * @returns {Array} Nueva lista con los mismos elementos en orden aleatorio.
+ */
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -30,6 +44,12 @@ function shuffle(arr) {
   return a;
 }
 
+/**
+ * Solicita preguntas al backend agregando filtros como parámetros de consulta.
+ * @param {string} path - Endpoint de preguntas que se consultará.
+ * @param {Object} params - Parámetros de categoría, dificultad y límite.
+ * @returns {Promise<Array|Object>} Datos JSON devueltos por el endpoint solicitado.
+ */
 async function fetchJSON(path, params) {
   const base = window.API_BASE || window.location.origin;
   const url = new URL(path, base);
@@ -43,6 +63,11 @@ async function fetchJSON(path, params) {
   return await res.json();
 }
 
+/**
+ * Extrae las categorías de vocabulario desde configuraciones nuevas o heredadas del nivel.
+ * @param {Object} cfg - Configuración del nivel cargada dinámicamente.
+ * @returns {string[]} Lista de categorías que debe solicitar el ejercicio.
+ */
 function resolveCategorias(cfg) {
   if (Array.isArray(cfg.categorias) && cfg.categorias.length > 0) {
     return cfg.categorias;
@@ -66,6 +91,11 @@ const CATEGORIA_ALIASES = {
   palabras_comunes: "palabrascomunes",
 };
 
+/**
+ * Limpia categorías vacías y traduce alias heredados al nombre esperado por la API.
+ * @param {string[]} categorias - Categorías declaradas por la configuración del nivel.
+ * @returns {string[]} Categorías normalizadas para enviarlas al backend.
+ */
 function normalizeCategorias(categorias) {
   return categorias
     .map((categoria) => String(categoria || "").trim())
@@ -73,6 +103,12 @@ function normalizeCategorias(categorias) {
     .map((categoria) => CATEGORIA_ALIASES[categoria] || categoria);
 }
 
+/**
+ * Muestra un mensaje y redirige al usuario cuando no puede continuar en el ejercicio.
+ * @param {Object} options - Opciones del modal que explican el motivo de salida.
+ * @param {string} target - Página a la que se redirigirá al cerrar el aviso.
+ * @returns {void} No devuelve valor; cambia window.location cuando corresponde.
+ */
 function redirectAfterModal(options, target = "index.html") {
   const modal = window.showLsmModal?.({
     ...options,
@@ -86,6 +122,11 @@ function redirectAfterModal(options, target = "index.html") {
   }
 }
 
+/**
+ * Normaliza la dificultad del nivel a una lista de enteros positivos únicos.
+ * @param {Object} cfg - Configuración del nivel con dificultad única o múltiple.
+ * @returns {number[]} Dificultades válidas que se enviarán al backend.
+ */
 function resolveDificultades(cfg) {
   if (Array.isArray(cfg.dificultad)) {
     return [...new Set(
@@ -274,6 +315,10 @@ function resolveDificultades(cfg) {
     return;
   }
 
+  /**
+   * Renderiza la pregunta actual con su medio, instrucciones y controles adecuados al tipo de ejercicio.
+   * @returns {void} No devuelve valor; actualiza el DOM de la plantilla de ejercicios.
+   */
   function renderCurrent() {
     state.selected = null;
     state.locked = false;
@@ -348,6 +393,12 @@ function resolveDificultades(cfg) {
     promptSubtitle.textContent = "";
   }
 
+  /**
+   * Registra la opción elegida y actualiza el estado visual de selección.
+   * @param {string} value - Respuesta seleccionada por el usuario.
+   * @param {HTMLElement} element - Botón que debe marcarse como seleccionado.
+   * @returns {void} No devuelve valor; guarda la selección en el estado local.
+   */
   function selectOption(value, element) {
     if (state.locked) return;
     state.selected = value;
@@ -355,6 +406,11 @@ function resolveDificultades(cfg) {
     element.classList.add("option--selected");
   }
 
+  /**
+   * Evalúa la respuesta del usuario según el tipo de pregunta actual.
+   * @param {Object} q - Pregunta activa con respuesta correcta y metadatos de tipo.
+   * @returns {boolean} true cuando la respuesta coincide con la solución esperada.
+   */
   function evaluateCurrent(q) {
     if (q.tipo === "multiple_choice") {
       if (!state.selected) return false;
@@ -382,12 +438,21 @@ function resolveDificultades(cfg) {
     return false;
   }
 
+  /**
+   * Avanza al siguiente ejercicio o termina el nivel cuando la cola se agotó.
+   * @returns {void} No devuelve valor; cambia el índice actual o finaliza la lección.
+   */
   function nextQuestion() {
     state.index++;
     if (state.index >= state.queue.length) return endLevel(true);
     renderCurrent();
   }
 
+  /**
+   * Cierra la sesión de práctica, reporta tiempo y registra avance si el nivel se completó.
+   * @param {boolean} completed - Indica si el usuario respondió toda la cola antes de quedarse sin vidas.
+   * @returns {Promise<void>} No devuelve valor; redirige a la ruta principal o muestra un aviso.
+   */
   async function endLevel(completed) {
     updateProgress(100);
     await reportTimeSpent();
@@ -409,6 +474,10 @@ function resolveDificultades(cfg) {
     redirectAfterModal({ message: '¡Sin corazones! Vuelve a intentarlo cuando recuperes vidas.' });
   }
 
+  /**
+   * Envía al backend el tiempo transcurrido desde que inició el nivel evitando reportes duplicados.
+   * @returns {Promise<void>} No devuelve valor; persiste segundos de práctica cuando hay sesión activa.
+   */
   async function reportTimeSpent() {
     if (timeReported) return;
     const session = loadSession();
@@ -425,17 +494,32 @@ function resolveDificultades(cfg) {
     }
   }
 
+  /**
+   * Sincroniza el contador de vidas de la pantalla con el estado local y el indicador de corazones infinitos.
+   * @returns {void} No devuelve valor; actualiza texto, dataset y animación del contador.
+   */
   function updateLives() {
     livesEl.dataset.lives = String(state.lives);
     if (livesCountEl) livesCountEl.textContent = state.infiniteHeartsActive ? "" : String(state.lives);
     updateInfiniteHeartsIndicator(livesEl, state);
   }
 
+  /**
+   * Actualiza la barra y etiqueta porcentual de progreso del nivel.
+   * @param {number} value - Porcentaje completado que debe mostrarse.
+   * @returns {void} No devuelve valor; cambia ancho y texto de progreso.
+   */
   function updateProgress(value) {
     progressFill.style.width = `${value}%`;
     if (progressValue) progressValue.textContent = `${value}%`;
   }
 
+  /**
+   * Construye el contenido de retroalimentación para respuestas correctas o incorrectas.
+   * @param {Object} question - Pregunta evaluada de la que se obtendrá la solución si falló.
+   * @param {boolean} ok - Resultado de la evaluación de la respuesta.
+   * @returns {Object} Título, mensaje e icono que se mostrarán al usuario.
+   */
   function buildFeedback(question, ok) {
     if (ok) {
       return {
@@ -455,6 +539,12 @@ function resolveDificultades(cfg) {
     };
   }
 
+  /**
+   * Muestra la tarjeta de retroalimentación y prepara el botón para continuar.
+   * @param {boolean} ok - Define el estilo visual de éxito o error.
+   * @param {Object} config - Textos e icono que explican el resultado.
+   * @returns {void} No devuelve valor; reemplaza las acciones por el panel de feedback.
+   */
   function showFeedback(ok, config) {
     feedback.style.display = "block";
     actionsEl?.classList.add("is-hidden");
@@ -480,6 +570,12 @@ function resolveDificultades(cfg) {
     document.getElementById("feedbackContinue")?.addEventListener("click", nextQuestion, { once: true });
   }
 
+  /**
+   * Determina si el recurso de la pregunta debe mostrarse como imagen, video local o YouTube.
+   * @param {string} rawType - Tipo declarado por la base de datos, si existe.
+   * @param {string} source - URL o ruta del recurso multimedia.
+   * @returns {string} Tipo normalizado: imagen, video o youtube.
+   */
   function inferMediaType(rawType, source) {
     const type = String(rawType || "").toLowerCase();
     if (type === "youtube" || type === "video" || type === "imagen") {
@@ -491,6 +587,12 @@ function resolveDificultades(cfg) {
     return "imagen";
   }
 
+  /**
+   * Presenta el recurso multimedia de la pregunta en el reproductor correspondiente.
+   * @param {string} type - Tipo normalizado del medio.
+   * @param {string} source - URL o ruta que se asignará al elemento visual.
+   * @returns {void} No devuelve valor; muestra imagen, video o iframe.
+   */
   function renderMedia(type, source) {
     currentMediaType = type;
     currentMediaSource = source;
@@ -524,6 +626,10 @@ function resolveDificultades(cfg) {
     btnRestartMedia.style.display = "none";
   }
 
+  /**
+   * Oculta y reinicia todos los reproductores para evitar audio, video o iframes residuales.
+   * @returns {void} No devuelve valor; limpia los elementos multimedia.
+   */
   function hideAllMedia() {
     imgEl.style.display = "none";
     videoEl.style.display = "none";
@@ -535,6 +641,10 @@ function resolveDificultades(cfg) {
     youtubeEl.src = "";
   }
 
+  /**
+   * Reinicia el video local o recarga el iframe de YouTube de la pregunta actual.
+   * @returns {void} No devuelve valor; vuelve a reproducir el recurso cuando aplica.
+   */
   function restartMedia() {
     if (currentMediaType === "video") {
       videoEl.currentTime = 0;
@@ -550,10 +660,20 @@ function resolveDificultades(cfg) {
     }
   }
 
+  /**
+   * Verifica si una cadena apunta a un dominio de YouTube compatible.
+   * @param {string} url - URL candidata de la pregunta.
+   * @returns {boolean} true si la URL pertenece a youtube.com o youtu.be.
+   */
   function isYouTubeUrl(url) {
     return /(^https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(String(url || ""));
   }
 
+  /**
+   * Convierte enlaces públicos de YouTube en una URL de inserción para iframe.
+   * @param {string} url - Enlace original guardado en la pregunta.
+   * @returns {string} URL embed válida o cadena vacía si no puede convertirse.
+   */
   function toYouTubeEmbedURL(url) {
     try {
       const candidate = String(url || "").trim();
@@ -583,6 +703,11 @@ function resolveDificultades(cfg) {
     }
   }
 
+  /**
+   * Extrae el identificador de video desde una URL de YouTube normalizada.
+   * @param {string} url - Enlace de YouTube asociado al ejercicio.
+   * @returns {string} ID del video o cadena vacía si el enlace es inválido.
+   */
   function extractYouTubeId(url) {
     const embedUrl = toYouTubeEmbedURL(url);
     if (!embedUrl) return "";

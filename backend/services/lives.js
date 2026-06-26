@@ -1,13 +1,18 @@
-/*
- * Nombre: lives.js
- * Descripción: Gestiona reglas de vidas, regeneración y corazones ilimitados.
- * Módulo: Backend / Servicios de usuario
+/**
+ * @file lives.js
+ * @description Aplica las reglas de vidas del jugador, incluyendo regeneración por tiempo, límite máximo y vigencia de corazones ilimitados.
+ * @module Vidas
  */
 import { pool } from "../db.js";
 
 export const MAX_LIVES = 5;
 export const LIFE_INTERVAL_MINUTES = 5;
 
+/**
+ * Regenera vidas del usuario según el tiempo transcurrido y respeta los corazones ilimitados activos.
+ * @param {string} usuario - Usuario cuyas vidas deben recalcularse.
+ * @returns {Promise<Object|null>} Registro actualizado de vidas o null si el usuario no existe.
+ */
 export async function applyLifeRegen(usuario) {
   const [rows] = await pool.query(
     `SELECT usuario, vidas, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta

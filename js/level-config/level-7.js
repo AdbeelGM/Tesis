@@ -1,7 +1,7 @@
-/*
- * Nombre: level-7.js
- * Descripción: Contiene estilos o lógica de soporte para level-7.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file level-7.js
+ * @description Define la configuración pedagógica del nivel 7: categorías de vocabulario LSM, dificultad, cantidad total de ejercicios, objetivo didáctico y mezcla de tipos de pregunta.
+ * @module ConfiguraciónDeNiveles
  */
 export const LEVEL_CONFIG = {
   level: 7,

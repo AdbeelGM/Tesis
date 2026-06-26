@@ -1,7 +1,13 @@
-/*
- * Nombre: levels.js
- * Descripción: Contiene estilos o lógica de soporte para levels.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file levels.js
+ * @description Actualiza los nodos de la ruta de aprendizaje según el nivel actual del usuario y controla el acceso, repetición o bloqueo de cada lección.
+ * @module Ruta
+ */
+/**
+ * Aplica a un nodo de nivel su estado visual de completado, actual o bloqueado.
+ * @param {HTMLElement} node - Botón de nivel con data-level.
+ * @param {number} currentLevel - Nivel actual desbloqueado para el usuario.
+ * @returns {void} No devuelve valor; modifica clases, icono y etiqueta accesible.
  */
 function applyLevelNodeState(node, currentLevel) {
   const level = Number(node.dataset.level);
@@ -43,6 +49,11 @@ function applyLevelNodeState(node, currentLevel) {
   node.setAttribute('aria-label', `Nivel ${level} actual`);
 }
 
+/**
+ * Recalcula todos los estados visuales de niveles dentro de un contenedor.
+ * @param {Document|HTMLElement} root - Raíz donde se buscarán los nodos de nivel.
+ * @returns {void} No devuelve valor; actualiza la ruta si hay estado de usuario disponible.
+ */
 function renderLevelStates(root = document) {
   const userState = window.currentUserState;
   if (!userState) return;
@@ -52,6 +63,11 @@ function renderLevelStates(root = document) {
   nodes.forEach((node) => applyLevelNodeState(node, currentLevel));
 }
 
+/**
+ * Enlaza cada nivel con la navegación a su ejercicio o con mensajes de bloqueo y repetición.
+ * @param {Document|HTMLElement} root - Raíz donde se buscarán los nodos interactivos.
+ * @returns {void} No devuelve valor; registra listeners evitando duplicados.
+ */
 function bindLevelClicks(root = document) {
   const nodes = root.querySelectorAll('.level-node[data-level]');
 
@@ -105,6 +121,10 @@ function bindLevelClicks(root = document) {
   });
 }
 
+/**
+ * Inicializa la ruta de aprendizaje al enlazar clics y pintar el avance actual.
+ * @returns {void} No devuelve valor; prepara la vista de aprendizaje visible.
+ */
 function initializeLearnView() {
   bindLevelClicks(document);
   renderLevelStates(document);

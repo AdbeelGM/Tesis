@@ -1,12 +1,16 @@
-/*
- * Nombre: store.js
- * Descripción: Renderiza y gestiona las compras de la tienda.
- * Módulo: Frontend / Tienda
+/**
+ * @file store.js
+ * @description Renderiza la tienda de vidas y poderes, valida disponibilidad de compras, ejecuta transacciones contra el estado del juego y dispara animaciones de recompensa.
+ * @module Tienda
  */
 import { refreshStatusBar } from '../statusbar.js';
 import { purchaseStoreItemGlobal } from '../game-state.js';
 import { showSingleHeartAnimation, showHeartBundleAnimation, showInfiniteHeartsAnimation } from '../rewards/rewards.js';
 
+/**
+ * Genera el HTML de la tienda con productos de vidas y corazones infinitos.
+ * @returns {string} Marcado HTML de la tienda listo para montarse.
+ */
 function renderStoreView() {
   return `
     <section class="store">
@@ -74,6 +78,11 @@ function renderStoreView() {
   `;
 }
 
+/**
+ * Convierte segundos restantes de un poder en horas y minutos.
+ * @param {number} seconds - Segundos restantes de corazones infinitos.
+ * @returns {string} Duración legible para el estado de la tienda.
+ */
 function formatDuration(seconds) {
   const clamped = Math.max(0, Number(seconds) || 0);
   const h = Math.floor(clamped / 3600);
@@ -81,6 +90,11 @@ function formatDuration(seconds) {
   return `${h}h ${m}m`;
 }
 
+/**
+ * Actualiza los contadores visibles de vidas y poder activo dentro de la tienda.
+ * @param {Object} state - Estado actual del jugador con vidas y corazones infinitos.
+ * @returns {void} No devuelve valor; modifica textos del DOM.
+ */
 function updateStoreStatus(state) {
   const livesLabel = document.getElementById('store-lives-label');
   const infiniteLabel = document.getElementById('store-infinite-status');
@@ -94,6 +108,11 @@ function updateStoreStatus(state) {
   }
 }
 
+/**
+ * Marca compras como no disponibles cuando el usuario ya tiene vidas máximas o poder activo.
+ * @param {Object} state - Estado del jugador usado para decidir bloqueos de productos.
+ * @returns {void} No devuelve valor; actualiza atributos accesibles y títulos.
+ */
 function updateStorePurchaseAvailability(state) {
   const livesAtMax = Number(state.lives) >= Number(state.maxLives);
   const infiniteActive = Boolean(state.infiniteHeartsActive);
@@ -117,6 +136,10 @@ function updateStorePurchaseAvailability(state) {
   });
 }
 
+/**
+ * Enlaza los botones de compra, ejecuta transacciones y muestra recompensas o errores.
+ * @returns {void} No devuelve valor; registra listeners sobre productos disponibles.
+ */
 function bindStoreActions() {
   const buyButtons = [...document.querySelectorAll('.product-card__buy[data-product-id]')];
   if (buyButtons.length === 0) return;

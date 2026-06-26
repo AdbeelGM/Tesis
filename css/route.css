@@ -1,7 +1,7 @@
-/*
- * Nombre: route.css
- * Descripción: Contiene estilos o lógica de soporte para route.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file route.css
+ * @description Define la presentación de la ruta de aprendizaje: unidades, camino serpenteante, nodos de nivel, cofres y encabezado dinámico.
+ * @module Ruta
  */
 .route {
   flex: 1;

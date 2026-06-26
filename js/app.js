@@ -1,7 +1,7 @@
-/*
- * Nombre: app.js
- * Descripción: Orquesta la ruta de aprendizaje, tienda, perfil y sesión del usuario.
- * Módulo: Frontend / Aplicación principal
+/**
+ * @file app.js
+ * @description Punto de entrada de la aplicación autenticada; valida la sesión, monta la vista activa de aprendizaje, tienda o perfil, enlaza navegación lateral y sincroniza la barra de estado del jugador.
+ * @module Aplicación
  */
 import { loadSession, clearSession } from './user-session.js';
 import { refreshStatusBar } from './statusbar.js';
@@ -11,6 +11,12 @@ import { renderProfileView, bindProfileActions } from './profile/profile.js';
 
 const LOGIN_URL = 'login.html';
 
+/**
+ * Monta en el contenedor principal la vista solicitada y ejecuta los enlaces específicos de cada sección.
+ * @param {string} viewName - Nombre lógico de la vista seleccionada desde la navegación lateral.
+ * @param {HTMLElement} mountNode - Elemento donde se inyectará el HTML de la vista.
+ * @returns {void} No devuelve valor; actualiza el DOM y emite un evento de montaje.
+ */
 function mountView(viewName, mountNode) {
   const views = {
     aprender: renderLearnView,

@@ -1,7 +1,7 @@
-/*
- * Nombre: pastel-overrides.css
- * Descripción: Contiene estilos o lógica de soporte para pastel-overrides.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file pastel-overrides.css
+ * @description Aplica una capa de personalización pastel sobre tarjetas, botones, ruta, tienda y perfil para reforzar la identidad visual lúdica.
+ * @module SistemaDeDiseño
  */
 /* Conflict-safe overrides moved out of core CSS files */
 .sidebar {

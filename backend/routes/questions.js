@@ -1,7 +1,7 @@
-/*
- * Nombre: questions.js
- * Descripción: Expone endpoints para generar ejercicios desde las tablas de preguntas.
- * Módulo: Backend / API de preguntas
+/**
+ * @file questions.js
+ * @description Construye ejercicios desde tablas de vocabulario LSM validadas y expone endpoints de opción múltiple, verdadero/falso y escritura.
+ * @module APIPreguntas
  */
 import { Router } from "express";
 import { pool } from "../db.js";
@@ -22,14 +22,28 @@ const tableAliases = {
   ambitojuridico: "ámbitojurídico",
 };
 
+/**
+ * Valida que el nombre de una tabla solo use letras, números o guiones bajos.
+ * @param {string} name - Nombre de categoría/tabla solicitado.
+ * @returns {boolean} true si el nombre es seguro para validación posterior.
+ */
 function isSafeTableName(name) {
   return /^[\p{L}\p{N}_]+$/u.test(name);
 }
 
+/**
+ * Escapa un identificador SQL para usarlo como nombre de tabla en consultas dinámicas validadas.
+ * @param {string} identifier - Nombre de tabla que se envolverá con backticks.
+ * @returns {string} Identificador escapado para MySQL.
+ */
 function quoteIdentifier(identifier) {
   return `\`${String(identifier).replaceAll("`", "``")}\``;
 }
 
+/**
+ * Consulta qué tablas de vocabulario tienen las columnas mínimas para generar ejercicios.
+ * @returns {Promise<Set<string>>} Conjunto de tablas disponibles como categorías.
+ */
 async function getEligibleTables() {
   const [rows] = await pool.query(
     `SELECT c.table_name AS table_name
@@ -48,6 +62,12 @@ async function getEligibleTables() {
   return new Set(rows.map((row) => row.table_name));
 }
 
+/**
+ * Lee, normaliza y valida las categorías solicitadas en la petición de ejercicios.
+ * @param {import("express").Request} req - Petición HTTP con query categoria.
+ * @param {import("express").Response} res - Respuesta usada para reportar errores de validación.
+ * @returns {Promise<string[]|null>} Categorías únicas válidas o null si se respondió error.
+ */
 async function getAndValidateCategorias(req, res) {
   const categoriasRaw = req.query.categoria;
   if (!categoriasRaw) {
@@ -83,6 +103,11 @@ async function getAndValidateCategorias(req, res) {
   return unicas;
 }
 
+/**
+ * Construye una subconsulta UNION ALL que unifica tablas de vocabulario con columnas compatibles.
+ * @param {string[]} categorias - Tablas validadas que formarán la fuente de preguntas.
+ * @returns {Promise<string>} SQL de subconsulta para seleccionar preguntas de varias categorías.
+ */
 async function buildUnionSubquery(categorias) {
   const [columnRows] = await pool.query(
     `SELECT table_name, column_name
@@ -123,12 +148,24 @@ async function buildUnionSubquery(categorias) {
     .join(" UNION ALL ");
 }
 
+/**
+ * Obtiene un límite positivo de resultados desde la query o usa un valor de respaldo.
+ * @param {import("express").Request} req - Petición HTTP con query limit opcional.
+ * @param {number} fallback - Cantidad usada cuando el límite no es válido.
+ * @returns {number} Límite seguro para la consulta.
+ */
 function getValidatedLimit(req, fallback = 5) {
   // Mantiene un límite positivo para proteger la API de consultas excesivas o inválidas.
   const limit = Number(req.query.limit || fallback);
   return Number.isInteger(limit) && limit > 0 ? limit : fallback;
 }
 
+/**
+ * Normaliza y valida una o varias dificultades recibidas en la query.
+ * @param {import("express").Request} req - Petición HTTP con query dificultad opcional.
+ * @param {import("express").Response} res - Respuesta usada para reportar errores.
+ * @returns {number[]|null} Dificultades únicas válidas o null si se respondió error.
+ */
 function getAndValidateDificultades(req, res) {
   const dificultadesRaw = req.query.dificultad ?? "1";
   const dificultades = String(dificultadesRaw)
@@ -146,10 +183,20 @@ function getAndValidateDificultades(req, res) {
   return [...new Set(dificultades)];
 }
 
+/**
+ * Genera placeholders para una cláusula SQL IN parametrizada.
+ * @param {Array} values - Valores que ocuparán los placeholders.
+ * @returns {string} Lista de signos de interrogación separados por coma.
+ */
 function buildInClause(values) {
   return values.map(() => "?").join(", ");
 }
 
+/**
+ * Normaliza una respuesta para comparaciones sin acentos, espacios extremos ni mayúsculas.
+ * @param {string} value - Respuesta original de la base de datos o del usuario.
+ * @returns {string} Respuesta normalizada para deduplicación o validación.
+ */
 function normalizeRespuesta(value) {
   return String(value || "")
     .trim()
@@ -158,6 +205,11 @@ function normalizeRespuesta(value) {
     .toLowerCase();
 }
 
+/**
+ * Elimina respuestas equivalentes conservando la primera forma legible encontrada.
+ * @param {string[]} values - Respuestas candidatas.
+ * @returns {string[]} Lista sin duplicados semánticos simples.
+ */
 function uniqueRespuestas(values) {
   const seen = new Set();
   const output = [];
@@ -172,6 +224,13 @@ function uniqueRespuestas(values) {
   return output;
 }
 
+/**
+ * Calcula las respuestas aceptadas para una fila, incluyendo alternativas numéricas cuando existen.
+ * @param {string} respuesta - Respuesta principal almacenada.
+ * @param {string|null} respuestaAlt - Respuesta alternativa opcional.
+ * @param {string} categoriaOrigen - Tabla/categoría de la que proviene la fila.
+ * @returns {string[]} Respuestas válidas para evaluar texto escrito.
+ */
 function getAcceptedAnswersForRow(respuesta, respuestaAlt, categoriaOrigen) {
   const base = String(respuesta || "").trim();
   if (!base) return [];
@@ -391,6 +450,11 @@ questionsRouter.get("/text-input", async (req, res) => {
   }
 });
 
+/**
+ * Mezcla opciones de respuesta sin alterar el arreglo original.
+ * @param {Array} arr - Opciones que se presentarán en orden aleatorio.
+ * @returns {Array} Nueva lista mezclada.
+ */
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {

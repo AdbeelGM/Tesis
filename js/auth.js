@@ -1,7 +1,7 @@
-/*
- * Nombre: auth.js
- * Descripción: Contiene estilos o lógica de soporte para auth.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file auth.js
+ * @description Gestiona la página de acceso: alterna entre inicio de sesión y registro, valida formularios, llama al backend de usuarios y crea la sesión local antes de entrar a LSM Gamificada.
+ * @module Autenticación
  */
 import { loginUser, registerUser } from "./api-user.js";
 import { loadSession, saveSession } from "./user-session.js";

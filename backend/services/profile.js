@@ -1,13 +1,17 @@
-/*
- * Nombre: profile.js
- * Descripción: Gestiona esquema, estado, métricas y foto de perfil del usuario.
- * Módulo: Backend / Servicios de usuario
+/**
+ * @file profile.js
+ * @description Mantiene el esquema extendido de usuarios, compone el estado completo del perfil y valida fotos de perfil enviadas por el frontend.
+ * @module Perfil
  */
 import { pool } from "../db.js";
 import { applyLifeRegen } from "./lives.js";
 
 export const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
 
+/**
+ * Asegura que la tabla Usuarios tenga las columnas requeridas por progreso, perfil y tienda.
+ * @returns {Promise<void>} No devuelve valor; ejecuta alteraciones idempotentes de esquema.
+ */
 export async function ensureUserSchema() {
   await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS vidas_actualizado_en DATETIME NULL`);
   await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS corazones_ilimitados_desde DATETIME NULL`);
@@ -23,6 +27,11 @@ export async function ensureUserSchema() {
   await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS tiempo_invertido_segundos INT NOT NULL DEFAULT 0`);
 }
 
+/**
+ * Obtiene el estado completo del usuario, incluyendo regeneración de vidas y foto codificada.
+ * @param {string} usuario - Usuario cuyo estado se consultará.
+ * @returns {Promise<Object|null>} Estado listo para la API o null si no existe.
+ */
 export async function getUserState(usuario) {
   await applyLifeRegen(usuario);
   const [rows] = await pool.query(
@@ -53,6 +62,13 @@ export async function getUserState(usuario) {
   };
 }
 
+/**
+ * Valida y decodifica la foto de perfil recibida desde el frontend.
+ * @param {Object} payload - Datos enviados para actualizar la foto.
+ * @param {string} payload.dataUrl - Imagen en formato Data URL base64.
+ * @param {string|null} payload.photoUrl - URL externa opcional de foto.
+ * @returns {Object} Buffer, tipo MIME y URL listos para persistirse.
+ */
 export function parseProfilePhotoPayload({ dataUrl, photoUrl = null }) {
   let photoBuffer = null;
   let mimeType = null;

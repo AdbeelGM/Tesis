@@ -1,7 +1,7 @@
-/*
- * Nombre: login.css
- * Descripción: Contiene estilos o lógica de soporte para login.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file login.css
+ * @description Estiliza la experiencia de autenticación con layout dividido, tarjetas de formulario, pestañas, campos y botones de acceso.
+ * @module Autenticación
  */
 .auth-page {
   min-height: 100vh;

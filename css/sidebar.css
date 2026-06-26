@@ -1,7 +1,7 @@
-/*
- * Nombre: sidebar.css
- * Descripción: Contiene estilos o lógica de soporte para sidebar.
- * Módulo: Proyecto LSM Gamificada
+/**
+ * @file sidebar.css
+ * @description Estiliza la navegación lateral con logotipo, botones de sección, estados activos, iconografía y acción de cierre de sesión.
+ * @module Navegación
  */
 .sidebar {
   width: 300px;
