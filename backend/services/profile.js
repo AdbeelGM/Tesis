@@ -32,11 +32,7 @@ export async function ensureUserSchema() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS usuarios (
       usuario VARCHAR(100) NOT NULL PRIMARY KEY,
-      \`contraseña\` VARCHAR(255) NOT NULL,
-      vidas INT NOT NULL DEFAULT 5,
-      gemas INT NOT NULL DEFAULT 0,
-      etapa INT NOT NULL DEFAULT 1,
-      nivel INT NOT NULL DEFAULT 1
+      \`contraseña\` VARCHAR(255) NOT NULL
     )
   `);
 
