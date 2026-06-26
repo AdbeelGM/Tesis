@@ -22,6 +22,26 @@ const tableAliases = {
   ambitojuridico: "ámbitojurídico",
 };
 
+const mediaColumnCandidates = [
+  "media_fuente",
+  "media_ruta",
+  "multimedia",
+  "ruta_multimedia",
+  "imagen",
+  "imagen_ruta",
+  "ruta_imagen",
+  "video",
+  "video_ruta",
+  "ruta_video",
+  "url",
+  "archivo",
+  "ruta",
+];
+
+const fallbackMediaByTable = {
+  abecedario: "CONCAT('/img/Abecedario/', respuesta, '.png')",
+};
+
 /**
  * Valida que el nombre de una tabla solo use letras, números o guiones bajos.
  * @param {string} name - Nombre de categoría/tabla solicitado.
@@ -41,6 +61,15 @@ function quoteIdentifier(identifier) {
 }
 
 /**
+ * Convierte valores constantes en una lista SQL segura para cláusulas IN internas.
+ * @param {string[]} values - Valores controlados por el código, no por el usuario.
+ * @returns {string} Lista SQL entre comillas simples.
+ */
+function buildQuotedList(values) {
+  return values.map((value) => `'${String(value).replaceAll("'", "''")}'`).join(", ");
+}
+
+/**
  * Consulta qué tablas de vocabulario tienen las columnas mínimas para generar ejercicios.
  * @returns {Promise<Set<string>>} Conjunto de tablas disponibles como categorías.
  */
@@ -54,8 +83,8 @@ async function getEligibleTables() {
         AND SUM(LOWER(c.column_name) = 'respuesta') > 0
         AND SUM(LOWER(c.column_name) = 'dificultad') > 0
         AND (
-          SUM(LOWER(c.column_name) = 'media_ruta') > 0
-          OR SUM(LOWER(c.column_name) = 'media_fuente') > 0
+          SUM(LOWER(c.column_name) IN (${buildQuotedList(mediaColumnCandidates)})) > 0
+          OR LOWER(c.table_name) IN (${buildQuotedList(Object.keys(fallbackMediaByTable))})
         )`
   );
 
@@ -115,7 +144,7 @@ async function buildUnionSubquery(categorias) {
      FROM information_schema.columns
      WHERE table_schema = DATABASE()
        AND table_name IN (${categoriasIn})
-       AND LOWER(column_name) IN ('media_ruta', 'media_fuente', 'media_tipo', 'respuesta_alt')`,
+       AND LOWER(column_name) IN (${buildQuotedList([...mediaColumnCandidates, "media_tipo", "respuesta_alt"])})`,
     categorias
   );
 
@@ -130,11 +159,12 @@ async function buildUnionSubquery(categorias) {
   return categorias
     .map((tabla) => {
       const cols = columnsByTable.get(tabla) || new Map();
-      const mediaColumn = cols.get("media_fuente") || cols.get("media_ruta");
-      if (!mediaColumn) {
+      const mediaColumn = mediaColumnCandidates.find((candidate) => cols.has(candidate));
+      const fallbackMediaExpr = fallbackMediaByTable[tabla.toLowerCase()];
+      if (!mediaColumn && !fallbackMediaExpr) {
         throw new Error(`La categoría ${tabla} no tiene columna multimedia compatible`);
       }
-      const mediaExpr = quoteIdentifier(mediaColumn);
+      const mediaExpr = mediaColumn ? quoteIdentifier(cols.get(mediaColumn)) : fallbackMediaExpr;
 
       const mediaTipoExpr = cols.has("media_tipo")
         ? quoteIdentifier(cols.get("media_tipo"))
