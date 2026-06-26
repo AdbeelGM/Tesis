@@ -16,7 +16,7 @@ export const LIFE_INTERVAL_MINUTES = 5;
 export async function applyLifeRegen(usuario) {
   const [rows] = await pool.query(
     `SELECT usuario, vidas, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta
-     FROM usuarios
+     FROM Usuarios
      WHERE usuario = ?
      LIMIT 1`,
     [usuario]
@@ -32,7 +32,7 @@ export async function applyLifeRegen(usuario) {
   if (hasUnlimited) {
     if (user.vidas < MAX_LIVES || !user.vidas_actualizado_en) {
       await pool.query(
-        `UPDATE usuarios
+        `UPDATE Usuarios
          SET vidas = ?, vidas_actualizado_en = ?
          WHERE usuario = ?`,
         [MAX_LIVES, now, usuario]
@@ -46,7 +46,7 @@ export async function applyLifeRegen(usuario) {
 
   if (!user.vidas_actualizado_en) {
     await pool.query(
-      `UPDATE usuarios SET vidas_actualizado_en = ? WHERE usuario = ?`,
+      `UPDATE Usuarios SET vidas_actualizado_en = ? WHERE usuario = ?`,
       [now, usuario]
     );
     return { ...user, vidas_actualizado_en: now };
@@ -54,7 +54,7 @@ export async function applyLifeRegen(usuario) {
 
   if (user.vidas >= MAX_LIVES) {
     await pool.query(
-      `UPDATE usuarios SET vidas = ?, vidas_actualizado_en = ? WHERE usuario = ?`,
+      `UPDATE Usuarios SET vidas = ?, vidas_actualizado_en = ? WHERE usuario = ?`,
       [MAX_LIVES, now, usuario]
     );
     return { ...user, vidas: MAX_LIVES, vidas_actualizado_en: now };
@@ -72,7 +72,7 @@ export async function applyLifeRegen(usuario) {
   const nextUpdate = new Date(lastUpdate.getTime() + minutesUsed * 60 * 1000);
 
   await pool.query(
-    `UPDATE usuarios
+    `UPDATE Usuarios
      SET vidas = ?, vidas_actualizado_en = ?
      WHERE usuario = ?`,
     [nextLives, nextUpdate, usuario]
