@@ -7,8 +7,6 @@ import { pool } from "../db.js";
 import { applyLifeRegen } from "./lives.js";
 
 export const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
-export const INITIAL_GEMS = 450;
-
 const USER_COLUMNS = [
   { name: "vidas_actualizado_en", definition: "DATETIME NULL" },
   { name: "corazones_ilimitados_desde", definition: "DATETIME NULL" },
@@ -36,13 +34,11 @@ export async function ensureUserSchema() {
       usuario VARCHAR(100) NOT NULL PRIMARY KEY,
       \`contraseña\` VARCHAR(255) NOT NULL,
       vidas INT NOT NULL DEFAULT 5,
-      gemas INT NOT NULL DEFAULT ${INITIAL_GEMS},
+      gemas INT NOT NULL DEFAULT 0,
       etapa INT NOT NULL DEFAULT 1,
       nivel INT NOT NULL DEFAULT 1
     )
   `);
-
-  await pool.query(`ALTER TABLE usuarios ALTER COLUMN gemas SET DEFAULT ${INITIAL_GEMS}`);
 
   const [columns] = await pool.query(
     `SELECT column_name

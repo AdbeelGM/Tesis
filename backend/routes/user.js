@@ -7,7 +7,7 @@ import { Router } from "express";
 import { pool } from "../db.js";
 import { MAX_LIVES } from "../services/lives.js";
 import { STORE_PRODUCTS, TOTAL_LEVELS, getExperienceRewardForLevel, getGemsRewardForLevel } from "../services/rewards.js";
-import { INITIAL_GEMS, ensureUserSchemaReady, getUserState, parseProfilePhotoPayload } from "../services/profile.js";
+import { ensureUserSchemaReady, getUserState, parseProfilePhotoPayload } from "../services/profile.js";
 
 export const userRouter = Router();
 
@@ -77,8 +77,8 @@ userRouter.post("/register", async (req, res) => {
 
     await pool.query(
       `INSERT INTO usuarios (usuario, \`contraseña\`, vidas, gemas, etapa, nivel, vidas_actualizado_en)
-       VALUES (?, ?, ?, ?, DEFAULT, DEFAULT, ?)`,
-      [username, pass, MAX_LIVES, INITIAL_GEMS, now]
+       VALUES (?, ?, ?, DEFAULT, DEFAULT, DEFAULT, ?)`,
+      [username, pass, MAX_LIVES, now]
     );
 
     const state = await getUserState(username);
