@@ -644,19 +644,18 @@ function bindStoreActions() {
         updateStorePurchaseAvailability(updated);
         await refreshStatusBar();
 
-        if (productId === 'single_heart') {
-          showSingleHeartAnimation();
-        }
+        const purchaseAnimationByProduct = {
+          single_heart: showSingleHeartAnimation,
+          heart_bundle: showHeartBundleAnimation,
+          infinite_hearts_24h: showInfiniteHeartsAnimation,
+        };
+        const showPurchaseAnimation = purchaseAnimationByProduct[productId];
 
-        if (productId === 'heart_bundle') {
-          showHeartBundleAnimation();
-        }
-
-        if (productId === 'infinite_hearts_24h') {
-          showInfiniteHeartsAnimation();
-        }
-
-        window.showLsmModal?.({ title: '¡Listo!', message: 'Compra realizada correctamente. Tu recompensa ya está disponible.' });
+        window.showLsmModal?.({
+          title: '¡Listo!',
+          message: 'Compra realizada correctamente. Tu recompensa ya está disponible.',
+          onConfirm: showPurchaseAnimation,
+        });
       } catch (err) {
         window.showLsmModal?.({ title: '¡Ups!', message: err.message || 'No pudimos completar la acción. Inténtalo de nuevo.' });
       } finally {
