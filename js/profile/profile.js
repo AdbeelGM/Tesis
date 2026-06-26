@@ -221,5 +221,6 @@ function bindProfileActions() {
     };
     reader.readAsDataURL(file);
   });
+}
 
 export { renderProfileView, bindProfileActions, updateProfileView };
