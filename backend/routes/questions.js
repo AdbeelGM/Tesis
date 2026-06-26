@@ -50,12 +50,12 @@ async function getEligibleTables() {
      FROM information_schema.columns c
      WHERE c.table_schema = DATABASE()
      GROUP BY c.table_name
-     HAVING SUM(c.column_name = 'id') > 0
-        AND SUM(c.column_name = 'respuesta') > 0
-        AND SUM(c.column_name = 'dificultad') > 0
+     HAVING SUM(LOWER(c.column_name) = 'id') > 0
+        AND SUM(LOWER(c.column_name) = 'respuesta') > 0
+        AND SUM(LOWER(c.column_name) = 'dificultad') > 0
         AND (
-          SUM(c.column_name = 'media_ruta') > 0
-          OR SUM(c.column_name = 'media_fuente') > 0
+          SUM(LOWER(c.column_name) = 'media_ruta') > 0
+          OR SUM(LOWER(c.column_name) = 'media_fuente') > 0
         )`
   );
 
@@ -111,38 +111,40 @@ async function getAndValidateCategorias(req, res) {
 async function buildUnionSubquery(categorias) {
   const categoriasIn = buildInClause(categorias);
   const [columnRows] = await pool.query(
-    `SELECT table_name, column_name
+    `SELECT table_name, LOWER(column_name) AS column_key, column_name
      FROM information_schema.columns
      WHERE table_schema = DATABASE()
        AND table_name IN (${categoriasIn})
-       AND column_name IN ('media_ruta', 'media_fuente', 'media_tipo', 'respuesta_alt')`,
+       AND LOWER(column_name) IN ('media_ruta', 'media_fuente', 'media_tipo', 'respuesta_alt')`,
     categorias
   );
 
   const columnsByTable = new Map();
   for (const row of columnRows) {
     if (!columnsByTable.has(row.table_name)) {
-      columnsByTable.set(row.table_name, new Set());
+      columnsByTable.set(row.table_name, new Map());
     }
-    columnsByTable.get(row.table_name).add(row.column_name);
+    columnsByTable.get(row.table_name).set(row.column_key, row.column_name);
   }
 
   return categorias
     .map((tabla) => {
-      const cols = columnsByTable.get(tabla) || new Set();
-      const mediaExpr = cols.has("media_fuente")
-        ? "media_fuente"
-        : "media_ruta";
+      const cols = columnsByTable.get(tabla) || new Map();
+      const mediaColumn = cols.get("media_fuente") || cols.get("media_ruta");
+      if (!mediaColumn) {
+        throw new Error(`La categoría ${tabla} no tiene columna multimedia compatible`);
+      }
+      const mediaExpr = quoteIdentifier(mediaColumn);
 
       const mediaTipoExpr = cols.has("media_tipo")
-        ? "media_tipo"
+        ? quoteIdentifier(cols.get("media_tipo"))
         : `CASE
              WHEN LOWER(${mediaExpr}) REGEXP '^(https://|http://|)(www\\.|)(youtube\\.com|youtu\\.be)/' THEN 'youtube'
              WHEN SUBSTRING_INDEX(LOWER(${mediaExpr}), CHAR(63), 1) REGEXP '\\\\.(mp4|webm|ogg)$' THEN 'video'
              ELSE 'imagen'
            END`;
 
-      const respuestaAltExpr = cols.has("respuesta_alt") ? "respuesta_alt" : "NULL";
+      const respuestaAltExpr = cols.has("respuesta_alt") ? quoteIdentifier(cols.get("respuesta_alt")) : "NULL";
 
       return `SELECT id, '${tabla}' AS categoria_origen, ${mediaTipoExpr} AS media_tipo, ${mediaExpr} AS media_fuente, respuesta, ${respuestaAltExpr} AS respuesta_alt, dificultad FROM ${quoteIdentifier(tabla)}`;
     })
