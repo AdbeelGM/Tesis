@@ -7,6 +7,7 @@ import { pool } from "../db.js";
 import { applyLifeRegen } from "./lives.js";
 
 export const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
+export const INITIAL_GEMS = 450;
 
 const USER_COLUMNS = [
   { name: "vidas_actualizado_en", definition: "DATETIME NULL" },
@@ -26,32 +27,34 @@ const USER_COLUMNS = [
 let userSchemaPromise = null;
 
 /**
- * Asegura que la tabla Usuarios tenga las columnas requeridas por progreso, perfil y tienda.
+ * Asegura que la tabla usuarios tenga las columnas requeridas por progreso, perfil y tienda.
  * @returns {Promise<void>} No devuelve valor; ejecuta creación y alteraciones idempotentes de esquema.
  */
 export async function ensureUserSchema() {
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS Usuarios (
+    CREATE TABLE IF NOT EXISTS usuarios (
       usuario VARCHAR(100) NOT NULL PRIMARY KEY,
       \`contraseña\` VARCHAR(255) NOT NULL,
       vidas INT NOT NULL DEFAULT 5,
-      gemas INT NOT NULL DEFAULT 0,
+      gemas INT NOT NULL DEFAULT ${INITIAL_GEMS},
       etapa INT NOT NULL DEFAULT 1,
       nivel INT NOT NULL DEFAULT 1
     )
   `);
 
+  await pool.query(`ALTER TABLE usuarios ALTER COLUMN gemas SET DEFAULT ${INITIAL_GEMS}`);
+
   const [columns] = await pool.query(
     `SELECT column_name
      FROM information_schema.columns
-     WHERE table_schema = DATABASE() AND table_name = 'Usuarios'`
+     WHERE table_schema = DATABASE() AND LOWER(table_name) = 'usuarios'`
   );
 
   const existingColumns = new Set(columns.map((column) => column.COLUMN_NAME || column.column_name));
 
   for (const column of USER_COLUMNS) {
     if (!existingColumns.has(column.name)) {
-      await pool.query(`ALTER TABLE Usuarios ADD COLUMN \`${column.name}\` ${column.definition}`);
+      await pool.query(`ALTER TABLE usuarios ADD COLUMN \`${column.name}\` ${column.definition}`);
       existingColumns.add(column.name);
     }
   }
@@ -82,7 +85,7 @@ export async function getUserState(usuario) {
   const [rows] = await pool.query(
     `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta,
             creado_en, foto_perfil_url, foto_perfil, foto_perfil_mime, experiencia, progreso, dias_racha, lecciones_terminadas, tiempo_invertido_segundos
-     FROM Usuarios
+     FROM usuarios
      WHERE usuario = ?
      LIMIT 1`,
     [usuario]
