@@ -5,7 +5,6 @@
  */
 import { Router } from "express";
 import { pool } from "../db.js";
-import { MAX_LIVES } from "../services/lives.js";
 import { STORE_PRODUCTS, TOTAL_LEVELS, getExperienceRewardForLevel, getGemsRewardForLevel } from "../services/rewards.js";
 import { ensureUserSchemaReady, getUserState, parseProfilePhotoPayload } from "../services/profile.js";
 
@@ -73,12 +72,10 @@ userRouter.post("/register", async (req, res) => {
       return res.status(409).json({ error: "Este usuario ya existe" });
     }
 
-    const now = new Date();
-
     await pool.query(
-      `INSERT INTO usuarios (usuario, \`contraseña\`, vidas, gemas, etapa, nivel, vidas_actualizado_en)
-       VALUES (?, ?, ?, DEFAULT, DEFAULT, DEFAULT, ?)`,
-      [username, pass, MAX_LIVES, now]
+      `INSERT INTO usuarios (usuario, \`contraseña\`)
+       VALUES (?, ?)`,
+      [username, pass]
     );
 
     const state = await getUserState(username);
