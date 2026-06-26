@@ -1,6 +1,6 @@
 /**
  * @file profile.js
- * @description Mantiene el esquema extendido de usuarios, compone el estado completo del perfil y valida fotos de perfil enviadas por el frontend.
+ * @description Valida el esquema existente de usuarios, compone el estado completo del perfil y valida fotos de perfil enviadas por el frontend.
  * @module Perfil
  */
 import { pool } from "../db.js";
@@ -25,30 +25,29 @@ const USER_COLUMNS = [
 let userSchemaPromise = null;
 
 /**
- * Asegura que la tabla usuarios tenga las columnas requeridas por progreso, perfil y tienda.
- * @returns {Promise<void>} No devuelve valor; ejecuta creación y alteraciones idempotentes de esquema.
+ * Valida que la tabla usuarios ya exista con las columnas esperadas por progreso, perfil y tienda.
+ * No crea ni altera tablas para respetar el esquema cargado manualmente en la base de datos.
+ * @returns {Promise<void>} No devuelve valor; lanza error si falta la tabla o alguna columna requerida.
  */
 export async function ensureUserSchema() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS usuarios (
-      usuario VARCHAR(100) NOT NULL PRIMARY KEY,
-      \`contraseña\` VARCHAR(255) NOT NULL
-    )
-  `);
-
   const [columns] = await pool.query(
     `SELECT column_name
      FROM information_schema.columns
      WHERE table_schema = DATABASE() AND LOWER(table_name) = 'usuarios'`
   );
 
-  const existingColumns = new Set(columns.map((column) => column.COLUMN_NAME || column.column_name));
+  if (columns.length === 0) {
+    throw new Error("La tabla usuarios no existe en la base de datos configurada");
+  }
 
-  for (const column of USER_COLUMNS) {
-    if (!existingColumns.has(column.name)) {
-      await pool.query(`ALTER TABLE usuarios ADD COLUMN \`${column.name}\` ${column.definition}`);
-      existingColumns.add(column.name);
-    }
+  const existingColumns = new Set(
+    columns.map((column) => String(column.COLUMN_NAME || column.column_name).toLowerCase())
+  );
+  const requiredColumns = ["usuario", "contraseña", "vidas", "gemas", "etapa", "nivel", ...USER_COLUMNS.map((column) => column.name)];
+  const missingColumns = requiredColumns.filter((column) => !existingColumns.has(column.toLowerCase()));
+
+  if (missingColumns.length > 0) {
+    throw new Error(`La tabla usuarios no tiene las columnas requeridas: ${missingColumns.join(", ")}`);
   }
 }
 
