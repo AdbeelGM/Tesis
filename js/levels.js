@@ -1,3 +1,8 @@
+/*
+ * Nombre: levels.js
+ * Descripción: Contiene estilos o lógica de soporte para levels.
+ * Módulo: Proyecto LSM Gamificada
+ */
 function applyLevelNodeState(node, currentLevel) {
   const level = Number(node.dataset.level);
   if (!level) return;

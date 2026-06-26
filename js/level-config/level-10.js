@@ -1,3 +1,8 @@
+/*
+ * Nombre: level-10.js
+ * Descripción: Contiene estilos o lógica de soporte para level-10.
+ * Módulo: Proyecto LSM Gamificada
+ */
 export const LEVEL_CONFIG = {
   level: 10,
   categorias: ['saludos', 'familia', 'pronombres', 'expresiones'],

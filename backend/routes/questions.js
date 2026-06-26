@@ -1,3 +1,8 @@
+/*
+ * Nombre: questions.js
+ * Descripción: Expone endpoints para generar ejercicios desde las tablas de preguntas.
+ * Módulo: Backend / API de preguntas
+ */
 import { Router } from "express";
 import { pool } from "../db.js";
 
@@ -118,6 +123,12 @@ async function buildUnionSubquery(categorias) {
     .join(" UNION ALL ");
 }
 
+function getValidatedLimit(req, fallback = 5) {
+  // Mantiene un límite positivo para proteger la API de consultas excesivas o inválidas.
+  const limit = Number(req.query.limit || fallback);
+  return Number.isInteger(limit) && limit > 0 ? limit : fallback;
+}
+
 function getAndValidateDificultades(req, res) {
   const dificultadesRaw = req.query.dificultad ?? "1";
   const dificultades = String(dificultadesRaw)
@@ -184,7 +195,7 @@ questionsRouter.get("/multiple-choice", async (req, res) => {
 
     const dificultades = getAndValidateDificultades(req, res);
     if (!dificultades) return;
-    const limit = Number(req.query.limit || 5);
+    const limit = getValidatedLimit(req);
     const source = await buildUnionSubquery(categorias);
     const dificultadesIn = buildInClause(dificultades);
 
@@ -271,7 +282,7 @@ questionsRouter.get("/true-false", async (req, res) => {
 
     const dificultades = getAndValidateDificultades(req, res);
     if (!dificultades) return;
-    const limit = Number(req.query.limit || 5);
+    const limit = getValidatedLimit(req);
     const source = await buildUnionSubquery(categorias);
     const dificultadesIn = buildInClause(dificultades);
 
@@ -346,7 +357,7 @@ questionsRouter.get("/text-input", async (req, res) => {
 
     const dificultades = getAndValidateDificultades(req, res);
     if (!dificultades) return;
-    const limit = Number(req.query.limit || 5);
+    const limit = getValidatedLimit(req);
     const source = await buildUnionSubquery(categorias);
     const dificultadesIn = buildInClause(dificultades);
 

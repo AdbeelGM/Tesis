@@ -1,3 +1,8 @@
+/*
+ * Nombre: server.js
+ * Descripción: Configura Express, middlewares, rutas API y archivos estáticos del frontend.
+ * Módulo: Backend / Servidor HTTP
+ */
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";

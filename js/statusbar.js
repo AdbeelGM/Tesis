@@ -1,3 +1,8 @@
+/*
+ * Nombre: statusbar.js
+ * Descripción: Contiene estilos o lógica de soporte para statusbar.
+ * Módulo: Proyecto LSM Gamificada
+ */
 import { loadState } from "./game-state.js";
 import { updateInfiniteHeartsIndicator } from "./infinite-hearts-indicator.js";
 

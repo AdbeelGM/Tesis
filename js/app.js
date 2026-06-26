@@ -1,3 +1,8 @@
+/*
+ * Nombre: app.js
+ * Descripción: Orquesta la ruta de aprendizaje, tienda, perfil y recompensas visuales del usuario.
+ * Módulo: Frontend / Aplicación principal
+ */
 import { loadSession, clearSession } from './user-session.js';
 import { refreshStatusBar } from './statusbar.js';
 import { purchaseStoreItemGlobal, updateProfilePhotoGlobal } from './game-state.js';
@@ -20,7 +25,8 @@ function ensureDotLottieScript() {
   document.head.appendChild(script);
 }
 
-function showSingleHeartAnimation() {
+function showFullscreenLottieAnimation(src, durationMs) {
+  // Centraliza la creación del overlay para evitar repetir estilos entre recompensas.
   ensureDotLottieScript();
 
   const overlay = document.createElement('div');
@@ -36,7 +42,7 @@ function showSingleHeartAnimation() {
   ].join(';');
 
   const animation = document.createElement('dotlottie-wc');
-  animation.setAttribute('src', 'https://lottie.host/b379f4f2-26d2-4b45-b598-5091c88a7d5b/PgQYbpR93Z.lottie');
+  animation.setAttribute('src', src);
   animation.setAttribute('autoplay', '');
   animation.setAttribute('loop', '');
   animation.style.cssText = [
@@ -48,76 +54,25 @@ function showSingleHeartAnimation() {
 
   overlay.appendChild(animation);
   document.body.appendChild(overlay);
-
-  const close = () => overlay.remove();
-  window.setTimeout(close, 3100);
+  window.setTimeout(() => overlay.remove(), durationMs);
 }
 
+function showSingleHeartAnimation() {
+  showFullscreenLottieAnimation(
+    'https://lottie.host/b379f4f2-26d2-4b45-b598-5091c88a7d5b/PgQYbpR93Z.lottie',
+    3100,
+  );
+}
 
 function showHeartBundleAnimation() {
-  ensureDotLottieScript();
-
-  const overlay = document.createElement('div');
-  overlay.style.cssText = [
-    'position: fixed',
-    'inset: 0',
-    'background: transparent',
-    'display: flex',
-    'align-items: center',
-    'justify-content: center',
-    'z-index: 9999',
-    'pointer-events: none',
-  ].join(';');
-
-  const animation = document.createElement('dotlottie-wc');
-  animation.setAttribute('src', 'https://lottie.host/a256014a-c9f6-4f21-8f89-ddb63470231b/4NIEBugTnF.lottie');
-  animation.setAttribute('autoplay', '');
-  animation.setAttribute('loop', '');
-  animation.style.cssText = [
-    'position: absolute',
-    'inset: 0',
-    'width: 100vw',
-    'height: 100vh',
-  ].join(';');
-
-  overlay.appendChild(animation);
-  document.body.appendChild(overlay);
-
-  const close = () => overlay.remove();
-  window.setTimeout(close, 4000);
+  showFullscreenLottieAnimation(
+    'https://lottie.host/a256014a-c9f6-4f21-8f89-ddb63470231b/4NIEBugTnF.lottie',
+    4000,
+  );
 }
 
 function showInfiniteHeartsAnimation() {
-  ensureDotLottieScript();
-
-  const overlay = document.createElement('div');
-  overlay.style.cssText = [
-    'position: fixed',
-    'inset: 0',
-    'background: transparent',
-    'display: flex',
-    'align-items: center',
-    'justify-content: center',
-    'z-index: 9999',
-    'pointer-events: none',
-  ].join(';');
-
-  const animation = document.createElement('dotlottie-wc');
-  animation.setAttribute('src', INFINITE_HEARTS_LOTTIE_SRC);
-  animation.setAttribute('autoplay', '');
-  animation.setAttribute('loop', '');
-  animation.style.cssText = [
-    'position: absolute',
-    'inset: 0',
-    'width: 100vw',
-    'height: 100vh',
-  ].join(';');
-
-  overlay.appendChild(animation);
-  document.body.appendChild(overlay);
-
-  const close = () => overlay.remove();
-  window.setTimeout(close, 9000);
+  showFullscreenLottieAnimation(INFINITE_HEARTS_LOTTIE_SRC, 9000);
 }
 
 function getGemCounterCenter() {

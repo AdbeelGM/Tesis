@@ -1,3 +1,8 @@
+/*
+ * Nombre: text-input.js
+ * Descripción: Contiene estilos o lógica de soporte para text-input.
+ * Módulo: Proyecto LSM Gamificada
+ */
 export function runTextInput(cfg) {
   return new Promise(async (resolve) => {
     const state = {

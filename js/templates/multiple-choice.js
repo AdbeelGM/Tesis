@@ -1,3 +1,8 @@
+/*
+ * Nombre: multiple-choice.js
+ * Descripción: Contiene estilos o lógica de soporte para multiple-choice.
+ * Módulo: Proyecto LSM Gamificada
+ */
 export function runMultipleChoice(cfg) {
   return new Promise(async (resolve) => {
     const state = {

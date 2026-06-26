@@ -1,3 +1,8 @@
+/*
+ * Nombre: true-false.js
+ * Descripción: Contiene estilos o lógica de soporte para true-false.
+ * Módulo: Proyecto LSM Gamificada
+ */
 export function runTrueFalse(cfg) {
   return new Promise(async (resolve) => {
     const state = {

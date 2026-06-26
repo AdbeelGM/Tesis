@@ -1,3 +1,8 @@
+/*
+ * Nombre: auth.js
+ * Descripción: Contiene estilos o lógica de soporte para auth.
+ * Módulo: Proyecto LSM Gamificada
+ */
 import { loginUser, registerUser } from "./api-user.js";
 import { loadSession, saveSession } from "./user-session.js";
 

@@ -1,3 +1,8 @@
+/*
+ * Nombre: sidebar.js
+ * Descripción: Contiene estilos o lógica de soporte para sidebar.
+ * Módulo: Proyecto LSM Gamificada
+ */
 class SidebarNav {
   constructor(rootElement, options = {}) {
     this.root = rootElement;

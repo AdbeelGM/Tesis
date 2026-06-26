@@ -1,3 +1,8 @@
+/*
+ * Nombre: app-exercise.js
+ * Descripción: Contiene estilos o lógica de soporte para app-exercise.
+ * Módulo: Proyecto LSM Gamificada
+ */
 import { loadState, loseLifeGlobal } from "./game-state.js";
 import { updateInfiniteHeartsIndicator } from "./infinite-hearts-indicator.js";
 import { addTimeInvested, completeLevel } from "./api-user.js";

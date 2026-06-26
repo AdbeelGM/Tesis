@@ -1,3 +1,8 @@
+/*
+ * Nombre: user-session.js
+ * Descripción: Contiene estilos o lógica de soporte para user-session.
+ * Módulo: Proyecto LSM Gamificada
+ */
 const SESSION_KEY = "lsmquest_user_session";
 
 export function saveSession(user) {
