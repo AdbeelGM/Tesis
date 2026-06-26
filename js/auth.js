@@ -20,11 +20,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const registerForm = document.getElementById("register-form");
 
   const loginError = document.getElementById("login-error");
+  const loginOk = document.getElementById("login-ok");
   const registerError = document.getElementById("register-error");
   const registerOk = document.getElementById("register-ok");
 
   const clearMessages = () => {
     loginError.textContent = "";
+    loginOk.textContent = "";
     registerError.textContent = "";
     registerOk.textContent = "";
   };
@@ -98,10 +100,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       await registerUser(usuario, password);
-      registerOk.textContent = "Cuenta creada. Ahora puedes iniciar sesión.";
       registerForm.reset();
       setTab("login");
       document.getElementById("login-usuario").value = usuario;
+      loginOk.textContent = `Usuario ${usuario} creado. Ahora puedes iniciar sesión.`;
     } catch (err) {
       registerError.textContent = err.message;
     }
