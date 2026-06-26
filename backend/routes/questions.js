@@ -13,8 +13,6 @@ questionsRouter.get("/", (req, res) => {
 });
 
 const tableAliases = {
-  // compatibilidad hacia atrás
-  palabras_comunes: "palabrascomunes",
   continentespaises: "continentespaíses",
   personajeshistoricos: "personajeshistóricos",
   proteccioncivil: "proteccióncivil",
@@ -22,25 +20,26 @@ const tableAliases = {
   ambitojuridico: "ámbitojurídico",
 };
 
-const mediaColumnCandidates = [
-  "media_fuente",
-  "media_ruta",
-  "multimedia",
-  "ruta_multimedia",
-  "imagen",
-  "imagen_ruta",
-  "ruta_imagen",
-  "video",
-  "video_ruta",
-  "ruta_video",
-  "url",
-  "archivo",
-  "ruta",
+const vocabularyTables = [
+  "abecedario",
+  "ámbitojurídico",
+  "colores",
+  "continentespaíses",
+  "expresiones",
+  "familia",
+  "museoarte",
+  "numeros",
+  "personajeshistóricos",
+  "profesiones",
+  "pronombres",
+  "proteccióncivil",
+  "salud",
+  "saludos",
+  "tecnología",
+  "temporalidad",
+  "transportes",
+  "vestimenta",
 ];
-
-const fallbackMediaByTable = {
-  abecedario: "CONCAT('/img/Abecedario/', respuesta, '.png')",
-};
 
 /**
  * Valida que el nombre de una tabla solo use letras, números o guiones bajos.
@@ -78,14 +77,12 @@ async function getEligibleTables() {
     `SELECT c.table_name AS table_name
      FROM information_schema.columns c
      WHERE c.table_schema = DATABASE()
+       AND c.table_name IN (${buildQuotedList(vocabularyTables)})
      GROUP BY c.table_name
      HAVING SUM(LOWER(c.column_name) = 'id') > 0
+        AND SUM(LOWER(c.column_name) = 'media_fuente') > 0
         AND SUM(LOWER(c.column_name) = 'respuesta') > 0
-        AND SUM(LOWER(c.column_name) = 'dificultad') > 0
-        AND (
-          SUM(LOWER(c.column_name) IN (${buildQuotedList(mediaColumnCandidates)})) > 0
-          OR LOWER(c.table_name) IN (${buildQuotedList(Object.keys(fallbackMediaByTable))})
-        )`
+        AND SUM(LOWER(c.column_name) = 'dificultad') > 0`
   );
 
   return new Set(rows.map((row) => row.table_name));
@@ -144,37 +141,21 @@ async function buildUnionSubquery(categorias) {
      FROM information_schema.columns
      WHERE table_schema = DATABASE()
        AND table_name IN (${categoriasIn})
-       AND LOWER(column_name) IN (${buildQuotedList([...mediaColumnCandidates, "media_tipo", "respuesta_alt"])})`,
+       AND LOWER(column_name) = 'respuesta_alt'`,
     categorias
   );
 
-  const columnsByTable = new Map();
-  for (const row of columnRows) {
-    if (!columnsByTable.has(row.table_name)) {
-      columnsByTable.set(row.table_name, new Map());
-    }
-    columnsByTable.get(row.table_name).set(row.column_key, row.column_name);
-  }
+  const tablesWithRespuestaAlt = new Set(columnRows.map((row) => row.table_name));
 
   return categorias
     .map((tabla) => {
-      const cols = columnsByTable.get(tabla) || new Map();
-      const mediaColumn = mediaColumnCandidates.find((candidate) => cols.has(candidate));
-      const fallbackMediaExpr = fallbackMediaByTable[tabla.toLowerCase()];
-      if (!mediaColumn && !fallbackMediaExpr) {
-        throw new Error(`La categoría ${tabla} no tiene columna multimedia compatible`);
-      }
-      const mediaExpr = mediaColumn ? quoteIdentifier(cols.get(mediaColumn)) : fallbackMediaExpr;
-
-      const mediaTipoExpr = cols.has("media_tipo")
-        ? quoteIdentifier(cols.get("media_tipo"))
-        : `CASE
-             WHEN LOWER(${mediaExpr}) REGEXP '^(https://|http://|)(www\\.|)(youtube\\.com|youtu\\.be)/' THEN 'youtube'
-             WHEN SUBSTRING_INDEX(LOWER(${mediaExpr}), CHAR(63), 1) REGEXP '\\\\.(mp4|webm|ogg)$' THEN 'video'
+      const mediaExpr = quoteIdentifier("media_fuente");
+      const mediaTipoExpr = `CASE
+             WHEN LOWER(${mediaExpr}) REGEXP '^(https://|http://|)(www[.]|)(youtube[.]com|youtu[.]be)/' THEN 'youtube'
+             WHEN SUBSTRING_INDEX(LOWER(${mediaExpr}), CHAR(63), 1) REGEXP '[.](mp4|webm|ogg)$' THEN 'video'
              ELSE 'imagen'
            END`;
-
-      const respuestaAltExpr = cols.has("respuesta_alt") ? quoteIdentifier(cols.get("respuesta_alt")) : "NULL";
+      const respuestaAltExpr = tabla === "numeros" && tablesWithRespuestaAlt.has(tabla) ? quoteIdentifier("respuesta_alt") : "NULL";
 
       return `SELECT id, '${tabla}' AS categoria_origen, ${mediaTipoExpr} AS media_tipo, ${mediaExpr} AS media_fuente, respuesta, ${respuestaAltExpr} AS respuesta_alt, dificultad FROM ${quoteIdentifier(tabla)}`;
     })
