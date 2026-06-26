@@ -7,7 +7,7 @@ import { Router } from "express";
 import { pool } from "../db.js";
 import { STORE_PRODUCTS, TOTAL_LEVELS, getExperienceRewardForLevel, getGemsRewardForLevel } from "../services/rewards.js";
 import { MAX_LIVES } from "../services/lives.js";
-import { ensureUserSchemaReady, getUserState, parseProfilePhotoPayload } from "../services/profile.js";
+import { ensureUserSchemaReady, getUserState, hasUserColumn, parseProfilePhotoPayload } from "../services/profile.js";
 
 export const userRouter = Router();
 
@@ -117,10 +117,12 @@ userRouter.post("/lose-life", async (req, res) => {
     const nextLives = Math.max(0, Number(state.vidas) - Number(amount));
     const now = new Date();
 
-    await pool.query(
-      `UPDATE usuarios SET vidas = ?, vidas_actualizado_en = ? WHERE usuario = ?`,
-      [nextLives, now, usuario]
-    );
+    if (hasUserColumn("vidas") && hasUserColumn("vidas_actualizado_en")) {
+      await pool.query(
+        `UPDATE usuarios SET vidas = ?, vidas_actualizado_en = ? WHERE usuario = ?`,
+        [nextLives, now, usuario]
+      );
+    }
 
     const updated = await getUserState(usuario);
     return res.json(updated);
@@ -144,6 +146,13 @@ userRouter.post("/purchase", async (req, res) => {
 
     const state = await getUserState(usuario);
     if (!state) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    const requiredStoreColumns = product.type === "infinite"
+      ? ["gemas", "vidas", "vidas_actualizado_en", "corazones_ilimitados_desde", "corazones_ilimitados_hasta"]
+      : ["gemas", "vidas", "vidas_actualizado_en"];
+    if (!requiredStoreColumns.every(hasUserColumn)) {
+      return res.status(400).json({ error: "La tienda requiere columnas de progreso en usuarios" });
+    }
 
     if (Number(state.gemas) < product.gems) {
       return res.status(400).json({ error: "No tienes gemas suficientes" });
@@ -198,6 +207,10 @@ userRouter.post("/complete-level", async (req, res) => {
     const state = await getUserState(usuario);
     if (!state) return res.status(404).json({ error: "Usuario no encontrado" });
 
+    if (!["nivel", "experiencia", "gemas", "lecciones_terminadas", "progreso"].every(hasUserColumn)) {
+      return res.json({ ...state, xp_ganada: 0, gemas_ganadas: 0 });
+    }
+
     const currentLevel = Number(state.nivel);
     const requestedLevel = Number(level);
 
@@ -244,12 +257,14 @@ userRouter.post("/time-invested", async (req, res) => {
       return res.json(state);
     }
 
-    await pool.query(
-      `UPDATE usuarios
-       SET tiempo_invertido_segundos = tiempo_invertido_segundos + ?
-       WHERE usuario = ?`,
-      [increment, usuario]
-    );
+    if (hasUserColumn("tiempo_invertido_segundos")) {
+      await pool.query(
+        `UPDATE usuarios
+         SET tiempo_invertido_segundos = tiempo_invertido_segundos + ?
+         WHERE usuario = ?`,
+        [increment, usuario]
+      );
+    }
 
     const updated = await getUserState(usuario);
     if (!updated) return res.status(404).json({ error: "Usuario no encontrado" });
@@ -267,6 +282,10 @@ userRouter.post("/profile-photo", async (req, res) => {
 
     if (!dataUrl && !photoUrl) {
       return res.status(400).json({ error: "Falta foto de perfil" });
+    }
+
+    if (!["foto_perfil", "foto_perfil_mime", "foto_perfil_url"].every(hasUserColumn)) {
+      return res.status(400).json({ error: "La foto de perfil requiere columnas de perfil en usuarios" });
     }
 
     const { photoBuffer, mimeType } = parseProfilePhotoPayload({ dataUrl, photoUrl });

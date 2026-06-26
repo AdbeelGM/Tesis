@@ -1,33 +1,40 @@
 /**
  * @file profile.js
- * @description Valida el esquema existente de usuarios, compone el estado completo del perfil y valida fotos de perfil enviadas por el frontend.
+ * @description Compone el estado de usuario respetando el esquema real de la tabla usuarios.
  * @module Perfil
  */
 import { pool } from "../db.js";
 import { applyLifeRegen } from "./lives.js";
 
 export const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
-const USER_COLUMNS = [
-  { name: "vidas_actualizado_en", definition: "DATETIME NULL" },
-  { name: "corazones_ilimitados_desde", definition: "DATETIME NULL" },
-  { name: "corazones_ilimitados_hasta", definition: "DATETIME NULL" },
-  { name: "creado_en", definition: "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP" },
-  { name: "foto_perfil_url", definition: "VARCHAR(500) NULL" },
-  { name: "foto_perfil", definition: "LONGBLOB NULL" },
-  { name: "foto_perfil_mime", definition: "VARCHAR(100) NULL" },
-  { name: "experiencia", definition: "INT NOT NULL DEFAULT 0" },
-  { name: "progreso", definition: "INT NOT NULL DEFAULT 0" },
-  { name: "dias_racha", definition: "INT NOT NULL DEFAULT 0" },
-  { name: "lecciones_terminadas", definition: "INT NOT NULL DEFAULT 0" },
-  { name: "tiempo_invertido_segundos", definition: "INT NOT NULL DEFAULT 0" },
-];
+
+const OPTIONAL_USER_DEFAULTS = {
+  vidas: 5,
+  gemas: 0,
+  etapa: 1,
+  nivel: 1,
+  vidas_actualizado_en: null,
+  corazones_ilimitados_desde: null,
+  corazones_ilimitados_hasta: null,
+  creado_en: null,
+  foto_perfil_url: null,
+  foto_perfil: null,
+  foto_perfil_mime: null,
+  experiencia: 0,
+  progreso: 0,
+  dias_racha: 0,
+  lecciones_terminadas: 0,
+  tiempo_invertido_segundos: 0,
+};
 
 let userSchemaPromise = null;
+let userColumns = new Set();
 
 /**
- * Valida que la tabla usuarios ya exista con las columnas esperadas por progreso, perfil y tienda.
- * No crea ni altera tablas para respetar el esquema cargado manualmente en la base de datos.
- * @returns {Promise<void>} No devuelve valor; lanza error si falta la tabla o alguna columna requerida.
+ * Valida únicamente las columnas reales obligatorias de la tabla usuarios.
+ * El progreso, tienda y perfil son opcionales para que el backend funcione con
+ * el esquema compartido: usuarios(usuario, contraseña).
+ * @returns {Promise<void>} No devuelve valor; lanza error si falta la tabla o las columnas base.
  */
 export async function ensureUserSchema() {
   const [columns] = await pool.query(
@@ -40,21 +47,14 @@ export async function ensureUserSchema() {
     throw new Error("La tabla usuarios no existe en la base de datos configurada");
   }
 
-  const existingColumns = new Set(
-    columns.map((column) => String(column.COLUMN_NAME || column.column_name).toLowerCase())
-  );
-  const requiredColumns = ["usuario", "contraseña", "vidas", "gemas", "etapa", "nivel", ...USER_COLUMNS.map((column) => column.name)];
-  const missingColumns = requiredColumns.filter((column) => !existingColumns.has(column.toLowerCase()));
+  userColumns = new Set(columns.map((column) => String(column.COLUMN_NAME || column.column_name).toLowerCase()));
+  const missingColumns = ["usuario", "contraseña"].filter((column) => !userColumns.has(column));
 
   if (missingColumns.length > 0) {
     throw new Error(`La tabla usuarios no tiene las columnas requeridas: ${missingColumns.join(", ")}`);
   }
 }
 
-/**
- * Ejecuta la validación de esquema una sola vez y comparte la promesa entre rutas concurrentes.
- * @returns {Promise<void>} Promesa de esquema listo para consultas de usuario.
- */
 export function ensureUserSchemaReady() {
   if (!userSchemaPromise) {
     userSchemaPromise = ensureUserSchema().catch((err) => {
@@ -66,16 +66,23 @@ export function ensureUserSchemaReady() {
   return userSchemaPromise;
 }
 
-/**
- * Obtiene el estado completo del usuario, incluyendo regeneración de vidas y foto codificada.
- * @param {string} usuario - Usuario cuyo estado se consultará.
- * @returns {Promise<Object|null>} Estado listo para la API o null si no existe.
- */
+export function hasUserColumn(column) {
+  return userColumns.has(String(column).toLowerCase());
+}
+
+function buildUserSelect() {
+  const optionalColumns = Object.keys(OPTIONAL_USER_DEFAULTS).filter(hasUserColumn);
+  return ["usuario", ...optionalColumns.map((column) => `\`${column}\``)].join(", ");
+}
+
 export async function getUserState(usuario) {
-  await applyLifeRegen(usuario);
+  await ensureUserSchemaReady();
+  if (hasUserColumn("vidas") && hasUserColumn("vidas_actualizado_en")) {
+    await applyLifeRegen(usuario);
+  }
+
   const [rows] = await pool.query(
-    `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta,
-            creado_en, foto_perfil_url, foto_perfil, foto_perfil_mime, experiencia, progreso, dias_racha, lecciones_terminadas, tiempo_invertido_segundos
+    `SELECT ${buildUserSelect()}
      FROM usuarios
      WHERE usuario = ?
      LIMIT 1`,
@@ -84,30 +91,24 @@ export async function getUserState(usuario) {
   const user = rows[0] || null;
   if (!user) return null;
 
+  const state = { ...OPTIONAL_USER_DEFAULTS, ...user };
   const now = new Date();
-  const unlimitedUntil = user.corazones_ilimitados_hasta ? new Date(user.corazones_ilimitados_hasta) : null;
+  const unlimitedUntil = state.corazones_ilimitados_hasta ? new Date(state.corazones_ilimitados_hasta) : null;
   const unlimitedActive = Boolean(unlimitedUntil && unlimitedUntil > now);
   const unlimitedRemainingSeconds = unlimitedActive
     ? Math.floor((unlimitedUntil.getTime() - now.getTime()) / 1000)
     : 0;
 
   return {
-    ...user,
-    foto_perfil_base64: user.foto_perfil && user.foto_perfil_mime
-      ? `data:${user.foto_perfil_mime};base64,${Buffer.from(user.foto_perfil).toString("base64")}`
+    ...state,
+    foto_perfil_base64: state.foto_perfil && state.foto_perfil_mime
+      ? `data:${state.foto_perfil_mime};base64,${Buffer.from(state.foto_perfil).toString("base64")}`
       : null,
     corazones_ilimitados_activos: unlimitedActive,
     corazones_ilimitados_segundos_restantes: Math.max(0, unlimitedRemainingSeconds),
   };
 }
 
-/**
- * Valida y decodifica la foto de perfil recibida desde el frontend.
- * @param {Object} payload - Datos enviados para actualizar la foto.
- * @param {string} payload.dataUrl - Imagen en formato Data URL base64.
- * @param {string|null} payload.photoUrl - URL externa opcional de foto.
- * @returns {Object} Buffer, tipo MIME y URL listos para persistirse.
- */
 export function parseProfilePhotoPayload({ dataUrl, photoUrl = null }) {
   let photoBuffer = null;
   let mimeType = null;
@@ -121,8 +122,7 @@ export function parseProfilePhotoPayload({ dataUrl, photoUrl = null }) {
     }
 
     mimeType = dataUrlMatch[1];
-    const b64 = dataUrlMatch[2];
-    photoBuffer = Buffer.from(b64, "base64");
+    photoBuffer = Buffer.from(dataUrlMatch[2], "base64");
     if (photoBuffer.length > MAX_PROFILE_PHOTO_BYTES) {
       const err = new Error("La foto de perfil excede 10 MB");
       err.status = 400;
