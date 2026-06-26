@@ -55,6 +55,10 @@ export async function ensureUserSchema() {
   }
 }
 
+/**
+ * Inicializa una sola vez la validación del esquema de usuarios y reutiliza la promesa en llamadas posteriores.
+ * @returns {Promise<void>} Promesa compartida que se resuelve cuando el esquema de usuarios está validado.
+ */
 export function ensureUserSchemaReady() {
   if (!userSchemaPromise) {
     userSchemaPromise = ensureUserSchema().catch((err) => {
@@ -66,15 +70,29 @@ export function ensureUserSchemaReady() {
   return userSchemaPromise;
 }
 
+/**
+ * Indica si una columna existe en el esquema real de la tabla usuarios ya validado.
+ * @param {string} column - Nombre de la columna a consultar.
+ * @returns {boolean} true si la columna existe en usuarios.
+ */
 export function hasUserColumn(column) {
   return userColumns.has(String(column).toLowerCase());
 }
 
+/**
+ * Construye la lista SELECT con usuario y solo las columnas opcionales existentes.
+ * @returns {string} Fragmento SQL seguro para seleccionar columnas de usuarios.
+ */
 function buildUserSelect() {
   const optionalColumns = Object.keys(OPTIONAL_USER_DEFAULTS).filter(hasUserColumn);
   return ["usuario", ...optionalColumns.map((column) => `\`${column}\``)].join(", ");
 }
 
+/**
+ * Obtiene el estado completo de un usuario combinando valores por defecto con columnas reales, regeneración de vidas y foto en base64.
+ * @param {string} usuario - Identificador del usuario a consultar.
+ * @returns {Promise<object|null>} Estado normalizado del usuario o null si no existe.
+ */
 export async function getUserState(usuario) {
   await ensureUserSchemaReady();
   if (hasUserColumn("vidas") && hasUserColumn("vidas_actualizado_en")) {
@@ -109,6 +127,11 @@ export async function getUserState(usuario) {
   };
 }
 
+/**
+ * Convierte una foto de perfil en data URL a buffer y conserva la URL remota opcional.
+ * @param {{dataUrl?: string, photoUrl?: string|null}} payload - Datos de imagen enviados por el cliente.
+ * @returns {{photoBuffer: Buffer|null, mimeType: string|null, photoUrl: string|null}} Foto parseada lista para guardar.
+ */
 export function parseProfilePhotoPayload({ dataUrl, photoUrl = null }) {
   let photoBuffer = null;
   let mimeType = null;

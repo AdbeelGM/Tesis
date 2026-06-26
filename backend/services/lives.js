@@ -8,6 +8,11 @@ import { pool } from "../db.js";
 export const MAX_LIVES = 5;
 export const LIFE_INTERVAL_MINUTES = 5;
 
+/**
+ * Regenera corazones de un usuario según el tiempo transcurrido o los rellena mientras tenga corazones ilimitados activos.
+ * @param {string} usuario - Identificador del usuario cuyas vidas se actualizarán.
+ * @returns {Promise<object|null>} Fila de usuario actualizada o null si no existe.
+ */
 export async function applyLifeRegen(usuario) {
   const [rows] = await pool.query(
     `SELECT usuario, vidas, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta
