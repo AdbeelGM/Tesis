@@ -6,6 +6,7 @@
 import { Router } from "express";
 import { pool } from "../db.js";
 import { STORE_PRODUCTS, TOTAL_LEVELS, getExperienceRewardForLevel, getGemsRewardForLevel } from "../services/rewards.js";
+import { MAX_LIVES } from "../services/lives.js";
 import { ensureUserSchemaReady, getUserState, parseProfilePhotoPayload } from "../services/profile.js";
 
 export const userRouter = Router();
