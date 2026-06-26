@@ -9,36 +9,22 @@ import { applyLifeRegen } from "./lives.js";
 export const MAX_PROFILE_PHOTO_BYTES = 10 * 1024 * 1024;
 
 /**
- * Asegura que la tabla usuarios tenga las columnas requeridas por progreso, perfil y tienda.
+ * Asegura que la tabla Usuarios tenga las columnas requeridas por progreso, perfil y tienda.
  * @returns {Promise<void>} No devuelve valor; ejecuta alteraciones idempotentes de esquema.
  */
 export async function ensureUserSchema() {
-  const columnsToAdd = [
-    ["vidas_actualizado_en", "DATETIME NULL"],
-    ["corazones_ilimitados_desde", "DATETIME NULL"],
-    ["corazones_ilimitados_hasta", "DATETIME NULL"],
-    ["creado_en", "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"],
-    ["foto_perfil_url", "VARCHAR(500) NULL"],
-    ["foto_perfil", "LONGBLOB NULL"],
-    ["foto_perfil_mime", "VARCHAR(100) NULL"],
-    ["experiencia", "INT NOT NULL DEFAULT 0"],
-    ["progreso", "INT NOT NULL DEFAULT 0"],
-    ["dias_racha", "INT NOT NULL DEFAULT 0"],
-    ["lecciones_terminadas", "INT NOT NULL DEFAULT 0"],
-    ["tiempo_invertido_segundos", "INT NOT NULL DEFAULT 0"],
-  ];
-
-  for (const [colName, colDef] of columnsToAdd) {
-    const [existing] = await pool.query(
-      `SELECT 1 FROM information_schema.columns
-       WHERE table_schema = DATABASE() AND table_name = 'usuarios' AND column_name = ?
-       LIMIT 1`,
-      [colName]
-    );
-    if (existing.length === 0) {
-      await pool.query(`ALTER TABLE usuarios ADD COLUMN \`${colName}\` ${colDef}`);
-    }
-  }
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS vidas_actualizado_en DATETIME NULL`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS corazones_ilimitados_desde DATETIME NULL`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS corazones_ilimitados_hasta DATETIME NULL`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS foto_perfil_url VARCHAR(500) NULL`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS foto_perfil LONGBLOB NULL`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS foto_perfil_mime VARCHAR(100) NULL`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS experiencia INT NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS progreso INT NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS dias_racha INT NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS lecciones_terminadas INT NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE Usuarios ADD COLUMN IF NOT EXISTS tiempo_invertido_segundos INT NOT NULL DEFAULT 0`);
 }
 
 /**
@@ -51,7 +37,7 @@ export async function getUserState(usuario) {
   const [rows] = await pool.query(
     `SELECT usuario, vidas, gemas, etapa, nivel, vidas_actualizado_en, corazones_ilimitados_desde, corazones_ilimitados_hasta,
             creado_en, foto_perfil_url, foto_perfil, foto_perfil_mime, experiencia, progreso, dias_racha, lecciones_terminadas, tiempo_invertido_segundos
-     FROM usuarios
+     FROM Usuarios
      WHERE usuario = ?
      LIMIT 1`,
     [usuario]
