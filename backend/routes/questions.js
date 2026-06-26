@@ -109,13 +109,14 @@ async function getAndValidateCategorias(req, res) {
  * @returns {Promise<string>} SQL de subconsulta para seleccionar preguntas de varias categorías.
  */
 async function buildUnionSubquery(categorias) {
+  const tablePlaceholders = buildInClause(categorias);
   const [columnRows] = await pool.query(
     `SELECT table_name, column_name
      FROM information_schema.columns
      WHERE table_schema = DATABASE()
-       AND table_name IN (?)
+       AND table_name IN (${tablePlaceholders})
        AND column_name IN ('media_ruta', 'media_fuente', 'media_tipo', 'respuesta_alt')`,
-    [categorias]
+    categorias
   );
 
   const columnsByTable = new Map();
