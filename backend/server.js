@@ -14,6 +14,9 @@ import { userRouter } from "./routes/user.js";
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+const PUBLIC_URL = process.env.RAILWAY_PUBLIC_DOMAIN
+  ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+  : `http://localhost:${PORT}`;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,4 +64,4 @@ app.use((req, res) => {
 });
 
 
-app.listen(PORT, "0.0.0.0", () => console.log(`Servidor escuchando en http://0.0.0.0:${PORT}`));
+app.listen(PORT, "0.0.0.0", () => console.log(`Servidor escuchando en ${PUBLIC_URL}`));
